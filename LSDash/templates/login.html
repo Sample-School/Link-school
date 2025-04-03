@@ -1,18 +1,51 @@
-<div class="form-container">
-    <form method="post" class="form-em-si">
-        {% csrf_token %}
-        {{ form.non_field_errors }}  <!-- Exibe erros globais do formulário -->
-        <div style="width: 80%; margin-left: 10%;">
-            <label for="{{ form.username.id_for_label }}">E-MAIL</label>
-            {{ form.username }}  <!-- Renderiza o campo de email (ainda chamado username no form) -->
-            {{ form.username.errors }}  <!-- Exibe erros relacionados ao campo -->
-        </div> 
-        <div style="width: 80%; margin-left: 10%;">
-            <label for="{{ form.password.id_for_label }}">SENHA</label>
-            {{ form.password }}  <!-- Renderiza o campo de senha -->
-            {{ form.password.errors }}  <!-- Exibe erros relacionados ao campo -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static "LSDash/css/login.css" %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <main>
+        <div class="form-container">
+            <!-- Logo do formulário: -->
+            <div class="logo"></div>
+            <!-- Formulário de login: -->
+            <form id="formLogin" class="form-login" method="post">
+                {% csrf_token %}
+                {{ form.non_field_errors }}  <!-- Exibe erros globais do formulário -->
+                <!-- Campo de E-mail: -->
+                <div class="email-container">
+                    <label for="{{ form.username.id_for_label }}">
+                        <i class="fa-solid fa-user"></i>
+                    </label>
+                    {{ form.username }}  <!-- Renderiza o campo de email (ainda chamado username no form) -->
+                    {{ form.username.errors }}  <!-- Exibe erros relacionados ao campo -->
+                </div>
+                <!-- Campo de Senha: -->
+                <div class="password-container">
+                    <label for="{{ form.password.id_for_label }}">
+                        <i class="fa-solid fa-lock"></i>
+                    </label>
+                    {{ form.password }}  <!-- Renderiza o campo de senha -->
+                    {{ form.password.errors }}  <!-- Exibe erros relacionados ao campo -->
+                </div>
+                <!-- Campos de (Esqueceu Senha) e (Lembre-se de mim): -->
+                <div class="forgot-password">
+                    <div class="remember">
+                        <input type="checkbox" id="remember">
+                        <label for="remember">LEMBRE-SE DE MIM</label>
+                    </div>
+                    <a href="">ESQUECi MINHA SENHA</a>
+                </div>
+            </form>
         </div>
-        <div class="esqueceu-a-senha"><a href="">Esqueceu a Senha?</a></div>
-        <button class="geral-b-color" type="submit">Login</button>
-    </form>
-</div>
+        <!-- Botão para enviar o formulário: -->
+        <button id="btnSend" class="btn-send" type="submit">LOGIN</button>
+    </main>
+    <script src="{% static "LSDash/js/login.js" %}"></script>
+</body>
+</html>

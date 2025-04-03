@@ -12,7 +12,7 @@ class UserLoginForm(AuthenticationForm):
             'placeholder': 'E-mail'
         })
         self.fields['password'].widget.attrs.update({
-            'placeholder': '*******'
+            'placeholder': 'Password'
         })
 
     def clean_username(self):
