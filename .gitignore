@@ -1,0 +1,8 @@
+# Virtualenv
+.venv/
+venv/
+
+# Outros arquivos ignorados (opcional)
+__pycache__/
+*.sqlite3
+*.pyc
