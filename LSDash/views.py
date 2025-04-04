@@ -37,6 +37,11 @@ class UserLoginView(auth_views.LoginView):
 
     def get_success_url(self):
         return self.success_url
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Login"
+        return context
 
 class HomeView(LoginRequiredMixin, TemplateView):
     template_name = 'index.html'
