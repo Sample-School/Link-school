@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Login LinkSchool</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}  <!-- Renderiza campos do formulário -->
+    <button type="submit">Entrar</button>
+    <p><a href="{% url 'password_reset' %}">Esqueci a senha</a></p>
+</form>
+{% endblock %}

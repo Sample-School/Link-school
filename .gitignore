@@ -1,0 +1,81 @@
+# =====================
+# Python/Django específicos
+# =====================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.egg
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.manifest
+*.spec
+
+# =====================
+# Banco de dados e migrações (ajuste conforme necessário)
+# =====================
+*.sqlite3
+*.db
+*.sql
+*.dump
+*.mdb
+
+# =====================
+# Ambiente virtual
+# =====================
+.env
+.venv/
+venv/
+ENV/
+env/
+
+# =====================
+# IDE e editores
+# =====================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.bak
+*.tmp
+*.orig
+
+# =====================
+# Sistema operacional
+# =====================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# =====================
+# Django específico (adicional)
+# =====================
+/media/
+/staticfiles/
+*.log
+local_settings.py
+.env.local
+.env.*.local
