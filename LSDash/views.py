@@ -37,7 +37,7 @@ class UserLoginView(LoginView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Login"
         return context
-
+    
 class HomeView(LoginRequiredMixin, TemplateView):
     template_name = 'index.html'
     
