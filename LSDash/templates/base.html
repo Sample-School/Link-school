@@ -1,12 +1,19 @@
-{% if messages %}
-    <style>
-        .error { color: red; }
-        .success { color: green; }
-    </style>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}LinkSchool{% endblock %}</title>
+</head>
+<body>
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
-    <ul>
-        {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
+    {% block content %}
+    {% endblock %}
+</body>
+</html>
