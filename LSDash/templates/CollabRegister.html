@@ -1,0 +1,107 @@
+{% extends "global/base.html" %} 
+{% load static %}
+
+{% block page-content %}
+
+    
+
+
+
+
+    
+        <h1>CADASTRO DE USUÁRIO</h1>
+    
+
+    <!-- Exibição de erros no topo -->
+    {% if messages %}
+<div class="alert-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if errors %}
+<div class="alert-container">
+    {% for field, error in errors.items %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+    <form  id="userRegisterForm" method="POST" action="{% url 'collabregister' %}" class="funciona_por_favor">
+        {% csrf_token %}
+        
+                <!-- Nome Completo -->
+                <div class="form-group mb-3">
+                    <label for="id_fullname">Nome Completo</label>
+                    <input type="text" name="fullname" class="form-control" id="id_fullname" required value="{{ form.fullname.value|default:'' }}">
+                </div>
+
+                <!-- Nome de Usuário -->
+                <div class="form-group mb-3">
+                    <label for="id_username">LOGIN (NOME DE USUÁRIO)</label>
+                    <input type="text" name="username" class="form-control" id="id_username" required value="{{ form.username.value|default:'' }}">
+                </div>
+
+                <!-- E-mail -->
+                <div class="form-group mb-3">
+                    <label for="id_email">E-mail</label>
+                    <input type="email" name="email" class="form-control" id="id_email" required value="{{ form.email.value|default:'' }}">
+                </div>
+
+                <!-- Senha -->
+                <div class="form-group mb-3">
+                    <label for="id_password">Senha*</label>
+                    <input type="password" name="password" class="form-control" id="id_password" required>
+                </div>
+            
+
+            
+                <!-- Tipo de Usuário -->
+                
+                
+                    <div class="label-title"><label for="id_tipo_usuario">Tipo de Usuário</label></div>
+                    
+                        <input type="radio" name="tipo_usuario" value="colaborador" id="colaborador" {% if form.tipo_usuario.value == "colaborador" or not form.tipo_usuario.value %}checked{% endif %}>
+                        <label for="colaborador">Colaborador</label>
+                    
+                        <input type="radio" name="tipo_usuario" value="administrador" id="administrador" {% if form.tipo_usuario.value == "administrador" %}checked{% endif %}>
+                        <label for="administrador">Administrador</label>
+                    
+                
+
+                
+
+                <!-- Status do Usuário -->
+                
+                
+                    <div class="label-title"><label for="id_is_active">Status do Usuário</label></div>
+                    
+                        <input type="radio" name="is_active" value="True" id="ativo" {% if form.is_active.value == "True" or not form.is_active.value %}checked{% endif %}>
+                        <label for="ativo">Ativo</label>
+                    
+                    
+                        <input type="radio" name="is_active" value="False" id="inativo" {% if form.is_active.value == "False" %}checked{% endif %}>
+                        <label for="inativo">Inativo</label>
+                    
+                
+        
+
+        <!-- Observações sobre o usuário -->
+        
+            
+                <div class="user-obs-title"><label for="id_observacoes">OBSERVAÇÕES SOBRE O USUÁRIO</label></div>
+                <textarea name="observacoes" class="form-control" id="id_observacoes" rows="4">{{ form.observacoes.value|default:'' }}</textarea>
+            
+        
+
+    </form>
+</div>
+
+
+{% endblock page-content %}
