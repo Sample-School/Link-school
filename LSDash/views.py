@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
+from .forms import CustomPasswordResetForm
 from django.contrib import messages
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
@@ -65,7 +66,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
 # View baseada em classe para iniciar o processo de recuperação de senha
 class PasswordResetView(FormView):
     template_name = "password_reset_form.html"
-    form_class = PasswordResetForm
+    form_class = CustomPasswordResetForm
     success_url = reverse_lazy("password_reset_done")  # Redirecionamento após envio bem-sucedido
 
     def form_valid(self, form):

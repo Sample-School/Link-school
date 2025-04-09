@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import AuthenticationForm
 from .models import UserModel
 from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import PasswordResetForm
 
 class UserLoginForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
@@ -42,3 +43,10 @@ class UserLoginForm(AuthenticationForm):
                 pass  # Este erro já será capturado em clean_username
         
         return password
+    
+class CustomPasswordResetForm(PasswordResetForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["email"].widget.attrs.update({
+            "placeholder": "E-MAIL DE RECUPERAÇÃO"
+        })
