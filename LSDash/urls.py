@@ -11,7 +11,8 @@ urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),
     path('login/', views.UserLoginView.as_view(), name='login'),
     path('collabmanage/', views.CollabManage.as_view(), name='collabmanage'),
-
+    path('collabregister/', views.CollabRegisterView.as_view(), name='collabregister'),
+    
     #urls para recuperação de conta
 path('password_reset/', auth_views.PasswordResetView.as_view(
     template_name='password_reset/password_reset_email_form.html',

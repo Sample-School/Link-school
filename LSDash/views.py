@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy,  reverse
 from django.contrib import messages
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -19,6 +19,7 @@ from django.template.loader import render_to_string
 from .forms import UserLoginForm
 from django.contrib.auth import logout
 from django.shortcuts import redirect
+from django.db import IntegrityError
 
 #Imports Locais
 from .forms import UserLoginForm, CollabManageForm
@@ -129,3 +130,105 @@ class CollabManage(LoginRequiredMixin,  TemplateView):
         else:
             messages.error(request, "Usuário não encontrado.", extra_tags="user_edit")
             return self.render_to_response(self.get_context_data())
+
+
+class CollabRegisterView(LoginRequiredMixin, View):
+    def get(self, request):
+        
+        
+        
+        
+        context = {
+            
+            
+            
+        }
+        return render(request, 'CollabRegister.html', context)
+
+    def post(self, request):
+        username = request.POST.get('username')
+        fullname = request.POST.get('fullname')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        tipo_usuario = request.POST.get('tipo_usuario')
+        is_active = request.POST.get('is_active') == 'True'
+        observacoes = request.POST.get('observacoes', '')
+
+        errors = {}
+        UserModel = get_user_model()
+
+        # Validação básica dos campos
+        if not username:
+            errors['username'] = "O campo Nome de Usuário é obrigatório."
+        elif UserModel.objects.filter(username=username).exists():
+            errors['username'] = "Este nome de usuário já está em uso."
+            
+        if not fullname:
+            errors['fullname'] = "O campo Nome Completo é obrigatório."
+            
+        if not email:
+            errors['email'] = "O campo E-mail é obrigatório."
+        elif '@' not in email:
+            errors['email'] = "Forneça um e-mail válido."
+        elif UserModel.objects.filter(email=email).exists():
+            errors['email'] = "Este e-mail já está cadastrado."
+            
+        if not password:
+            errors['password'] = "O campo Senha é obrigatório."
+        elif len(password) < 6:
+            errors['password'] = "A senha deve ter pelo menos 6 caracteres."
+
+        
+        # Se houver erros, retorna o formulário com os erros
+        if errors:
+            
+            
+            context = {
+                
+                'form_data': request.POST,
+                'errors': errors,
+            }
+            return render(request, 'userRegister.html', context)
+
+        try:
+            user = UserModel.objects.create_user(
+                username=username,
+                fullname=fullname,
+                email=email,
+                password=password,
+                is_active=is_active,
+                observacoes=observacoes
+            )
+
+            if tipo_usuario == 'administrador':
+                user.is_staff = True
+                user.is_superuser = True
+            else:
+                user.is_staff = False
+                user.is_superuser = False
+
+            
+            user.save()
+
+            messages.success(request, "Usuário registrado com sucesso.")
+            return redirect('AT-A-CU-001')
+
+        except IntegrityError as e:
+            # Tratamento específico para erros de integridade
+            if 'username' in str(e).lower():
+                errors['username'] = "Este nome de usuário já está em uso."
+            elif 'email' in str(e).lower():
+                errors['email'] = "Este e-mail já está cadastrado."
+            else:
+                errors['general'] = "Erro ao criar usuário. Por favor, verifique os dados informados."
+            
+            context = {
+
+                'form_data': request.POST,
+                'errors': errors,
+            }
+            return render(request, 'userRegister.html', context)
+            
+        except Exception as e:
+            messages.error(request, f"Erro inesperado: {str(e)}")
+            return redirect('AT-A-CU-001')
