@@ -14,7 +14,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 from .forms import UserLoginForm
-
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 # View de login personalizada baseada em classe
 class UserLoginView(LoginView):
@@ -127,17 +128,20 @@ class PasswordResetConfirmView(View):
             messages.error(request, "O link de recuperação está inválido ou expirado.")
             return redirect("password_reset")
 
-    # Processa o envio do novo formulário de senha
-    def post(self, request, uidb64, token):
-        user = self.get_user(uidb64)
-        if user and default_token_generator.check_token(user, token):
-            form = SetPasswordForm(user, request.POST)
-            if form.is_valid():
-                form.save()  # Salva nova senha
-                login(request, user)  # Loga o usuário automaticamente
-                messages.success(request, "Sua senha foi alterada com sucesso!")
-                return redirect("password_reset_complete")
-            return render(request, self.template_name, {"form": form})
-        else:
-            messages.error(request, "O link de recuperação está inválido ou expirado.")
-            return redirect("password_reset")
+    from django.contrib.auth import logout
+from django.shortcuts import redirect
+
+def post(self, request, uidb64, token):
+    user = self.get_user(uidb64)
+    if user and default_token_generator.check_token(user, token):
+        form = SetPasswordForm(user, request.POST)
+        if form.is_valid():
+            form.save()  # Salva nova senha
+            logout(request)  #  Faz logout
+            messages.success(request, "Sua senha foi alterada com sucesso!")
+            return redirect("login")  # Vai direto pro login
+        return render(request, self.template_name, {"form": form})
+    else:
+        messages.error(request, "O link de recuperação está inválido ou expirado.")
+        return redirect("password_reset")
+
