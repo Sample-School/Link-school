@@ -1,12 +1,27 @@
-{% if messages %}
-    <style>
-        .error { color: red; }
-        .success { color: green; }
-    </style>
-
-    <ul>
-        {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}LinkSchool{% endblock %}</title>
+    <link rel="stylesheet" href="{% static "LSDash/css/password_reset.css" %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <main>
+        <div class="logo">
+            <img src="{% static "LSDash/img/copyright.png" %}" alt="">
+        </div>
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% block content %}
+        {% endblock %}
+    </main>
+    <script src="{% static "LSDash/js/password_reset.js" %}"></script>
+</body>
+</html>
