@@ -151,6 +151,7 @@ main {
   font-family: "Open Sans", sans-serif;
   font-size: 1.5em;
   font-weight: bold;
+  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.5);
 }
 /* Estilização das mensagens de erro no formulário. */
 .errorlist {
