@@ -14,7 +14,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 from .forms import UserLoginForm
-
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 # View de login personalizada baseada em classe
 class UserLoginView(LoginView):
