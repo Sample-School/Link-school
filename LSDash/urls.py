@@ -1,3 +1,4 @@
+from django.views.generic import TemplateView
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
@@ -21,3 +22,6 @@ path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(template_n
 path('password_reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='password_reset/password_reset_senha_nova_form.html', form_class=NewResetPasswordForm), name='password_reset_confirm'), #Rota para a tela de redefinir senha
 path('password_reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset/password_reset_senha_trocada.html'), name='password_reset_complete'), #Rota para a confirmação de senha trocada
 ]
+
+
+

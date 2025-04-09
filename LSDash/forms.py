@@ -5,6 +5,7 @@ from django import forms
 #imports locais
 from .models import UserModel
 
+from django.contrib.auth.forms import PasswordResetForm
 
 class UserLoginForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
