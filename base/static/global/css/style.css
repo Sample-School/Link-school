@@ -1,0 +1,17 @@
+* {
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+}
+body {
+
+}
+.navbar {
+  background: linear-gradient(to right, #0fc9B0, #048089);
+  width: 100vw;
+  height: 90px;
+  padding: 10px;
+}
+.navbar img {
+  width: 80px;
+}
