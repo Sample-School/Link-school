@@ -136,8 +136,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "base",
-    BASE_DIR / "./LsDash/static",
+    BASE_DIR / "base" / 'static'
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 # Default primary key field type

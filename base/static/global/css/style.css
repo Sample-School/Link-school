@@ -4,14 +4,21 @@
   box-sizing: border-box;
 }
 body {
-
+  display: flex;
+  background-image: url(../img/background-transparent.png);
+  background-position: center;
+  background-size: cover;
+  width: 100vw;
+  height: 100vh;
 }
 .navbar {
-  background: linear-gradient(to right, #0fc9B0, #048089);
-  width: 100vw;
-  height: 90px;
-  padding: 10px;
+  background: linear-gradient(to bottom, #0fc9B0, #048089);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 200px;
+  height: 100%;
 }
 .navbar img {
-  width: 80px;
+  width: 150px;
 }
