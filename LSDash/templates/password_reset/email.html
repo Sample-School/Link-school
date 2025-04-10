@@ -1,32 +1,20 @@
 {% autoescape off %}
-
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Redefinição de Senha</title>
-    
-</head>
-<body>
-    <div class="container">
-        
-        
+  {% load static %}
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Redefinição de Senha</title>
+    </head>
+    <body>
+      <div class="container">
         <h2>Olá {{ user.username }},</h2>
-        
         <p>Você solicitou a redefinição de sua senha. Para continuar, clique no botão abaixo:</p>
-        
         <p>
-            <a href="{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}" class="button">
-                Redefinir minha senha
-            </a>
+          <a href="{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}" class="button">Redefinir minha senha</a>
         </p>
-
         <p>Se você não solicitou esta alteração, por favor, ignore este e-mail.</p>
-        
-        
-        
-    </div>
-</body>
-</html>
+      </div>
+    </body>
+  </html>
 {% endautoescape %}
