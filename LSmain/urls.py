@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     
-    path('accounts/', include('django.contrib.auth.urls')),  
+    
     path('', include('LSDash.urls')),  # Suas URLs customizadas
 ]
 
