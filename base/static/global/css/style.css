@@ -18,6 +18,7 @@ body {
   align-items: center;
   width: 200px;
   height: 100%;
+  padding-top: 20px;
 }
 .navbar img {
   width: 150px;
