@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
 /* Reset básico. */
 * {
@@ -73,7 +73,7 @@ main {
   border-radius: 20px;
   padding: 0px 15px 0px 45px;
   color: #fff;
-  font-family: "Open Sans", sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 1em;
 }
 .email-container input::placeholder, .password-container input::placeholder {
@@ -109,7 +109,7 @@ main {
 }
 .remember label {
   color: #01335c;
-  font-family: "Open Sans", sans-serif;
+  font-family: "Inter", sans-serif;
   font-weight: bold;
   position: relative;
   cursor: pointer;
@@ -117,7 +117,7 @@ main {
 .forgot-password a {
   position: relative;
   color: #fff;
-  font-family: "Open Sans", sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 1em;
   font-weight: bold;
   text-decoration: none;
@@ -148,7 +148,7 @@ main {
   border-bottom-left-radius: 60px;
   cursor: pointer;
   color: #fff;
-  font-family: "Open Sans", sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 1.5em;
   font-weight: bold;
   box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.5);

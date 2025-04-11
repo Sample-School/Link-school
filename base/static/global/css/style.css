@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
 * {
   margin: 0px;
   padding: 0px;
@@ -10,6 +12,7 @@ body {
   background-size: cover;
   width: 100vw;
   height: 100vh;
+  font-family: "Inter", sans-serif;
 }
 .navbar {
   background: linear-gradient(to bottom, #0fc9B0, #048089);
@@ -22,4 +25,24 @@ body {
 }
 .navbar img {
   width: 150px;
+}
+.navbar__list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  height: 150px;
+}
+.navbar__link {
+  list-style: none;
+}
+.navbar__link img {
+  width: 15px;
+}
+.navbar__link a {
+  color: #fff;
+  font-size: 1em;
+  text-decoration: none;
+  padding-left: 5px;
+  position: relative;
 }
