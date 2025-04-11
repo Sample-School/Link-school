@@ -73,6 +73,10 @@ class HomeView(LoginRequiredMixin, TemplateView):
 class CollabManage(LoginRequiredMixin,  TemplateView):
     template_name = 'CollabManage.html'
 
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user_id = self.request.GET.get('user_id') or kwargs.get('user_id')
@@ -81,7 +85,8 @@ class CollabManage(LoginRequiredMixin,  TemplateView):
         if user_id:
             try:
                 selected_user = UserModel.objects.get(user_id=user_id)
-                context['selected_user'] = selected_user  # Mudado de 'user' para 'selected_user'
+                print(f"Usuário encontrado: {selected_user.username}, ID: {selected_user.user_id}")
+                context['selected_user'] = selected_user
                 context['form'] = CollabManageForm(instance=selected_user)
                 context['user_id'] = user_id
                 context['tipo_usuario_display'] = (
@@ -96,13 +101,10 @@ class CollabManage(LoginRequiredMixin,  TemplateView):
         else:
             context['form'] = CollabManageForm()
 
-        
-        
         context['users'] = UserModel.objects.all()
-        context['logged_user'] = logged_user  # Adicionando o usuário logado ao contexto
-
+        context['logged_user'] = logged_user
         return context
-
+    
     def post(self, request, *args, **kwargs):
         user_id = request.GET.get('user_id') or kwargs.get('user_id')
 
@@ -120,7 +122,7 @@ class CollabManage(LoginRequiredMixin,  TemplateView):
                     form.save_m2m()
                     
                     messages.success(request, "Usuário atualizado com sucesso!", extra_tags="user_edit")
-                    return redirect(f"{reverse('AT-A-EU-001')}?user_id={user_id}")
+                    return redirect(f"{reverse('collabmanage')}?user_id={user_id}")
                 else:
                     messages.error(request, "Erro no formulário. Por favor, verifique os campos." , extra_tags="user_edit")
                     return self.render_to_response(self.get_context_data(form=form, selected_user=selected_user))
@@ -188,7 +190,7 @@ class CollabRegisterView(LoginRequiredMixin, View):
                 'form_data': request.POST,
                 'errors': errors,
             }
-            return render(request, 'userRegister.html', context)
+            return render(request, 'CollabRegister.html', context)
 
         try:
             user = UserModel.objects.create_user(
@@ -211,7 +213,7 @@ class CollabRegisterView(LoginRequiredMixin, View):
             user.save()
 
             messages.success(request, "Usuário registrado com sucesso.")
-            return redirect('AT-A-CU-001')
+            return redirect('collabregister')
 
         except IntegrityError as e:
             # Tratamento específico para erros de integridade
@@ -231,4 +233,7 @@ class CollabRegisterView(LoginRequiredMixin, View):
             
         except Exception as e:
             messages.error(request, f"Erro inesperado: {str(e)}")
-            return redirect('AT-A-CU-001')
+            return redirect('collabregister')
+def custom_logout_view(request):
+    logout(request)
+    return redirect('login')

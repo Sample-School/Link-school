@@ -1,0 +1,70 @@
+.overlay-stripes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1; /* acima do fundo, abaixo do conteúdo se necessário */
+  }
+  
+  .overlay-stripes img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .wellcome-text{
+    
+    width: 500px;
+    height: 400px;
+    margin-left: 5%;
+    margin-top: 25%;
+    font-family: 'Inter', sans-serif;
+    color: #FFFFFF;
+  }
+  .wellcome-msg{
+
+font-size: 30px;
+
+  }
+  .intro-text{
+    margin-top: 15px;
+    margin-bottom: 15px;
+    font-weight: 100;
+  }
+
+  .img-index img{
+    border-radius: 50px;
+    margin-top: 100px;
+    width: 80%;
+    height: 70%;
+    margin-left: 120px;
+    
+  }
+
+  .img-container {
+    position: relative;
+    width: 80%;
+    height: auto;
+    margin-left: 10px;
+    margin-top: 100px;
+  }
+  
+  .img-container img {
+    border-radius: 50px;
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .text-img {
+    position: absolute;
+    bottom: 20px;
+    left: 200px;
+    color: #fff;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    z-index: 2;
+    background-color: rgba(0, 0, 0, 0.4); /* opcional pra legibilidade */
+    padding: 10px;
+    border-radius: 10px;
+  }

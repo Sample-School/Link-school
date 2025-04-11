@@ -12,7 +12,7 @@ urlpatterns = [
     path('login/', views.UserLoginView.as_view(), name='login'),
     path('collabmanage/', views.CollabManage.as_view(), name='collabmanage'),
     path('collabregister/', views.CollabRegisterView.as_view(), name='collabregister'),
-    
+    path('logout/', views.custom_logout_view, name='logout'),
     #urls para recuperação de conta
 path('password_reset/', auth_views.PasswordResetView.as_view(
     template_name='password_reset/password_reset_email_form.html',

@@ -9,17 +9,140 @@
 {% block page-content %}
   <header>
     {% include "global/partials/navbar.html" %}
-  </header>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</header>
   <main>
     <div class="container-top">
-      <h1>Cadastrar Usuário</h1>
+      <h1>Editar Usuário</h1>
+        <!-- Exibir mensagens de sucesso ou erro -->
+        
+
+
       <div class="buttons">
-        <button class="btn-reset" id="btnReset" type="submit">Redefinir</button>
+        <a href="{% url 'collabmanage' %}"> <button class="btn-reset" id="btnReset" type="submit">Redefinir</button></a>
         <button class="btn-save" id="btnSave" type="submit">Salvar</button>
       </div>
     </div>
 
-    <form class="form" method="POST" class="form-container">
+    {% if messages %}
+        <div class="alert-container">
+            {% for message in messages %}
+                {% if "user_edit" in message.extra_tags %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    {{ message }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if error_message %}
+            <div class="alert-container" >
+                <div class="alert alert-danger" role="alert">
+                    {{ error_message }}
+                </div>
+            </div>
+            {% endif %}
+    
+
+        
+    <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="messageModalLabel">Mensagem</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="messageModalBody">
+                    <!-- Mensagem será preenchida dinamicamente -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            // Verifique se há mensagens de alerta para exibir
+            $('.alert').each(function() {
+                $(this).show();
+            });
+            
+            // Para o botão salvar
+            document.getElementById('btnSave').addEventListener('click', function() {
+                document.getElementById('collabForm').submit();
+            });
+        });
+        
+    </script>
+
+
+    <div class="header_container">
+        <div class="search_id_conatiner">
+            <div class="search-user-container">
+                <form method="GET" action="{% url 'collabmanage' %}" id="userSearchForm">
+                    <label for="user_id">COD DO USUARIO</label>
+                    <input type="string" id="user_id" value="{{user_id|default:'' }}" name="user_id" placeholder="COD">
+                    <button id="id_search_button" type="submit" class="geral-b-color">PESQUISAR</button>
+                </form>
+                <div class="pop-up-user-list-container">
+                    
+                    
+                    <button class="button-pop-up geral-b-color" data-toggle="modal" data-target="#userModal">Lista de Usuarios</button>
+                    
+                </div>
+            </div>
+
+            
+
+            
+            <!-- Modal com a lista de usuários -->
+            <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true" data-backdrop="false">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="userModalLabel">Escolha um Usuário</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>COD</th>
+                                        <th>NOME</th>
+                                        <th></th>  <!-- Coluna vazia para o botão -->
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                    <tr data-user-id="{{user.user_id}}">
+                                        <td>{{user.user_id}}</td>
+                                        <td>{{user.username}}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-secondary float-right select-user-btn geral-b-color">SELECIONAR</button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-fechar-secondary exit-b-color" data-dismiss="modal">FECHAR</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    <form class="form" method="POST" class="form-container " id="collabForm">
         {% csrf_token %}
         <div class="container-form-center">
             <div class="container-form-center-left">
@@ -70,227 +193,7 @@
     
     </form>
   </main>
+  <script src="{% static 'LSDash/js/script-collab-mange.js' %}"></script>
 
-{% comment %} <!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Edição de Usuário</title>
-        <link rel="stylesheet" href="{% static 'LSDash/css/style-collabEdit.css' %}">
-        
-        <!-- Links do jQuery -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="{% static 'js/script-afktime.js' %}"></script>
-        <!-- Links do Bootstrap JS -->
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    </head>
-    <body>
-                
-            <div class="buttons-container">
-                    <button type="submit" id="submit-button" class="save-b-color">SALVAR</button>
-                    <a href="{% url 'collabmanage' %}"> <button type="submit" id="reset-button" class="geral-b-color">REDEFINIR</button></a>
-            </div>
-            <div class="titulo-page-content">
-                
-                <h1>Edição de Usuário</h1>
-            </div>
-            {% if error_message %}
-            <div class="alert-container" >
-                <div class="alert alert-danger" role="alert">
-                    {{ error_message }}
-                </div>
-            </div>
-            {% endif %}
-            
-            <!-- Exibir mensagens de sucesso ou erro -->
-            {% if messages %}
-<div class="alert-container">
-    {% for message in messages %}
-        {% if "user_edit" in message.extra_tags %}
-        <div class="alert alert-{{ message.tags }}" role="alert">
-            {{ message }}
-        </div>
-        {% endif %}
-    {% endfor %}
-</div>
-{% endif %}
-
-            <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true" data-backdrop="static">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="messageModalLabel">Mensagem</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body" id="messageModalBody">
-                            <!-- Mensagem será preenchida dinamicamente -->
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <script>
-                        $(document).ready(function() {
-                    const messages = JSON.parse('{{ messages|escapejs }}');
-                    
-                    if (messages.length > 0) {
-                        let messageContent = '';
-                        
-                        messages.forEach(message => {
-                            messageContent += `<div class="alert alert-${message.tags}" role="alert">
-                                                    ${message}
-                                                </div>`;
-                        });
-
-                        // Inserir as mensagens no corpo do modal
-                        $('#messageModalBody').html(messageContent);
-
-                        // Exibir o modal
-                        $('#messageModal').modal('show');
-                    }
-                });
-
-                document.getElementById('submit-button').addEventListener('click', function() {
-                    document.querySelector('.form-container').submit();
-                });
-            </script>
-
-
-            <div class="header_container">
-                <div class="search_id_conatiner">
-                    <div class="search-user-container">
-                        <form method="GET" action="{% url 'collabmanage' %}" id="userSearchForm">
-                            <label for="user_id">COD DO USUARIO</label>
-                            <input type="string" id="user_id" value="{{user_id|default:'' }}" name="user_id" placeholder="COD">
-                            <button id="id_search_button" type="submit" class="geral-b-color">PESQUISAR</button>
-                        </form>
-                        <div class="pop-up-user-list-container">
-                            
-                            <div class="pop-up-title"><p>Lista de Usuarios</p></div>
-                            
-                            <button class="button-pop-up geral-b-color" data-toggle="modal" data-target="#userModal">ABRIR</button>
-                            
-                        </div>
-                    </div>
-
-                    
-
-                    
-                    <!-- Modal com a lista de usuários -->
-<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true" data-backdrop="false">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="userModalLabel">Escolha um Usuário</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>COD</th>
-                            <th>NOME</th>
-                            <th></th>  <!-- Coluna vazia para o botão -->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in users %}
-                        <tr data-user-id="{{user.user_id}}">
-                            <td>{{user.user_id}}</td>
-                            <td>{{user.username}}</td>
-                            <td>
-                                <button class="btn btn-sm btn-secondary float-right select-user-btn geral-b-color">SELECIONAR</button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-fechar-secondary exit-b-color" data-dismiss="modal">FECHAR</button>
-            </div>
-        </div>
-    </div>
-</div>
-                </div>
-                <div class="register-date-container">
-                    <p>Data de Cadastro: {{selected_user.date_joined|date:"d/m/Y" }}</p>
-                </div>
-            </div>
-            <form method="POST" class="form-container">
-                {% csrf_token %}
-                <div class="user-register-container">
-                    <div class="info-user-container">
-                        <label for="{{ form.fullname.id_for_label }}">NOME COMPLETO</label>
-                        {{ form.fullname }}
-            
-                        <label for="{{ form.username.id_for_label }}">LOGIN (NOME DE USUÁRIO)</label>
-                        {{ form.username }}
-            
-                        <label for="{{ form.email.id_for_label }}">E-MAIL</label>
-                        {{ form.email }}
-            
-                        <button type="button" id="reset-password-button" class="geral-b-color">REDEFINIR SENHA</button>
-                    </div>
-            
-                    <div class="info-acess-container">
-                        <div class="tipo_user_title">
-                            <label for="{{ form.tipo_usuario.id_for_label }}">Tipo de Usuário</label>
-                        </div>                    
-                            {% if form.instance.pk %}
-                                {{ form.tipo_usuario }}
-                                
-                            {% else %}
-                            {{ form.tipo_usuario }}
-                            {% endif %}
-                        
-                        {{ form.grupo_acesso }}
-            
-                        <div class="status_title">
-                            <label for="{{ form.status.id_for_label }}">Status do usuario</label>
-                        </div>
-                        
-                        
-                        {% if form.instance.pk %}
-                                
-                                    {{ form.status }}
-                                
-                                
-                            {% else %}
-                            {{ form.status }}
-                            {% endif %}
-
-
-
-
-                    </div>
-                </div>
-            
-                <div class="info-observation-container">
-                    <label for="{{ form.observacoes.id_for_label }}">OBSERVAÇÕES SOBRE O USUÁRIO</label>
-                    {{ form.observacoes }}
-                </div>
-            
-            </form>
-        
-        
-        
-        
-        
-        <script src="{% static 'LSDash/js/script-collab-mange.js' %}"></script>
-        
-        
-    </body>
-</html> {% endcomment %}
 
 {% endblock %}

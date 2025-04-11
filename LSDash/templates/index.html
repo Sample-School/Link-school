@@ -1,22 +1,52 @@
+{% extends "global/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="pt-br">
+
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title }}</title>
-  <link rel="shortcut icon" href="{% static "LSDash/img/favicon.ico" %}" type="image/x-icon">
-</head>
-<body>
-    <header>
-      
-    </header>
-    <main>
-      <h1>Se você está aqui, é por que deu tudo certo!</h1>
-      <h1>Senão... Melhor fazer essa bagulho funcionar AGORA!</h1>
-    </main>
-    <footer>
 
-    </footer>
-</body>
-</html>
+
+</head>
+{% block style %}
+
+<link rel="shortcut icon" href="{% static "LSDash/img/favicon.ico" %}" type="image/x-icon">
+<link rel="stylesheet" href="{% static "LSDash/css/style-index.css" %}">
+{% endblock style %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+{% block page-content %}
+{% include "global/partials/navbar.html" %}
+
+<div class="wellcome-text">
+  
+<div class="wellcome-msg">
+  <h1>BEM-VINDO</h1>
+</div>
+<div class="intro-text">
+<h2>
+  Educação com a tecnologia ao seu lado.
+</h2>
+</div>
+<div class="text">
+<h2>Aqui, você encontra ferramentas de inteligência
+artificial desenvolvidas para automatizar a criação
+  de provas e oferecer suporte inteligente para
+  professores e escolas.
+  Agilize processos, ganhe tempo e eleve a
+  qualidade do ensino com inovação.
+</h2>
+</div>
+</div>
+<div class="img-index">
+  <div class="img-container">
+    <img src="{% static 'LSDash/img/index-img.png' %}" alt="imagem de um pai ensinando sua filha" class="img-fluid">
+    <div class="text-img">
+      <h2>Mais eficiência para quem ensina.  
+        Mais qualidade para quem aprende.
+      </h2>
+    </div>
+  </div>
+</div>
+{% endblock page-content%}

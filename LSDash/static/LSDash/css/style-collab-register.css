@@ -205,3 +205,16 @@ main {
   cursor: text;
   padding: 5px 20px;
 }
+.alert-container{
+  background-color: var(--container-color);
+  width: 40%;
+  height: 10%;
+  align-items: center;
+  justify-content: center;
+  margin-left: 480px;
+  margin-top: 20px;
+  text-align: center;
+  padding-top: 20px;
+  border-radius: 30px;
+  
+}
