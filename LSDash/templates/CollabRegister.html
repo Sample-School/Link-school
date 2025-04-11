@@ -2,100 +2,114 @@
 
 {% load static %}
 {% block style %}
-  <link rel="stylesheet" href="{% static "LSDash/css/collab_register.css" %}">
+  <link rel="shortcut icon" href="{% static "LSDash/img/favicon.ico" %}" type="image/x-icon">
+  <link rel="stylesheet" href="{% static "LSDash/css/style-collab-register.css" %}">
 {% endblock style %}
 
 {% block page-content %}
+  <header>
     {% include "global/partials/navbar.html" %}
-
-    <!-- Exibição de erros no topo -->
-    {% if messages %}
-<div class="alert-container">
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags }}" role="alert">
-        {{ message }}
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
-
-{% if errors %}
-<div class="alert-container">
-    {% for field, error in errors.items %}
-    <div class="alert alert-danger" role="alert">
-        {{ error }}
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
-
-    <form  id="userRegisterForm" method="POST" action="{% url 'collabregister' %}" class="funciona_por_favor">
-        {% csrf_token %}
-        
-                <!-- Nome Completo -->
-                <div class="form-group mb-3">
-                    <label for="id_fullname">Nome Completo</label>
-                    <input type="text" name="fullname" class="form-control" id="id_fullname" required value="{{ form.fullname.value|default:'' }}">
-                </div>
-
-                <!-- Nome de Usuário -->
-                <div class="form-group mb-3">
-                    <label for="id_username">LOGIN (NOME DE USUÁRIO)</label>
-                    <input type="text" name="username" class="form-control" id="id_username" required value="{{ form.username.value|default:'' }}">
-                </div>
-
-                <!-- E-mail -->
-                <div class="form-group mb-3">
-                    <label for="id_email">E-mail</label>
-                    <input type="email" name="email" class="form-control" id="id_email" required value="{{ form.email.value|default:'' }}">
-                </div>
-
-                <!-- Senha -->
-                <div class="form-group mb-3">
-                    <label for="id_password">Senha*</label>
-                    <input type="password" name="password" class="form-control" id="id_password" required>
-                </div>
-            
-
-            
-                <!-- Tipo de Usuário -->
-                
-                
-                    <div class="label-title"><label for="id_tipo_usuario">Tipo de Usuário</label></div>
-                    
-                        <input type="radio" name="tipo_usuario" value="colaborador" id="colaborador" {% if form.tipo_usuario.value == "colaborador" or not form.tipo_usuario.value %}checked{% endif %}>
-                        <label for="colaborador">Colaborador</label>
-                    
-                        <input type="radio" name="tipo_usuario" value="administrador" id="administrador" {% if form.tipo_usuario.value == "administrador" %}checked{% endif %}>
-                        <label for="administrador">Administrador</label>
-                    
-                
-
-                
-
-                <!-- Status do Usuário -->
-                
-                
-                    <div class="label-title"><label for="id_is_active">Status do Usuário</label></div>
-                    
-                        <input type="radio" name="is_active" value="True" id="ativo" {% if form.is_active.value == "True" or not form.is_active.value %}checked{% endif %}>
-                        <label for="ativo">Ativo</label>
-                    
-                    
-                        <input type="radio" name="is_active" value="False" id="inativo" {% if form.is_active.value == "False" %}checked{% endif %}>
-                        <label for="inativo">Inativo</label>
-                    
-                
-        
-
-        <!-- Observações sobre o usuário -->
-        
-            
-                <div class="user-obs-title"><label for="id_observacoes">OBSERVAÇÕES SOBRE O USUÁRIO</label></div>
-                <textarea name="observacoes" class="form-control" id="id_observacoes" rows="4">{{ form.observacoes.value|default:'' }}</textarea>
-            
-        
-
-    </form>
-</div>
+  </header>
+  <main>
+      <div class="container-top">
+          <h1>Cadastrar Usuário</h1>
+          <div class="buttons">
+              <button class="btn-reset" id="btnReset" type="submit">Redefinir</button>
+              <button class="btn-save" id="btnSave" type="submit">Salvar</button>
+          </div>
+      </div>
+      
+        <!-- Exibição de erros no topo -->
+        {% if messages %}
+      <div class="alert-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      
+      {% if errors %}
+      <div class="alert-container">
+        {% for field, error in errors.items %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+        <form class="form"  id="userRegisterForm" method="POST" action="{% url 'collabregister' %}" class="funciona_por_favor">
+            {% csrf_token %}
+      
+                    <div class="container-form-center">
+                        <!-- Nome Completo -->
+                        <div class="container-form-center-left">
+                            <div class="input-name">
+                                <label for="id_fullname">Nome Completo</label>
+                                <input type="text" name="fullname" class="form-control" id="id_fullname" required value="{{ form.fullname.value|default:'' }}">
+                            </div>
+                            <!-- Nome de Usuário -->
+                            <div class="input-user">
+                                <label for="id_username">Login (Nome De Usuário)</label>
+                                <input type="text" name="username" class="form-control" id="id_username" required value="{{ form.username.value|default:'' }}">
+                            </div>
+                            <!-- E-mail -->
+                            <div class="input-email">
+                                <label for="id_email">E-mail</label>
+                                <input type="email" name="email" class="form-control" id="id_email" required value="{{ form.email.value|default:'' }}">
+                            </div>
+                            <!-- Senha -->
+                            <div class="input-password">
+                                <label for="id_password">Senha</label>
+                                <input type="password" name="password" class="form-control" id="id_password" required>
+                            </div>
+                        </div>
+                        <!-- Tipo de Usuário -->
+                            <div class="container-form-center-right">
+                                <section>
+                                    <div class="title"><label for="id_tipo_usuario">Tipo de Usuário</label></div>
+                                        <div class="input-radio">
+                                            <div class="radio-collab">
+                                                <input type="radio" name="tipo_usuario" value="colaborador" id="colaborador" {% if form.tipo_usuario.value == "colaborador" or not form.tipo_usuario.value %}checked{% endif %}>
+                                                <label for="colaborador">Colaborador</label>
+                                            </div>
+                                            <div class="radio-adm">
+                                                <input type="radio" name="tipo_usuario" value="administrador" id="administrador" {% if form.tipo_usuario.value == "administrador" %}checked{% endif %}>
+                                                <label for="administrador">Administrador</label>
+                                            </div>
+                                        </div>
+                                </section>
+                                <section>
+                                                        <!-- Status do Usuário -->
+                                    <div class="title"><label for="id_is_active">Status do Usuário</label></div>
+                                        <div class="input-radio">
+                                            <div class="radio-active">
+                                                <input type="radio" name="is_active" value="True" id="ativo" {% if form.is_active.value == "True" or not form.is_active.value %}checked{% endif %}>
+                                                <div class="description"><label for="ativo">Ativo</label></div>
+                                            </div>
+                                            <div class="radio-deactive">
+                                                <input type="radio" name="is_active" value="False" id="inativo" {% if form.is_active.value == "False" %}checked{% endif %}>
+                                                <div class="description"><label for="inativo">Inativo</label></div>
+                                            </div>
+                                        </div>
+                                </section>
+                            </div>
+                    </div>
+      
+      
+      
+            <!-- Observações sobre o usuário -->
+      
+      
+                    <div class="container-form-bottom">
+                        <label for="id_observacoes">Observações sobre o usuário</label>
+                        <textarea name="observacoes" class="form-control" id="id_observacoes" rows="4">{{ form.observacoes.value|default:'' }}</textarea>
+                    </div>
+      
+      
+        </form>
+      </div>
+  </main>
+  <script src="{% static "LSDash/js/script-collab-register.js" %}"></script>
 {% endblock page-content %}
