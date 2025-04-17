@@ -23,7 +23,7 @@ from django.db import IntegrityError
 
 #Imports Locais
 from .forms import UserLoginForm, CollabManageForm
-from .models import UserModel
+from .models import UserModel, Pagina
 
 
 class UserLoginView(LoginView):
@@ -119,6 +119,7 @@ class CollabManage(LoginRequiredMixin,  TemplateView):
                     updated_user = form.save(commit=False)
                     updated_user.password = old_password
                     updated_user.save()
+                    # Salvar relações many-to-many, incluindo as páginas
                     form.save_m2m()
                     
                     messages.success(request, "Usuário atualizado com sucesso!", extra_tags="user_edit")
@@ -136,14 +137,20 @@ class CollabManage(LoginRequiredMixin,  TemplateView):
 
 class CollabRegisterView(LoginRequiredMixin, View):
     def get(self, request):
-        
-        
-        
+        # Obter todas as páginas para o select multiple
+        paginas = Pagina.objects.all()
         
         context = {
-            
-            
-            
+            'form': {
+                'fullname': {'value': ''},
+                'username': {'value': ''},
+                'email': {'value': ''},
+                'tipo_usuario': {'value': 'colaborador'},
+                'is_active': {'value': 'True'},
+                'observacoes': {'value': ''},
+                'paginas': {'value': []},
+                'fields': {'paginas': {'queryset': paginas}}
+            }
         }
         return render(request, 'CollabRegister.html', context)
 
@@ -155,6 +162,7 @@ class CollabRegisterView(LoginRequiredMixin, View):
         tipo_usuario = request.POST.get('tipo_usuario')
         is_active = request.POST.get('is_active') == 'True'
         observacoes = request.POST.get('observacoes', '')
+        paginas_ids = request.POST.getlist('paginas')
 
         errors = {}
         UserModel = get_user_model()
@@ -183,11 +191,20 @@ class CollabRegisterView(LoginRequiredMixin, View):
         
         # Se houver erros, retorna o formulário com os erros
         if errors:
-            
+            # Obter novamente todas as páginas para o formulário
+            paginas = Pagina.objects.all()
             
             context = {
-                
-                'form_data': request.POST,
+                'form': {
+                    'fullname': {'value': fullname},
+                    'username': {'value': username},
+                    'email': {'value': email},
+                    'tipo_usuario': {'value': tipo_usuario},
+                    'is_active': {'value': is_active},
+                    'observacoes': {'value': observacoes},
+                    'paginas': {'value': paginas_ids},
+                    'fields': {'paginas': {'queryset': paginas}}
+                },
                 'errors': errors,
             }
             return render(request, 'CollabRegister.html', context)
@@ -211,7 +228,12 @@ class CollabRegisterView(LoginRequiredMixin, View):
 
             
             user.save()
-
+            
+            # Vincular páginas ao usuário
+            if paginas_ids:
+                paginas = Pagina.objects.filter(id__in=paginas_ids)
+                user.paginas.set(paginas)
+                
             messages.success(request, "Usuário registrado com sucesso.")
             return redirect('collabregister')
 
@@ -224,16 +246,28 @@ class CollabRegisterView(LoginRequiredMixin, View):
             else:
                 errors['general'] = "Erro ao criar usuário. Por favor, verifique os dados informados."
             
+            # Obter novamente todas as páginas para o formulário
+            paginas = Pagina.objects.all()
+            
             context = {
-
-                'form_data': request.POST,
+                'form': {
+                    'fullname': {'value': fullname},
+                    'username': {'value': username},
+                    'email': {'value': email},
+                    'tipo_usuario': {'value': tipo_usuario},
+                    'is_active': {'value': is_active},
+                    'observacoes': {'value': observacoes},
+                    'paginas': {'value': paginas_ids},
+                    'fields': {'paginas': {'queryset': paginas}}
+                },
                 'errors': errors,
             }
-            return render(request, 'userRegister.html', context)
+            return render(request, 'CollabRegister.html', context)
             
         except Exception as e:
             messages.error(request, f"Erro inesperado: {str(e)}")
             return redirect('collabregister')
+
 def custom_logout_view(request):
     logout(request)
     return redirect('login')

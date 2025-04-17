@@ -1,115 +1,152 @@
-{% extends "global/base.html" %} 
+{% extends "global/base.html" %}
 
 {% load static %}
+
 {% block style %}
-  <link rel="shortcut icon" href="{% static "LSDash/img/favicon.ico" %}" type="image/x-icon">
-  <link rel="stylesheet" href="{% static "LSDash/css/style-collab-register.css" %}">
+  <link rel="shortcut icon" href="{% static 'LSDash/img/favicon.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="{% static 'LSDash/css/style-collab-register.css' %}">
+  <style>
+    /* Estilos adicionais para melhorar a visualização do select multiple */
+    select[multiple] {
+      min-height: 150px;
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    select[multiple] option {
+      padding: 5px;
+      margin-bottom: 2px;
+      border-bottom: 1px solid #eee;
+    }
+    select[multiple] option:hover {
+      background-color: #f0f0f0;
+    }
+  </style>
 {% endblock style %}
 
 {% block page-content %}
-  <header>
-    {% include "global/partials/navbar.html" %}
-  </header>
+  <header></header>
+  
   <main>
-      <div class="container-top">
-          <h1>Cadastrar Usuário</h1>
-          <div class="buttons">
-            <a href="{% url 'collabregister' %}"><button class="btn-reset" id="btnReset" type="submit">Redefinir</button></a>
-              <button class="btn-save" id="btnSave" type="submit">Salvar</button>
-          </div>
+    <div class="container-top">
+      <h1>Cadastrar Usuário</h1>
+      <div class="buttons">
+        <a href="{% url 'collabregister' %}"><button class="btn-reset" id="btnReset" type="submit">Redefinir</button></a>
+        <button class="btn-save" id="btnSave" type="submit">Salvar</button>
       </div>
-      
-        <!-- Exibição de erros no topo -->
-        {% if messages %}
+    </div>
+
+    <!-- Exibição de erros no topo -->
+    {% if messages %}
       <div class="alert-container">
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }}" role="alert">
-            {{ message }}
+          {{ message }}
         </div>
         {% endfor %}
       </div>
-      {% endif %}
-      
-      {% if errors %}
+    {% endif %}
+
+    {% if errors %}
       <div class="alert-container">
         {% for field, error in errors.items %}
         <div class="alert alert-danger" role="alert">
-            {{ error }}
+          {{ error }}
         </div>
         {% endfor %}
       </div>
-      {% endif %}
-        <form class="form"  id="userRegisterForm" method="POST" action="{% url 'collabregister' %}" class="funciona_por_favor">
-            {% csrf_token %}
-      
-                    <div class="container-form-center">
-                        <!-- Nome Completo -->
-                        <div class="container-form-center-left">
-                            <div class="input-name">
-                                <label for="id_fullname">Nome Completo</label>
-                                <input type="text" name="fullname" class="form-control" id="id_fullname" required value="{{ form.fullname.value|default:'' }}">
-                            </div>
-                            <!-- Nome de Usuário -->
-                            <div class="input-user">
-                                <label for="id_username">Login (Nome De Usuário)</label>
-                                <input type="text" name="username" class="form-control" id="id_username" required value="{{ form.username.value|default:'' }}">
-                            </div>
-                            <!-- E-mail -->
-                            <div class="input-email">
-                                <label for="id_email">E-mail</label>
-                                <input type="email" name="email" class="form-control" id="id_email" required value="{{ form.email.value|default:'' }}">
-                            </div>
-                            <!-- Senha -->
-                            <div class="input-password">
-                                <label for="id_password">Senha</label>
-                                <input type="password" name="password" class="form-control" id="id_password" required>
-                            </div>
-                        </div>
-                        <!-- Tipo de Usuário -->
-                            <div class="container-form-center-right">
-                                <section>
-                                    <div class="title"><label for="id_tipo_usuario">Tipo de Usuário</label></div>
-                                        <div class="input-radio">
-                                            <div class="radio-collab">
-                                                <input type="radio" name="tipo_usuario" value="colaborador" id="colaborador" {% if form.tipo_usuario.value == "colaborador" or not form.tipo_usuario.value %}checked{% endif %}>
-                                                <label for="colaborador">Colaborador</label>
-                                            </div>
-                                            <div class="radio-adm">
-                                                <input type="radio" name="tipo_usuario" value="administrador" id="administrador" {% if form.tipo_usuario.value == "administrador" %}checked{% endif %}>
-                                                <label for="administrador">Administrador</label>
-                                            </div>
-                                        </div>
-                                </section>
-                                <section>
-                                                        <!-- Status do Usuário -->
-                                    <div class="title"><label for="id_is_active">Status do Usuário</label></div>
-                                        <div class="input-radio">
-                                            <div class="radio-active">
-                                                <input type="radio" name="is_active" value="True" id="ativo" {% if form.is_active.value == "True" or not form.is_active.value %}checked{% endif %}>
-                                                <div class="description"><label for="ativo">Ativo</label></div>
-                                            </div>
-                                            <div class="radio-deactive">
-                                                <input type="radio" name="is_active" value="False" id="inativo" {% if form.is_active.value == "False" %}checked{% endif %}>
-                                                <div class="description"><label for="inativo">Inativo</label></div>
-                                            </div>
-                                        </div>
-                                </section>
-                            </div>
-                    </div>
-      
-      
-      
-            <!-- Observações sobre o usuário -->
-      
-      
-                    <div class="container-form-bottom">
-                        <label for="id_observacoes">Observações sobre o usuário</label>
-                        <textarea name="observacoes" class="form-control" id="id_observacoes" rows="4">{{ form.observacoes.value|default:'' }}</textarea>
-                    </div>
-      
-      
-        </form>
+    {% endif %}
+
+    <form class="form" id="userRegisterForm" method="POST" action="{% url 'collabregister' %}">
+      {% csrf_token %}
+
+      <div class="container-form-center">
+        <!-- Nome Completo -->
+        <div class="container-form-center-left">
+          <div class="input-name">
+            <label for="id_fullname">Nome Completo</label>
+            <input type="text" name="fullname" class="form-control" id="id_fullname" required value="{{ form.fullname.value|default:'' }}">
+          </div>
+          <!-- Nome de Usuário -->
+          <div class="input-user">
+            <label for="id_username">Login (Nome De Usuário)</label>
+            <input type="text" name="username" class="form-control" id="id_username" required value="{{ form.username.value|default:'' }}">
+          </div>
+          <!-- E-mail -->
+          <div class="input-email">
+            <label for="id_email">E-mail</label>
+            <input type="email" name="email" class="form-control" id="id_email" required value="{{ form.email.value|default:'' }}">
+          </div>
+          <!-- Senha -->
+          <div class="input-password">
+            <label for="id_password">Senha</label>
+            <input type="password" name="password" class="form-control" id="id_password" required>
+          </div>
+        </div>
+
+        <!-- Tipo de Usuário -->
+        <div class="container-form-center-right">
+          <section>
+            <div class="title"><label for="id_tipo_usuario">Tipo de Usuário</label></div>
+            <div class="input-radio">
+              <div class="radio-collab">
+                <input type="radio" name="tipo_usuario" value="colaborador" id="colaborador" {% if form.tipo_usuario.value == "colaborador" or not form.tipo_usuario.value %}checked{% endif %}>
+                <label for="colaborador">Colaborador</label>
+              </div>
+              <div class="radio-adm">
+                <input type="radio" name="tipo_usuario" value="administrador" id="administrador" {% if form.tipo_usuario.value == "administrador" %}checked{% endif %}>
+                <label for="administrador">Administrador</label>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <div class="title"><label for="id_is_active">Status do Usuário</label></div>
+            <div class="input-radio">
+              <div class="radio-active">
+                <input type="radio" name="is_active" value="True" id="ativo" {% if form.is_active.value == "True" or not form.is_active.value %}checked{% endif %}>
+                <div class="description"><label for="ativo">Ativo</label></div>
+              </div>
+              <div class="radio-deactive">
+                <input type="radio" name="is_active" value="False" id="inativo" {% if form.is_active.value == "False" %}checked{% endif %}>
+                <div class="description"><label for="inativo">Inativo</label></div>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <div class="title"><label for="id_paginas">Páginas vinculadas</label></div>
+            <div class="input-select">
+                <select name="paginas" id="id_paginas" class="form-control" multiple>
+                    {% for pagina in form.fields.paginas.queryset %}
+                      <option value="{{ pagina.id }}"
+                        {% if pagina.id|stringformat:"s" in form.paginas.value %}selected{% endif %}
+                      >
+                        {{ pagina }}
+                      </option>
+                    {% endfor %}
+                  </select>
+              <small class="form-text text-muted">Segure Ctrl (Windows) ou Cmd (Mac) para selecionar várias.</small>
+            </div>
+          </section>
+        </div>
       </div>
+
+      <div class="container-form-bottom">
+        <label for="id_observacoes">Observações sobre o usuário</label>
+        <textarea name="observacoes" class="form-control" id="id_observacoes" rows="4">{{ form.observacoes.value|default:'' }}</textarea>
+      </div>
+
+    </form>
   </main>
-  <script src="{% static "LSDash/js/script-collab-register.js" %}"></script>
+
+  <script>
+    // Script para submeter o formulário quando o botão Salvar for clicado
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('btnSave').addEventListener('click', function() {
+        document.getElementById('userRegisterForm').submit();
+      });
+    });
+  </script>
+  <script src="{% static 'LSDash/js/script-collab-register.js' %}"></script>
 {% endblock page-content %}

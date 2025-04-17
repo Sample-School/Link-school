@@ -3,23 +3,11 @@ from django.core.exceptions import ValidationError
 from django import forms
 
 #imports locais
-from .models import UserModel
+from .models import UserModel, Pagina
 
 from django.contrib.auth.forms import PasswordResetForm
 
 class UserLoginForm(AuthenticationForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Atualizando campos para email em vez de username
-        self.fields['username'].label = 'Email'  # O campo é chamado 'username' no AuthenticationForm
-        self.fields['username'].widget.attrs.update({
-            'maxlength': 100,
-            'placeholder': 'E-mail'
-        })
-        self.fields['password'].widget.attrs.update({
-            'placeholder': 'Password'
-        })
-
     def clean_username(self):
         # Realiza a verificação do usuário por email
         email = self.cleaned_data.get('username')  # AuthenticationForm sempre usa 'username'
@@ -73,8 +61,6 @@ class CollabManageForm(forms.ModelForm):
         },
     )
 
-    
-
     password = forms.CharField(
         widget=forms.PasswordInput,
         required=False,  # Permite que a senha não seja obrigatória para atualização
@@ -93,9 +79,17 @@ class CollabManageForm(forms.ModelForm):
         },
     )
 
+    paginas = forms.ModelMultipleChoiceField(
+        queryset=Pagina.objects.all(),
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+        required=False,
+        label="Páginas",
+        help_text="Selecione uma ou mais páginas"
+    )
+
     class Meta:
         model = UserModel
-        fields = ['username', 'fullname', 'email', 'tipo_usuario', 'status', 'observacoes']
+        fields = ['username', 'fullname', 'email', 'tipo_usuario', 'status', 'observacoes', 'paginas']
         error_messages = {
             'username': {
                 'required': 'O nome de usuário é obrigatório.',
@@ -111,22 +105,24 @@ class CollabManageForm(forms.ModelForm):
         self.instance = kwargs.get('instance', None)
         super().__init__(*args, **kwargs)
 
+        # Garantir que o queryset de páginas está sempre atualizado
+        self.fields['paginas'].queryset = Pagina.objects.all()
+
         if self.instance:
+            # Definir valores iniciais com base no instance
             self.fields['tipo_usuario'].initial = 'adm' if self.instance.is_staff else 'colaborador'
             self.fields['status'].initial = 'ativo' if self.instance.is_active else 'inativo'
             self.fields['observacoes'].initial = self.instance.observacoes
 
-            
-
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        if UserModel.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+        if UserModel.objects.filter(username=username).exclude(pk=self.instance.pk if self.instance else None).exists():
             raise ValidationError("Este nome de usuário já está em uso. Escolha outro.")
         return username
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        if UserModel.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+        if UserModel.objects.filter(email=email).exclude(pk=self.instance.pk if self.instance else None).exists():
             raise ValidationError("Este email já está cadastrado. Por favor, use outro.")
         return email
 
@@ -148,14 +144,12 @@ class CollabManageForm(forms.ModelForm):
     def save(self, commit=True):
         # Salva o usuário, incluindo os grupos de acesso
         user = super().save(commit=False)
-        password = self.cleaned_data['password']
+        password = self.cleaned_data.get('password')
         
         if password:  # Só define a senha se o campo estiver preenchido
             user.set_password(password)
 
-        
-        
-
         if commit:
             user.save()
+            self.save_m2m()  # Salva as relações many-to-many, incluindo páginas
         return user

@@ -10,8 +10,8 @@ from . import views
 urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),
     path('login/', views.UserLoginView.as_view(), name='login'),
-    path('collabmanage/', views.CollabManage.as_view(), name='collabmanage'),
-    path('collabregister/', views.CollabRegisterView.as_view(), name='collabregister'),
+    path('GestaoColaborador/', views.CollabManage.as_view(), name='collabmanage'),
+    path('RegistroColaborador/', views.CollabRegisterView.as_view(), name='collabregister'),
     path('logout/', views.custom_logout_view, name='logout'),
     #urls para recuperação de conta
 path('password_reset/', auth_views.PasswordResetView.as_view(

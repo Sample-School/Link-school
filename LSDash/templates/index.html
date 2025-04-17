@@ -17,36 +17,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 
 {% block page-content %}
-{% include "global/partials/navbar.html" %}
 
-<div class="wellcome-text">
-  
-<div class="wellcome-msg">
-  <h1>BEM-VINDO</h1>
+<div class="overlay-stripes">
+  <img src="{% static 'LSDash/img/indexsobreposc.png' %}" alt="imagem de fundo pro index" class="img-fluid">
 </div>
-<div class="intro-text">
-<h2>
-  Educação com a tecnologia ao seu lado.
-</h2>
+
+<div class="overlay-stripes2">
+  <img src="{% static 'LSDash/img/indexsobreposc2.png' %}" alt="imagem de fundo pro index" class="img-fluid">
 </div>
-<div class="text">
-<h2>Aqui, você encontra ferramentas de inteligência
-artificial desenvolvidas para automatizar a criação
-  de provas e oferecer suporte inteligente para
-  professores e escolas.
-  Agilize processos, ganhe tempo e eleve a
-  qualidade do ensino com inovação.
-</h2>
-</div>
-</div>
-<div class="img-index">
+<div class="index-content">
+  <div class="wellcome-container">
+
+  </div>
   <div class="img-container">
-    <img src="{% static 'LSDash/img/index-img.png' %}" alt="imagem de um pai ensinando sua filha" class="img-fluid">
-    <div class="text-img">
-      <h2>Mais eficiência para quem ensina.  
-        Mais qualidade para quem aprende.
-      </h2>
-    </div>
+  
   </div>
 </div>
 {% endblock page-content%}

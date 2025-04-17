@@ -5,10 +5,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
-    <link rel="stylesheet" href="{% static "global/css/style.css" %}">
+    <link rel="stylesheet" href="{% static "global/css/style-base.css" %}">
     {% block style %}{% endblock style %}
   </head>
   <body>
+    <div class="navbar" id="dropdownMenu">
+      <!-- Logo -->
+      <div class="logo">
+        <a href="{% url 'home' %}">
+          <img src="{% static "global/img/navbar-logo.png" %}" alt="Logo da Navbar">
+        </a>
+      </div>
+      
+      <div class="navbar-itens">
+      <!-- Menu -->
+      {% for familia, paginas in user.obter_paginas_por_familia.items %}
+  <div class="familia-navbar">
+    <h5 class="title-navbar-itens">{{ familia }}</h5>
+    <ul class="list-itens-navbar">
+      {% for pagina in paginas %}
+        <li class="navbar__link">
+          <img src="{% static "global/img/point-asset.png" %}">
+          <a href="/{{ pagina.codigo }}/"
+             class="{% if request.path == '/'|add:pagina.codigo|add:'/' %}active-page{% endif %}">
+            {{ pagina.nome }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+    <div class="line"></div>
+  </div>
+{% endfor %}
+</div>
+      <div class="footer">
+        {% if user.is_authenticated %}
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-logout exit-b-color">Sair</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    <div class="page-content">
     {% block page-content %}{% endblock %}
+  </div>
   </body>
 </html>

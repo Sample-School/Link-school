@@ -182,7 +182,15 @@
                             {{ form.status }}
                             {% endif %}
                     </section>
-                    
+                    <section>
+                        <div class="title">
+                            <label for="{{ form.paginas.id_for_label }}">Páginas vinculadas</label>
+                        </div>
+                        <div class="input-select">
+                            {{ form.paginas }}
+                            <small class="form-text text-muted">Segure Ctrl (Windows) ou Cmd (Mac) para selecionar várias.</small>
+                        </div>
+                    </section>
                 </div>
         </div>
     
