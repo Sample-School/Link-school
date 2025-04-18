@@ -27,10 +27,72 @@
 </div>
 <div class="index-content">
   <div class="wellcome-container">
-
+    <div class="title-wellcome">
+      <h1>BEM-VINDO</h1>
+    </div>
+    <div class="subtitle-wellcome">
+      <p>Educação com a tecnologia ao seu lado.</p>
+    </div>
+    <div class="text-wellcome">
+      <p>Aqui, você encontra ferramentas de inteligência
+        artificial desenvolvidas para automatizar a criação
+          de provas e oferecer suporte inteligente para
+          professores e escolas.
+          Agilize processos, ganhe tempo e eleve a
+          qualidade do ensino com inovação.
+      </p>
+    </div>
   </div>
   <div class="img-container">
-  
+    <div id="img1" class="img-1">
+      <img src="{% static 'LSDash/img/index-img.png' %}" alt="imagem de um pai ensinando sua filha" class="img-fluid">
+    </div>
+    <div id="img2" class="img-2">
+      <img src="{% static 'LSDash/img/index-img2.png' %}" alt="iamgem de uma professora " class="img-fluid">
+    </div>
+    <div class="img-text">
+    <p>Mais eficiência para quem ensina.
+      Mais qualidade para quem aprende.</p>
+    </div>
   </div>
 </div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const img1 = document.getElementById('img1');
+    const img2 = document.getElementById('img2');
+    let img1InPosition1 = true;
+    
+    // Função para trocar as posições das imagens
+    function swapPositions() {
+      if (img1InPosition1) {
+        // Move img1 para posição 2
+        img1.classList.remove('position-1');
+        img1.classList.add('position-2');
+        
+        // Move img2 para posição 1
+        img2.classList.remove('position-2');
+        img2.classList.add('position-1');
+      } else {
+        // Move img1 para posição 1
+        img1.classList.remove('position-2');
+        img1.classList.add('position-1');
+        
+        // Move img2 para posição 2
+        img2.classList.remove('position-1');
+        img2.classList.add('position-2');
+      }
+      
+      img1InPosition1 = !img1InPosition1;
+    }
+    
+    // Definir posições iniciais
+    img1.classList.add('position-1');
+    img2.classList.add('position-2');
+    
+    // Trocar posições a cada 5 segundos
+    setInterval(swapPositions, 5000);
+  });
+</script>
 {% endblock page-content%}
