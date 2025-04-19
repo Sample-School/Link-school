@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
 from django_tenants.models import TenantMixin, DomainMixin
+from django.dispatch import receiver
+from django.db.models.signals import post_migrate
 
 # Create your models here.
 class FamiliaPagina(models.Model):
@@ -211,3 +213,5 @@ class UsuarioMaster(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return f"{self.nome} ({self.cliente.nome})"
+
+

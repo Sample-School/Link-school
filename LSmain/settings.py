@@ -56,7 +56,7 @@ EMAIL_HOST_PASSWORD = 'marw oycd lsqy bhxq'
 DEFAULT_FROM_EMAIL = 'jaumamaralpessoal@gmail.com'
 
 MIDDLEWARE = [
-    #'django_tenants.middleware.main.TenantMainMiddleware',
+    'LSmain.middleware.SelectiveTenantMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
