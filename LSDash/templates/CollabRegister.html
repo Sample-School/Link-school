@@ -1,37 +1,22 @@
 {% extends "global/base.html" %}
 
 {% load static %}
-
 {% block style %}
   <link rel="shortcut icon" href="{% static 'LSDash/img/favicon.ico' %}" type="image/x-icon">
-  <link rel="stylesheet" href="{% static 'LSDash/css/style-collab-register.css' %}">
-  <style>
-    /* Estilos adicionais para melhorar a visualização do select multiple */
-    select[multiple] {
-      min-height: 150px;
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-    }
-    select[multiple] option {
-      padding: 5px;
-      margin-bottom: 2px;
-      border-bottom: 1px solid #eee;
-    }
-    select[multiple] option:hover {
-      background-color: #f0f0f0;
-    }
-  </style>
+  <link rel="stylesheet" href="{% static "LSDash/css/collab-register.css" %}">
 {% endblock style %}
 
 {% block page-content %}
-  <header></header>
-  
+  <header>
+    {% include "global/partials/navbar.html" %}
+  </header>
   <main>
     <div class="container-top">
       <h1>Cadastrar Usuário</h1>
       <div class="buttons">
-        <a href="{% url 'collabregister' %}"><button class="btn-reset" id="btnReset" type="submit">Redefinir</button></a>
+        <a href="{% url 'collabregister' %}">
+          <button class="btn-reset" id="btnReset" type="submit">Redefinir</button>
+        </a>
         <button class="btn-save" id="btnSave" type="submit">Salvar</button>
       </div>
     </div>
@@ -86,33 +71,34 @@
 
         <!-- Tipo de Usuário -->
         <div class="container-form-center-right">
-          <section>
-            <div class="title"><label for="id_tipo_usuario">Tipo de Usuário</label></div>
-            <div class="input-radio">
-              <div class="radio-collab">
-                <input type="radio" name="tipo_usuario" value="colaborador" id="colaborador" {% if form.tipo_usuario.value == "colaborador" or not form.tipo_usuario.value %}checked{% endif %}>
-                <label for="colaborador">Colaborador</label>
+          <div class="top">
+            <section>
+              <div class="title"><label for="id_tipo_usuario">Tipo de Usuário</label></div>
+              <div class="input-radio">
+                <div class="radio-collab">
+                  <input type="radio" name="tipo_usuario" value="colaborador" id="colaborador" {% if form.tipo_usuario.value == "colaborador" or not form.tipo_usuario.value %}checked{% endif %}>
+                  <label for="colaborador">Colaborador</label>
+                </div>
+                <div class="radio-adm">
+                  <input type="radio" name="tipo_usuario" value="administrador" id="administrador" {% if form.tipo_usuario.value == "administrador" %}checked{% endif %}>
+                  <label for="administrador">Administrador</label>
+                </div>
               </div>
-              <div class="radio-adm">
-                <input type="radio" name="tipo_usuario" value="administrador" id="administrador" {% if form.tipo_usuario.value == "administrador" %}checked{% endif %}>
-                <label for="administrador">Administrador</label>
+            </section>
+            <section>
+              <div class="title"><label for="id_is_active">Status do Usuário</label></div>
+              <div class="input-radio">
+                <div class="radio-active">
+                  <input type="radio" name="is_active" value="True" id="ativo" {% if form.is_active.value == "True" or not form.is_active.value %}checked{% endif %}>
+                  <div class="description"><label for="ativo">Ativo</label></div>
+                </div>
+                <div class="radio-deactive">
+                  <input type="radio" name="is_active" value="False" id="inativo" {% if form.is_active.value == "False" %}checked{% endif %}>
+                  <div class="description"><label for="inativo">Inativo</label></div>
+                </div>
               </div>
-            </div>
-          </section>
-
-          <section>
-            <div class="title"><label for="id_is_active">Status do Usuário</label></div>
-            <div class="input-radio">
-              <div class="radio-active">
-                <input type="radio" name="is_active" value="True" id="ativo" {% if form.is_active.value == "True" or not form.is_active.value %}checked{% endif %}>
-                <div class="description"><label for="ativo">Ativo</label></div>
-              </div>
-              <div class="radio-deactive">
-                <input type="radio" name="is_active" value="False" id="inativo" {% if form.is_active.value == "False" %}checked{% endif %}>
-                <div class="description"><label for="inativo">Inativo</label></div>
-              </div>
-            </div>
-          </section>
+            </section>
+          </div>
 
           <section>
             <div class="title"><label for="id_paginas">Páginas vinculadas</label></div>
@@ -133,8 +119,13 @@
       </div>
 
       <div class="container-form-bottom">
-        <label for="id_observacoes">Observações sobre o usuário</label>
-        <textarea name="observacoes" class="form-control" id="id_observacoes" rows="4">{{ form.observacoes.value|default:'' }}</textarea>
+        <div class="container-form-bottom-left">
+          <h2>Foto do Usuário</h2>
+        </div>
+        <div class="container-form-bottom-right">
+          <label for="id_observacoes">Observações sobre o usuário</label>
+          <textarea name="observacoes" class="form-control" id="id_observacoes" rows="4">{{ form.observacoes.value|default:'' }}</textarea>
+        </div>
       </div>
 
     </form>
