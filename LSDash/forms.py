@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django import forms
 
 #imports locais
-from .models import UserModel, Pagina
+from .models import UserModel, Pagina, Cliente
 
 from django.contrib.auth.forms import PasswordResetForm
 
@@ -153,3 +153,22 @@ class CollabManageForm(forms.ModelForm):
             user.save()
             self.save_m2m()  # Salva as relações many-to-many, incluindo páginas
         return user
+
+
+class ClienteForm(forms.ModelForm):
+    subdominio = forms.CharField(max_length=50, help_text="Será usado como: subdominio.seudominio.com.br")
+    email_master = forms.EmailField(help_text="Email do usuário master")
+    senha_master = forms.CharField(widget=forms.PasswordInput, help_text="Senha do usuário master")
+    responsavel = forms.CharField(max_length=100, help_text="Nome do responsável/administrador")
+    email_contato = forms.EmailField(help_text="Email de contato da instituição")
+    
+    class Meta:
+        model = Cliente
+        fields = ['nome', 'cor_primaria', 'cor_secundaria', 'data_inicio_assinatura', 
+                    'data_validade_assinatura', 'observacoes', 'logo', 'qtd_usuarios']
+        widgets = {
+            'data_inicio_assinatura': forms.DateInput(attrs={'type': 'date'}),
+            'data_validade_assinatura': forms.DateInput(attrs={'type': 'date'}),
+            'cor_primaria': forms.TextInput(attrs={'type': 'color'}),
+            'cor_secundaria': forms.TextInput(attrs={'type': 'color'}),
+        }

@@ -1,0 +1,88 @@
+{% extends "global/base.html" %}
+
+
+{% block style %}
+
+{% endblock style %}
+
+{% block page-content %}
+
+{% if messages %}
+      <div class="alert-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if errors %}
+      <div class="alert-container">
+        {% for field, error in errors.items %}
+        <div class="alert alert-danger" role="alert">
+          {{ error }}
+        </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+  
+    <!-- Subdomínio -->
+    <label for="{{ form.subdominio.id_for_label }}">Subdomínio:</label>
+    {{ form.subdominio }}
+  
+    <!-- Email do usuário master -->
+    <label for="{{ form.email_master.id_for_label }}">Email do Usuário Master:</label>
+    {{ form.email_master }}
+  
+    <!-- Senha do usuário master -->
+    <label for="{{ form.senha_master.id_for_label }}">Senha do Usuário Master:</label>
+    {{ form.senha_master }}
+  
+    <!-- Responsável -->
+    <label for="{{ form.responsavel.id_for_label }}">Responsável:</label>
+    {{ form.responsavel }}
+  
+    <!-- Email de contato -->
+    <label for="{{ form.email_contato.id_for_label }}">Email de Contato:</label>
+    {{ form.email_contato }}
+  
+    <!-- Nome da instituição -->
+    <label for="{{ form.nome.id_for_label }}">Nome da Instituição:</label>
+    {{ form.nome }}
+  
+    <!-- Cor primária -->
+    <label for="{{ form.cor_primaria.id_for_label }}">Cor Primária:</label>
+    {{ form.cor_primaria }}
+  
+    <!-- Cor secundária -->
+    <label for="{{ form.cor_secundaria.id_for_label }}">Cor Secundária:</label>
+    {{ form.cor_secundaria }}
+  
+    <!-- Início da assinatura -->
+    <label for="{{ form.data_inicio_assinatura.id_for_label }}">Data de Início da Assinatura:</label>
+    {{ form.data_inicio_assinatura }}
+  
+    <!-- Validade da assinatura -->
+    <label for="{{ form.data_validade_assinatura.id_for_label }}">Data de Validade da Assinatura:</label>
+    {{ form.data_validade_assinatura }}
+  
+    <!-- Observações -->
+    <label for="{{ form.observacoes.id_for_label }}">Observações:</label>
+    {{ form.observacoes }}
+  
+    <!-- Logo -->
+    <label for="{{ form.logo.id_for_label }}">Logo da Instituição:</label>
+    {{ form.logo }}
+  
+    <!-- Quantidade de usuários -->
+    <label for="{{ form.qtd_usuarios.id_for_label }}">Quantidade Máxima de Usuários:</label>
+    {{ form.qtd_usuarios }}
+  
+    <!-- Botão de envio -->
+    <button type="submit">Salvar Cliente</button>
+  </form>
+{%endblock page-content%}

@@ -10,7 +10,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from .forms import NewResetPasswordForm
-from django.contrib import messages
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
@@ -20,10 +19,12 @@ from .forms import UserLoginForm
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.db import IntegrityError
+from django_tenants.utils import tenant_context
+from django.utils.text import slugify
 
 #Imports Locais
-from .forms import UserLoginForm, CollabManageForm
-from .models import UserModel, Pagina
+from .forms import UserLoginForm, CollabManageForm, ClienteForm
+from .models import UserModel, Pagina, Cliente, Dominio, UsuarioMaster
 
 
 class UserLoginView(LoginView):
@@ -271,3 +272,65 @@ class CollabRegisterView(LoginRequiredMixin, View):
 def custom_logout_view(request):
     logout(request)
     return redirect('login')
+
+
+class CadastroClienteView(LoginRequiredMixin, View):
+    template_name = 'ClienteRegister.html'
+    
+    def get(self, request):
+        form = ClienteForm()
+        return render(request, self.template_name, {'form': form})
+    
+    def post(self, request):
+        form = ClienteForm(request.POST, request.FILES)
+        
+        if form.is_valid():
+            dados = form.cleaned_data
+            
+            try:
+                # Criar o cliente com o usuário master usando nosso manager personalizado
+                cliente = Cliente.objects.create_cliente_with_master(
+                    nome=dados['nome'],
+                    email_master=dados['email_master'],
+                    password_master=dados['senha_master'],
+                    cor_primaria=dados['cor_primaria'],
+                    cor_secundaria=dados['cor_secundaria'],
+                    data_inicio_assinatura=dados['data_inicio_assinatura'],
+                    data_validade_assinatura=dados['data_validade_assinatura'],
+                    observacoes=dados['observacoes'],
+                    logo=dados.get('logo'),
+                    qtd_usuarios=dados['qtd_usuarios'],
+                    responsavel=dados['responsavel'],
+                    email_contato=dados['email_contato'],
+                    schema_name = slugify(dados['nome'])
+                )
+                
+                # Criar o domínio
+                subdominio = dados['subdominio']
+                dominio_base = 'seudominio.com.br'
+                dominio_completo = f"{subdominio}.{dominio_base}"
+                
+                dominio = Dominio()
+                dominio.domain = dominio_completo
+                dominio.tenant = cliente
+                dominio.is_primary = True
+                dominio.save()
+                
+                # Sincronizar usuário master dentro do tenant
+                with tenant_context(cliente):
+                    from LSCliente.models import UsuarioCliente
+                    
+                    # Criar um usuário equivalente dentro do tenant
+                    usuario_tenant = UsuarioCliente.objects.create_superuser(
+                        email=dados['email_master'],
+                        password=dados['senha_master'],
+                        nome=dados['responsavel'],
+                    )
+                
+                messages.success(request, f"Cliente {cliente.nome} cadastrado com sucesso!")
+                return redirect('lista_clientes')
+                
+            except Exception as e:
+                messages.error(request, f"Erro ao cadastrar cliente: {str(e)}")
+        
+        return render(request, self.template_name, {'form': form})
