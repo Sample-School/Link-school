@@ -22,12 +22,14 @@ LOGIN_URL = '/login/'
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ylxmjhqh%ug3b)jizt*m47&(d7_d1xs@obias%yx!-5io0tm-#'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')  # Valor padrão para evitar erros
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = ['sampletext.com.br','69.62.98.124', '195.200.4.174', 'localhost']
 
-ALLOWED_HOSTS = []
+CSRF_TRUSTED_ORIGINS = [
+    'https://sampletext.com.br',
+]
 
 #User model
 AUTH_USER_MODEL = 'LSDash.UserModel'
@@ -179,3 +181,8 @@ SHARED_APPS = [
 
 TENANT_MODEL = "LSDash.Cliente"  # Seu modelo de tenant
 TENANT_DOMAIN_MODEL = "LSDash.Dominio"  # Seu modelo de domínio
+
+try:
+    from LSmain import *
+except ImportError:
+    ...
