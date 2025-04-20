@@ -1,0 +1,95 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+:root {
+  --font-family: "Inter", sans-serif;
+}
+body {
+  background-image: url(../img/background.png);
+  color: #fff;
+  font-family: var(--font-family);
+}
+main {
+  position: relative;
+}
+.overlay-stripes {
+  position: fixed;
+  z-index: -1;
+}
+.overlay-stripes img {
+  width: 90%;
+}
+.overlay-stripes2 {
+  position: fixed;
+  top: 5px;
+  left: 270px;
+}
+.overlay-stripes2 img {
+  width: 420px;
+  height: 280px;
+}
+.index-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 40px;
+  position: fixed;
+  bottom: 0px;
+  width: 400px;
+  height: 500px;
+  padding-left: 12px;
+}
+.welcome-title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+}
+.welcome-title h1 {
+  font-size: 4em;
+}
+.carousel {
+  position: fixed;
+  bottom: 80px;
+  right: 80px;
+  width: 500px;
+  height: 400px;
+  overflow: hidden;
+}
+.slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.4;
+  transform: scale(0.92) translateY(30px);
+  transition: all 1s ease-in-out;
+  z-index: 1;
+}
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 30px;
+}
+.slide.active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  z-index: 2;
+}
+.carousel-text {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  width: 90%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 1.2em;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 8px;
+  font-style: italic;
+}

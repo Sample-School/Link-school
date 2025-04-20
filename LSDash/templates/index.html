@@ -1,98 +1,72 @@
 {% extends "global/base.html" %}
 {% load static %}
 
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title }}</title>
-
-
 </head>
-{% block style %}
 
-<link rel="shortcut icon" href="{% static "LSDash/img/favicon.ico" %}" type="image/x-icon">
-<link rel="stylesheet" href="{% static "LSDash/css/style-index.css" %}">
+{% block style %}
+  <link rel="shortcut icon" href="{% static "LSDash/img/favicon.ico" %}" type="image/x-icon">
+  <link rel="stylesheet" href="{% static "LSDash/css/index.css" %}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 {% endblock style %}
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 
 {% block page-content %}
-
-<div class="overlay-stripes">
-  <img src="{% static 'LSDash/img/indexsobreposc.png' %}" alt="imagem de fundo pro index" class="img-fluid">
-</div>
-
-<div class="overlay-stripes2">
-  <img src="{% static 'LSDash/img/indexsobreposc2.png' %}" alt="imagem de fundo pro index" class="img-fluid">
-</div>
-<div class="index-content">
-  <div class="wellcome-container">
-    <div class="title-wellcome">
-      <h1>BEM-VINDO</h1>
+  <header>
+    {% include "global/partials/navbar.html" %}
+  </header>
+  <main>
+    <div class="overlay-stripes">
+      <img src="{% static 'LSDash/img/indexsobreposc.png' %}" alt="imagem de fundo pro index" class="img-fluid">
     </div>
-    <div class="subtitle-wellcome">
-      <p>Educação com a tecnologia ao seu lado.</p>
+    <div class="overlay-stripes2">
+      <img src="{% static 'LSDash/img/indexsobreposc2.png' %}" alt="imagem de fundo pro index" class="img-fluid">
     </div>
-    <div class="text-wellcome">
-      <p>Aqui, você encontra ferramentas de inteligência
-        artificial desenvolvidas para automatizar a criação
-          de provas e oferecer suporte inteligente para
-          professores e escolas.
-          Agilize processos, ganhe tempo e eleve a
-          qualidade do ensino com inovação.
-      </p>
+    <div class="index-content">
+      <div class="welcome-title">
+        <div class="title-wellcome">
+          <h1>BEM-VINDO</h1>
+        </div>
+        <div class="subtitle-wellcome">
+          <p>Educação com a tecnologia ao seu lado.</p>
+        </div>
+      </div>
+      <div class="text-wellcome">
+        <p>
+          Aqui, você encontra ferramentas de inteligência artificial desenvolvidas para 
+          automatizar a criação de provas e oferecer suporte inteligente para professores 
+          e escolas. Agilize processos, ganhe tempo e eleve a qualidade do ensino com inovação.
+        </p>
+      </div>
     </div>
-  </div>
-  <div class="img-container">
-    <div id="img1" class="img-1">
-      <img src="{% static 'LSDash/img/index-img.png' %}" alt="imagem de um pai ensinando sua filha" class="img-fluid">
-    </div>
-    <div id="img2" class="img-2">
-      <img src="{% static 'LSDash/img/index-img2.png' %}" alt="iamgem de uma professora " class="img-fluid">
-    </div>
-    <div class="img-text">
-    <p>Mais eficiência para quem ensina.
-      Mais qualidade para quem aprende.</p>
-    </div>
-  </div>
-</div>
-
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const img1 = document.getElementById('img1');
-    const img2 = document.getElementById('img2');
-    let img1InPosition1 = true;
-    
-    // Função para trocar as posições das imagens
-    function swapPositions() {
-      if (img1InPosition1) {
-        // Move img1 para posição 2
-        img1.classList.remove('position-1');
-        img1.classList.add('position-2');
-        
-        // Move img2 para posição 1
-        img2.classList.remove('position-2');
-        img2.classList.add('position-1');
-      } else {
-        // Move img1 para posição 1
-        img1.classList.remove('position-2');
-        img1.classList.add('position-1');
-        
-        // Move img2 para posição 2
-        img2.classList.remove('position-1');
-        img2.classList.add('position-2');
-      }
-      
-      img1InPosition1 = !img1InPosition1;
-    }
-    
-    // Definir posições iniciais
-    img1.classList.add('position-1');
-    img2.classList.add('position-2');
-    
-    // Trocar posições a cada 5 segundos
-    setInterval(swapPositions, 5000);
-  });
-</script>
+    <div class="carousel">
+      <div class="slide slide-1 active">
+        <img src="{% static 'LSDash/img/index-img.png' %}" alt="Imagem 1">
+        <div class="carousel-text">
+          <p>Mas eficiência para quem ensina.</p>
+          <p>Mais qualidade para quem aprende.</p>
+        </div>
+      </div>
+      <div class="slide slide-2">
+        <img src="{% static 'LSDash/img/index-img2.png' %}" alt="Imagem 2">
+        <div class="carousel-text">
+          <p>Texto da segunda imagem</p>
+        </div>
+      </div>
+    </div>    
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const slides = document.querySelectorAll(".slide");
+      let current = 0;
+  
+      setInterval(() => {
+        slides[current].classList.remove("active");
+        current = (current + 1) % slides.length;
+        slides[current].classList.add("active");
+      }, 5000); // troca a cada 5 segundos
+    });
+  </script>
 {% endblock page-content%}
