@@ -15,7 +15,7 @@ main {
   display: flex;
   justify-content: space-around;
   width: 100%;
-  height: 60px;
+  height: 10%;
 }
 .container-top h1 {
   background-color: var(--container-color);
@@ -28,6 +28,7 @@ main {
   color: #01335c;
   font-family: var(--font-family);
   font-size: 1.8em;
+  font-style: italic;
 }
 .buttons {
   display: flex;
@@ -46,7 +47,6 @@ main {
   font-family: var(--font-family);
   font-size: 1.2em;
   font-weight: bold;
-  transition: transform 0.5s ease;
 }
 .btn-save {
   background: linear-gradient(to bottom, #0fc9B0, #048089);
@@ -59,10 +59,6 @@ main {
   font-family: var(--font-family);
   font-size: 1.2em;
   font-weight: bold;
-  transition: transform 0.5s ease;
-}
-.btn-reset:hover, .btn-save:hover {
-  transform: scale(1.1);
 }
 .form {
   display: flex;
@@ -70,7 +66,7 @@ main {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  height: 100%;
+  height: 90%;
 }
 .container-form-center {
   display: flex;
@@ -91,6 +87,7 @@ main {
   height: 80%;
   border-radius: 40px;
   box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
+  margin-top: 50px;
 }
 .input-name, .input-user, .input-email, .input-password {
   display: flex;
@@ -131,6 +128,7 @@ main {
   height: 80%;
   border-radius: 40px;
   box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
+  margin-top: 50px;
 }
 .top {
   display: flex;
@@ -175,6 +173,45 @@ main {
 .radio-collab, .radio-active {
   accent-color: #01335c;
 }
+.bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.bottom section {
+  width: 100%;
+}
+.input-select {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+}
+.input-select select {
+  display: flex;
+  justify-content: center;
+  background-color: transparent;
+  padding-left: 15px;
+  border: none;
+  outline: none;
+  width: 80%;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+.input-select option {
+  color: #01335c;
+  font-family: var(--font-family);
+  font-size: 1.1em;
+  font-weight: bold;
+  width: 100%;
+}
+.input-select option::before {
+  content: "> ";
+}
+.input-select option::after {
+  content: " <";
+}
 .container-form-bottom {
   display: flex;
   justify-content: space-between;
@@ -208,7 +245,7 @@ main {
   justify-content: center;
   align-items: center;
   gap: 10px;
-  width: 55%;
+  width: 48%;
   height: 170px;
   margin-bottom: 10px;
   border-radius: 40px;
@@ -232,6 +269,61 @@ main {
   font-size: 1.1em;
   cursor: text;
   padding: 5px 20px;
+}
+.container-form-bottom-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  width: 48%;
+}
+.content {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+.upload {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  width: 150px;
+  height: 120px;
+}
+.buttons-bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+.buttons-bottom button {
+  background: linear-gradient(to bottom, #0fc9B0, #048089);
+  width: 65px;
+  height: 35px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 0.8em;
+  font-weight: bold;
+}
+.upload i {
+  color: #048089;
+  font-size: 4em;
+}
+.photo {
+  background-color: #10858e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 140px;
+  height: 110px;
+}
+.photo i {
+  color: #fff;
+  font-size: 6em;
 }
 .alert.alert-success {
   display: flex;

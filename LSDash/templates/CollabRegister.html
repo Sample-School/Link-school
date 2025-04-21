@@ -100,27 +100,40 @@
             </section>
           </div>
 
-          <section>
-            <div class="title"><label for="id_paginas">Páginas vinculadas</label></div>
-            <div class="input-select">
-                <select name="paginas" id="id_paginas" class="form-control" multiple>
-                    {% for pagina in form.fields.paginas.queryset %}
-                      <option value="{{ pagina.id }}"
-                        {% if pagina.id|stringformat:"s" in form.paginas.value %}selected{% endif %}
-                      >
-                        {{ pagina }}
-                      </option>
-                    {% endfor %}
-                  </select>
-              <small class="form-text text-muted">Segure Ctrl (Windows) ou Cmd (Mac) para selecionar várias.</small>
-            </div>
-          </section>
+          <div class="bottom">
+            <section>
+              <div class="title"><label for="id_paginas">Páginas vinculadas</label></div>
+              <div class="input-select">
+                  <select name="paginas" id="id_paginas" class="form-control" multiple>
+                      {% for pagina in form.fields.paginas.queryset %}
+                        <option value="{{ pagina.id }}"
+                          {% if pagina.id|stringformat:"s" in form.paginas.value %}selected{% endif %}
+                        >
+                          {{ pagina }}
+                        </option>
+                      {% endfor %}
+                    </select>
+              </div>
+            </section>
+          </div>
         </div>
       </div>
 
       <div class="container-form-bottom">
         <div class="container-form-bottom-left">
           <h2>Foto do Usuário</h2>
+          <div class="content">
+            <div class="upload">
+              <i class="fas fa-upload"></i>
+              <div class="buttons-bottom">
+                <button type="submit">Aplicar</button>
+                <button type="submit">Carregar</button>
+              </div>
+            </div>
+            <div class="photo">
+              <i class="fa-regular fa-circle-user"></i>
+            </div>
+          </div>
         </div>
         <div class="container-form-bottom-right">
           <label for="id_observacoes">Observações sobre o usuário</label>
