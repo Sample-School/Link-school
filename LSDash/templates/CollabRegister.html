@@ -22,7 +22,10 @@
     </div>
 
     <!-- Exibição de erros no topo -->
-    {% comment %} {% if messages %}
+    
+
+    <form class="form" id="userRegisterForm" method="POST" action="{% url 'collabregister' %}">
+      {% if messages %}
       <div class="alert-container">
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }}" role="alert">
@@ -40,9 +43,8 @@
         </div>
         {% endfor %}
       </div>
-    {% endif %} {% endcomment %}
-
-    <form class="form" id="userRegisterForm" method="POST" action="{% url 'collabregister' %}">
+    {% endif %}
+    
       {% csrf_token %}
 
       <div class="container-form-center">
@@ -106,11 +108,13 @@
               <div class="input-select">
                   <select name="paginas" id="id_paginas" class="form-control" multiple>
                       {% for pagina in form.fields.paginas.queryset %}
+                        
                         <option value="{{ pagina.id }}"
                           {% if pagina.id|stringformat:"s" in form.paginas.value %}selected{% endif %}
                         >
                           {{ pagina }}
                         </option>
+                        
                       {% endfor %}
                     </select>
               </div>

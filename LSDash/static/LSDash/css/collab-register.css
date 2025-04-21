@@ -87,7 +87,7 @@ main {
   height: 80%;
   border-radius: 40px;
   box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
-  margin-top: 50px;
+  margin-top: 40px;
 }
 .input-name, .input-user, .input-email, .input-password {
   display: flex;
@@ -128,7 +128,7 @@ main {
   height: 80%;
   border-radius: 40px;
   box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
-  margin-top: 50px;
+  margin-top: 40px;
 }
 .top {
   display: flex;
@@ -319,12 +319,17 @@ main {
   color: #fff;
   font-size: 6em;
 }
-.alert.alert-success {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  color: green;
+.alert-container {
+  position: absolute;
   font-family: var(--font-family);
-  font-size: 1.2em;
+  font-size: 0.8em;
   font-weight: bold;
+  width: auto;
+  height: 30px;
+}
+.alert.alert-danger {
+  color: #ff0000;
+}
+.alert.alert-success {
+  color: green;
 }
