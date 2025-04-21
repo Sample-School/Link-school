@@ -22,7 +22,7 @@
     </div>
 
     <!-- Exibição de erros no topo -->
-    {% if messages %}
+    {% comment %} {% if messages %}
       <div class="alert-container">
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }}" role="alert">
@@ -40,7 +40,7 @@
         </div>
         {% endfor %}
       </div>
-    {% endif %}
+    {% endif %} {% endcomment %}
 
     <form class="form" id="userRegisterForm" method="POST" action="{% url 'collabregister' %}">
       {% csrf_token %}
