@@ -167,11 +167,28 @@ class ClienteForm(forms.ModelForm):
     senha_master = forms.CharField(widget=forms.PasswordInput, help_text="Senha do usuário master")
     responsavel = forms.CharField(max_length=100, help_text="Nome do responsável/administrador")
     email_contato = forms.EmailField(help_text="Email de contato da instituição")
-    
+    url_usuario = forms.URLField(required=False, help_text="URL de acesso ao sistema para os usuários do cliente")
+    login_cliente = forms.CharField(max_length=100, required=False, help_text="Login utilizado pelos usuários do cliente")
+
     class Meta:
         model = Cliente
-        fields = ['nome', 'cor_primaria', 'cor_secundaria', 'data_inicio_assinatura', 
-                    'data_validade_assinatura', 'observacoes', 'logo', 'qtd_usuarios']
+        fields = [
+            'nome',
+            'cor_primaria',
+            'cor_secundaria',
+            'data_inicio_assinatura',
+            'data_validade_assinatura',
+            'observacoes',
+            'logo',
+            'qtd_usuarios',
+            'subdominio',
+            'email_master',
+            'senha_master',
+            'responsavel',
+            'email_contato',
+            'url_usuario',
+            'login_cliente',
+        ]
         widgets = {
             'data_inicio_assinatura': forms.DateInput(attrs={'type': 'date'}),
             'data_validade_assinatura': forms.DateInput(attrs={'type': 'date'}),

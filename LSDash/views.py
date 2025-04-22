@@ -25,6 +25,7 @@ from django.utils.text import slugify
 #Imports Locais
 from .forms import UserLoginForm, CollabManageForm, ClienteForm
 from .models import UserModel, Pagina, Cliente, Dominio, UsuarioMaster
+from django.shortcuts import render, redirect, get_object_or_404
 
 
 class UserLoginView(LoginView):
@@ -336,3 +337,89 @@ class CadastroClienteView(LoginRequiredMixin, View):
                 messages.error(request, f"Erro ao cadastrar cliente: {str(e)}")
         
         return render(request, self.template_name, {'form': form})
+
+
+class EditarClienteView(View):
+    template_name = 'ClienteEdit.html'
+
+    def get(self, request):
+        cliente_id = request.GET.get('cliente_id')
+        form = ClienteForm()
+        cliente_selecionado = None
+        cliente_data = {}
+
+        if cliente_id:
+            try:
+                cliente_selecionado = Cliente.objects.get(id=cliente_id)
+                usuario_master = cliente_selecionado.usuario_master
+                dominio = Dominio.objects.filter(tenant=cliente_selecionado).first()
+
+                cliente_data = {
+                    'nome': cliente_selecionado.nome,
+                    'cor_primaria': cliente_selecionado.cor_primaria,
+                    'cor_secundaria': cliente_selecionado.cor_secundaria,
+                    'data_inicio_assinatura': cliente_selecionado.data_inicio_assinatura,
+                    'data_validade_assinatura': cliente_selecionado.data_validade_assinatura,
+                    'observacoes': cliente_selecionado.observacoes,
+                    'logo': cliente_selecionado.logo,
+                    'qtd_usuarios': cliente_selecionado.qtd_usuarios,
+                    'responsavel': cliente_selecionado.responsavel,
+                    'email_contato': cliente_selecionado.email_contato,
+                    'subdominio': dominio.domain if dominio else '',
+                    'email_master': usuario_master.email if usuario_master else '',
+                    'senha_master': '',
+                    'url_usuario': f"https://{dominio.domain}" if dominio else '',
+                    'login_cliente': usuario_master.email if usuario_master else '',
+                }
+                form = ClienteForm(initial=cliente_data)
+            except Cliente.DoesNotExist:
+                messages.error(request, 'Cliente não encontrado.')
+
+        todos_clientes = Cliente.objects.all()
+        return render(request, self.template_name, {
+            'form': form,
+            'cliente_id': cliente_id,
+            'clientes': todos_clientes,
+            'cliente_selecionado': cliente_selecionado,
+            'url_usuario': cliente_data.get('url_usuario', ''),
+            'login_cliente': cliente_data.get('login_cliente', ''),
+        })
+
+    def post(self, request):
+        cliente_id = request.POST.get('cliente_id')
+        if not cliente_id:
+            messages.error(request, 'ID do cliente não enviado.')
+            return redirect('EditarCliente')
+
+        cliente = get_object_or_404(Cliente, id=cliente_id)
+        form = ClienteForm(request.POST, request.FILES, instance=cliente)
+
+        if form.is_valid():
+            cliente = form.save()
+
+            subdominio = form.cleaned_data.get('subdominio')
+            email_master = form.cleaned_data.get('email_master')
+            senha_master = form.cleaned_data.get('senha_master')
+
+            dominio, _ = Dominio.objects.get_or_create(tenant=cliente)
+            dominio.domain = subdominio
+            dominio.is_primary = True
+            dominio.save()
+
+            usuario_master = cliente.usuario_master
+            if usuario_master:
+                usuario_master.email = email_master
+                if senha_master:
+                    usuario_master.set_password(senha_master)
+                usuario_master.save()
+
+            messages.success(request, 'Cliente atualizado com sucesso.')
+            return redirect(f"{reverse('EditarCliente')}?cliente_id={cliente.id}")
+
+        todos_clientes = Cliente.objects.all()
+        return render(request, self.template_name, {
+            'form': form,
+            'cliente_id': cliente_id,
+            'clientes': todos_clientes,
+            'cliente_selecionado': cliente,
+        })
