@@ -114,7 +114,7 @@ class CollabManage(LoginRequiredMixin,  TemplateView):
                 selected_user = UserModel.objects.get(user_id=user_id)  # Mudado de user para selected_user
                 old_password = selected_user.password
                 
-                form = CollabManageForm(request.POST, instance=selected_user)
+                form = CollabManageForm(request.POST,request.FILES, instance=selected_user)
                 
                 if form.is_valid():
                     updated_user = form.save(commit=False)
@@ -164,6 +164,7 @@ class CollabRegisterView(LoginRequiredMixin, View):
         is_active = request.POST.get('is_active') == 'True'
         observacoes = request.POST.get('observacoes', '')
         paginas_ids = request.POST.getlist('paginas')
+        user_img = request.FILES.get('user_img')
 
         errors = {}
         UserModel = get_user_model()
@@ -217,7 +218,8 @@ class CollabRegisterView(LoginRequiredMixin, View):
                 email=email,
                 password=password,
                 is_active=is_active,
-                observacoes=observacoes
+                observacoes=observacoes,
+                user_img=user_img
             )
 
             if tipo_usuario == 'administrador':

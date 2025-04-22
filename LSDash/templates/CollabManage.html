@@ -183,20 +183,21 @@
     
         <div class="container-form-bottom">
             <div class="container-form-bottom-left">
-              <h2>Foto do Usuário</h2>
-              <div class="content">
-                <div class="upload">
-                  <i class="fas fa-upload"></i>
-                  <div class="buttons-bottom">
-                    <button type="submit">Aplicar</button>
-                    <button type="submit">Carregar</button>
+                <h2>Foto do Usuário</h2>
+                <div class="content">
+                  <div class="upload">
+                    <i class="fas fa-upload" id="uploadIcon"></i>
+                    <input type="file" name="user_img" id="user_img" accept="image/*" style="display: none;">
+                  </div>
+                  <div class="photo" id="userPhotoContainer">
+                    <!-- O ícone será exibido apenas se não houver imagem -->
+                    <i class="fa-regular fa-circle-user" id="userIcon" {% if selected_user.user_img %}style="display: none;"{% endif %}></i>
+                    <!-- A imagem será exibida se existir -->
+                    <img id="imagePreview" src="{% if selected_user.user_img %}{{ selected_user.user_img.url }}{% endif %}" 
+                         alt="Preview" style="max-width: 100%; max-height: 100%; border-radius: 50%; {% if not selected_user.user_img %}display: none;{% endif %}">
                   </div>
                 </div>
-                <div class="photo">
-                  <i class="fa-regular fa-circle-user"></i>
-                </div>
               </div>
-            </div>
         <div class="container-form-bottom-rigth">
             <label for="{{ form.observacoes.id_for_label }}">Observações Sobre o usuário</label>
             {{ form.observacoes }}

@@ -86,10 +86,16 @@ class CollabManageForm(forms.ModelForm):
         label="Páginas",
         help_text="Selecione uma ou mais páginas"
     )
+    user_img = forms.ImageField(
+        required=False,
+        label="Imagem do Usuário",
+        widget=forms.FileInput(attrs={'class': 'form-control-file'}),
+        help_text="Upload de uma imagem para o perfil do usuário"
+    )
 
     class Meta:
         model = UserModel
-        fields = ['username', 'fullname', 'email', 'tipo_usuario', 'status', 'observacoes', 'paginas']
+        fields = ['username', 'fullname', 'email', 'tipo_usuario', 'status', 'observacoes', 'paginas', 'user_img']
         error_messages = {
             'username': {
                 'required': 'O nome de usuário é obrigatório.',
