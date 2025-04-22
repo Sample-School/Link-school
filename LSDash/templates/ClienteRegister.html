@@ -1,15 +1,32 @@
 {% extends "global/base.html" %}
+{% load static %}
 
 {% block style %}
+<link rel="shortcut icon" href="{% static 'LSDash/img/favicon.ico' %}" type="image/x-icon">
+<link rel="stylesheet" href="{% static "LSDash/css/collab-register.css" %}">
 {% endblock style %}
 
-{% block navbar %}
-  {% include "global/partials/navbar.html" %}  {# Caminho corrigido #}
-{% endblock %}
+
 
 {% block page-content %}
+<header>
+  {% include "global/partials/navbar.html" %}
+</header>
 
-{% if messages %}
+<main>
+  <div class="container-top">
+    <h1>Cadastrar Usuário</h1>
+    <div class="buttons">
+      <a href="{% url 'collabregister' %}">
+        <button class="btn-reset" id="btnReset" type="submit">Redefinir</button>
+      </a>
+      <button class="btn-save" id="btnSave" type="submit">Salvar</button>
+    </div>
+  </div>
+
+  <form class="form" id="ClientRegisterForm" method="POST" action="{% url 'ClienteRegister' %}">
+    {% if messages %}
+
       <div class="alert-container">
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }}" role="alert">
@@ -28,6 +45,13 @@
         {% endfor %}
       </div>
     {% endif %}
+    
+
+  </form>
+</main>
+
+
+    
 
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
