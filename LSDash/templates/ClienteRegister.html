@@ -25,6 +25,8 @@
   </div>
 
   <form class="form" id="ClientRegisterForm" method="POST" action="{% url 'ClienteRegister' %}">
+    {% csrf_token %}
+    
     {% if messages %}
 
       <div class="alert-container">
@@ -46,17 +48,10 @@
       </div>
     {% endif %}
     
-
-  </form>
-</main>
-
-
-    
-
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-  
-    <!-- Subdomínio -->
+  <div class="container-form-center">
+      
+      <div class="container-form-center-left">
+        <!-- Subdomínio -->
     <label for="{{ form.subdominio.id_for_label }}">Subdomínio:</label>
     {{ form.subdominio }}
   
@@ -79,34 +74,69 @@
     <!-- Nome da instituição -->
     <label for="{{ form.nome.id_for_label }}">Nome da Instituição:</label>
     {{ form.nome }}
-  
-    <!-- Cor primária -->
-    <label for="{{ form.cor_primaria.id_for_label }}">Cor Primária:</label>
-    {{ form.cor_primaria }}
-  
-    <!-- Cor secundária -->
-    <label for="{{ form.cor_secundaria.id_for_label }}">Cor Secundária:</label>
-    {{ form.cor_secundaria }}
-  
-    <!-- Início da assinatura -->
-    <label for="{{ form.data_inicio_assinatura.id_for_label }}">Data de Início da Assinatura:</label>
-    {{ form.data_inicio_assinatura }}
-  
-    <!-- Validade da assinatura -->
-    <label for="{{ form.data_validade_assinatura.id_for_label }}">Data de Validade da Assinatura:</label>
-    {{ form.data_validade_assinatura }}
-  
-    <!-- Observações -->
-    <label for="{{ form.observacoes.id_for_label }}">Observações:</label>
-    {{ form.observacoes }}
-  
-    <!-- Logo -->
-    <label for="{{ form.logo.id_for_label }}">Logo da Instituição:</label>
-    {{ form.logo }}
-  
+
     <!-- Quantidade de usuários -->
     <label for="{{ form.qtd_usuarios.id_for_label }}">Quantidade Máxima de Usuários:</label>
     {{ form.qtd_usuarios }}
+
+      
+      </div>
+
+    <div class="container-form-center-right">
+        <!-- Cor primária -->
+      <label for="{{ form.cor_primaria.id_for_label }}">Cor Primária:</label>
+      {{ form.cor_primaria }}
+  
+      <!-- Cor secundária -->
+      <label for="{{ form.cor_secundaria.id_for_label }}">Cor Secundária:</label>
+      {{ form.cor_secundaria }}
+  
+      <!-- Início da assinatura -->
+      <label for="{{ form.data_inicio_assinatura.id_for_label }}">Data de Início da Assinatura:</label>
+      {{ form.data_inicio_assinatura }}
+    
+      <!-- Validade da assinatura -->
+      <label for="{{ form.data_validade_assinatura.id_for_label }}">Data de Validade da Assinatura:</label>
+      {{ form.data_validade_assinatura }}
+    </div>
+    
+    <div class="container-form-bottom">
+      <div class="container-form-bottom-left">
+        <!-- Logo -->
+        <label for="{{ form.logo.id_for_label }}">Logo da Instituição:</label>
+        {{ form.logo }}
+
+      
+      </div>
+      
+      <div class="container-form-bottom-right">
+      
+        <!-- Observações -->
+        <label for="{{ form.observacoes.id_for_label }}">Observações:</label>
+        {{ form.observacoes }}
+      <div>
+
+    </div>
+  </div>
+
+  </form>
+</main>
+
+
+    
+
+<form method="post" enctype="multipart/form-data">
+    
+    
+  
+    
+    
+  
+    
+  
+    
+  
+    
   
     <!-- Botão de envio -->
     <button type="submit">Salvar Cliente</button>
