@@ -1,6 +1,6 @@
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import authenticate, login
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy,  reverse
 from django.contrib import messages
@@ -21,11 +21,10 @@ from django.shortcuts import redirect
 from django.db import IntegrityError
 from django_tenants.utils import tenant_context
 from django.utils.text import slugify
-
+from django import forms
 #Imports Locais
-from .forms import UserLoginForm, CollabManageForm, ClienteForm
-from .models import UserModel, Pagina, Cliente, Dominio, UsuarioMaster
-from django.shortcuts import render, redirect, get_object_or_404
+from .forms import UserLoginForm, CollabManageForm, ClienteForm, QuestaoForm, ImagemQuestaoFormSet, AlternativaMultiplaEscolhaForm, FraseVerdadeiroFalsoForm
+from .models import UserModel, Pagina, Cliente, Dominio, UsuarioMaster, Questao, ImagemQuestao, AlternativaMultiplaEscolha, FraseVerdadeiroFalso
 
 
 class UserLoginView(LoginView):
@@ -337,89 +336,228 @@ class CadastroClienteView(LoginRequiredMixin, View):
                 messages.error(request, f"Erro ao cadastrar cliente: {str(e)}")
         
         return render(request, self.template_name, {'form': form})
+    
 
+AlternativaFormSet = forms.inlineformset_factory(
+    Questao, 
+    AlternativaMultiplaEscolha,
+    form=AlternativaMultiplaEscolhaForm,
+    extra=5,  # 5 alternativas para múltipla escolha
+    max_num=5,
+    can_delete=True
+)
 
-class EditarClienteView(View):
-    template_name = 'ClienteEdit.html'
+FraseVFFormSet = forms.inlineformset_factory(
+    Questao, 
+    FraseVerdadeiroFalso,
+    form=FraseVerdadeiroFalsoForm,
+    extra=4,  # 4 frases para verdadeiro/falso
+    max_num=4,
+    can_delete=True
+)
 
+class QuestaoManageView(LoginRequiredMixin, View):
+    template_name = 'questionRegister.html'
+    
     def get(self, request):
-        cliente_id = request.GET.get('cliente_id')
-        form = ClienteForm()
-        cliente_selecionado = None
-        cliente_data = {}
-
-        if cliente_id:
-            try:
-                cliente_selecionado = Cliente.objects.get(id=cliente_id)
-                usuario_master = cliente_selecionado.usuario_master
-                dominio = Dominio.objects.filter(tenant=cliente_selecionado).first()
-
-                cliente_data = {
-                    'nome': cliente_selecionado.nome,
-                    'cor_primaria': cliente_selecionado.cor_primaria,
-                    'cor_secundaria': cliente_selecionado.cor_secundaria,
-                    'data_inicio_assinatura': cliente_selecionado.data_inicio_assinatura,
-                    'data_validade_assinatura': cliente_selecionado.data_validade_assinatura,
-                    'observacoes': cliente_selecionado.observacoes,
-                    'logo': cliente_selecionado.logo,
-                    'qtd_usuarios': cliente_selecionado.qtd_usuarios,
-                    'responsavel': cliente_selecionado.responsavel,
-                    'email_contato': cliente_selecionado.email_contato,
-                    'subdominio': dominio.domain if dominio else '',
-                    'email_master': usuario_master.email if usuario_master else '',
-                    'senha_master': '',
-                    'url_usuario': f"https://{dominio.domain}" if dominio else '',
-                    'login_cliente': usuario_master.email if usuario_master else '',
-                }
-                form = ClienteForm(initial=cliente_data)
-            except Cliente.DoesNotExist:
-                messages.error(request, 'Cliente não encontrado.')
-
-        todos_clientes = Cliente.objects.all()
-        return render(request, self.template_name, {
-            'form': form,
-            'cliente_id': cliente_id,
-            'clientes': todos_clientes,
-            'cliente_selecionado': cliente_selecionado,
-            'url_usuario': cliente_data.get('url_usuario', ''),
-            'login_cliente': cliente_data.get('login_cliente', ''),
-        })
-
+        context = self.get_context_data(request)
+        return render(request, self.template_name, context)
+    
     def post(self, request):
-        cliente_id = request.POST.get('cliente_id')
-        if not cliente_id:
-            messages.error(request, 'ID do cliente não enviado.')
-            return redirect('EditarCliente')
-
-        cliente = get_object_or_404(Cliente, id=cliente_id)
-        form = ClienteForm(request.POST, request.FILES, instance=cliente)
-
-        if form.is_valid():
-            cliente = form.save()
-
-            subdominio = form.cleaned_data.get('subdominio')
-            email_master = form.cleaned_data.get('email_master')
-            senha_master = form.cleaned_data.get('senha_master')
-
-            dominio, _ = Dominio.objects.get_or_create(tenant=cliente)
-            dominio.domain = subdominio
-            dominio.is_primary = True
-            dominio.save()
-
-            usuario_master = cliente.usuario_master
-            if usuario_master:
-                usuario_master.email = email_master
-                if senha_master:
-                    usuario_master.set_password(senha_master)
-                usuario_master.save()
-
-            messages.success(request, 'Cliente atualizado com sucesso.')
-            return redirect(f"{reverse('EditarCliente')}?cliente_id={cliente.id}")
-
-        todos_clientes = Cliente.objects.all()
-        return render(request, self.template_name, {
-            'form': form,
-            'cliente_id': cliente_id,
-            'clientes': todos_clientes,
-            'cliente_selecionado': cliente,
-        })
+        questao_id = request.POST.get('questao_id')
+        
+        # Se tiver ID, estamos editando uma questão existente
+        if questao_id:
+            return self.update_questao(request, questao_id)
+        else:
+            return self.create_questao(request)
+    
+    def get_context_data(self, request):
+        context = {}
+        
+        # Busca por ID de questão
+        questao_id = request.GET.get('questao_id')
+        if questao_id:
+            try:
+                questao = Questao.objects.get(id=questao_id)
+                context['questao'] = questao
+                context['questao_form'] = QuestaoForm(instance=questao)
+                context['imagem_formset'] = ImagemQuestaoFormSet(instance=questao)
+                
+                # Adicionar formsets específicos baseados no tipo da questão
+                if questao.tipo == 'multipla':
+                    context['alternativa_formset'] = AlternativaFormSet(instance=questao)
+                elif questao.tipo == 'vf':
+                    context['frase_vf_formset'] = FraseVFFormSet(instance=questao)
+                
+            except Questao.DoesNotExist:
+                messages.error(request, f"Questão com ID {questao_id} não encontrada.")
+                context['questao_form'] = QuestaoForm()
+                context['imagem_formset'] = ImagemQuestaoFormSet()
+                context['alternativa_formset'] = AlternativaFormSet()
+                context['frase_vf_formset'] = FraseVFFormSet()
+        else:
+            context['questao_form'] = QuestaoForm()
+            context['imagem_formset'] = ImagemQuestaoFormSet()
+            context['alternativa_formset'] = AlternativaFormSet()
+            context['frase_vf_formset'] = FraseVFFormSet()
+        
+        # Lista de questões para seleção
+        context['questoes'] = Questao.objects.select_related('materia', 'ano_escolar', 'criado_por').all().order_by('-data_criacao')[:50]  # Limitando a 50 para performance
+        
+        return context
+    
+    def create_questao(self, request):
+        questao_form = QuestaoForm(request.POST)
+        imagem_formset = ImagemQuestaoFormSet(request.POST, request.FILES)
+        
+        # FormSets serão processados conforme o tipo de questão
+        alternativa_formset = None
+        frase_vf_formset = None
+        
+        if questao_form.is_valid():
+            # Salvar a questão com o usuário atual
+            questao = questao_form.save(commit=False)
+            questao.criado_por = request.user
+            questao.save()
+            
+            # Validar e salvar o formset de imagens
+            imagem_formset = ImagemQuestaoFormSet(request.POST, request.FILES, instance=questao)
+            if imagem_formset.is_valid():
+                imagens = imagem_formset.save(commit=False)
+                for imagem in imagens:
+                    imagem.questao = questao
+                    imagem.save()
+                
+                for obj in imagem_formset.deleted_objects:
+                    obj.delete()
+            
+            # Processar formsets específicos com base no tipo da questão
+            is_specific_formset_valid = True
+            
+            if questao.tipo == 'multipla':
+                alternativa_formset = AlternativaFormSet(request.POST, request.FILES, instance=questao)
+                if alternativa_formset.is_valid():
+                    alternativas = alternativa_formset.save(commit=False)
+                    for i, alternativa in enumerate(alternativas):
+                        alternativa.questao = questao
+                        alternativa.ordem = i
+                        alternativa.save()
+                    
+                    for obj in alternativa_formset.deleted_objects:
+                        obj.delete()
+                else:
+                    is_specific_formset_valid = False
+            
+            elif questao.tipo == 'vf':
+                frase_vf_formset = FraseVFFormSet(request.POST, request.FILES, instance=questao)
+                if frase_vf_formset.is_valid():
+                    frases = frase_vf_formset.save(commit=False)
+                    for i, frase in enumerate(frases):
+                        frase.questao = questao
+                        frase.ordem = i
+                        frase.save()
+                    
+                    for obj in frase_vf_formset.deleted_objects:
+                        obj.delete()
+                else:
+                    is_specific_formset_valid = False
+            
+            if imagem_formset.is_valid() and is_specific_formset_valid:
+                messages.success(request, "Questão cadastrada com sucesso!")
+                return redirect('questao_manage')
+        
+        # Se chegou aqui, houve erro em algum formulário
+        messages.error(request, "Erro ao cadastrar questão. Verifique os dados informados.")
+        context = {
+            'questao_form': questao_form,
+            'imagem_formset': imagem_formset,
+            'questoes': Questao.objects.all().order_by('-data_criacao')[:50]
+        }
+        
+        # Adicionar formsets específicos ao contexto, se necessário
+        if questao_form.is_valid():
+            tipo_questao = questao_form.cleaned_data['tipo']
+            if tipo_questao == 'multipla':
+                context['alternativa_formset'] = alternativa_formset or AlternativaFormSet(request.POST)
+            elif tipo_questao == 'vf':
+                context['frase_vf_formset'] = frase_vf_formset or FraseVFFormSet(request.POST)
+        else:
+            context['alternativa_formset'] = AlternativaFormSet()
+            context['frase_vf_formset'] = FraseVFFormSet()
+        
+        return render(request, self.template_name, context)
+    
+    def update_questao(self, request, questao_id):
+        questao = get_object_or_404(Questao, id=questao_id)
+        questao_form = QuestaoForm(request.POST, instance=questao)
+        imagem_formset = ImagemQuestaoFormSet(request.POST, request.FILES, instance=questao)
+        
+        # FormSets serão processados conforme o tipo de questão
+        alternativa_formset = None
+        frase_vf_formset = None
+        
+        if questao_form.is_valid() and imagem_formset.is_valid():
+            # Salvar a questão principal
+            questao = questao_form.save()
+            
+            # Salvar o formset de imagens
+            imagens = imagem_formset.save(commit=False)
+            for imagem in imagens:
+                imagem.questao = questao
+                imagem.save()
+            
+            for obj in imagem_formset.deleted_objects:
+                obj.delete()
+            
+            # Processar formsets específicos com base no tipo da questão
+            is_specific_formset_valid = True
+            
+            if questao.tipo == 'multipla':
+                alternativa_formset = AlternativaFormSet(request.POST, request.FILES, instance=questao)
+                if alternativa_formset.is_valid():
+                    alternativas = alternativa_formset.save(commit=False)
+                    for i, alternativa in enumerate(alternativas):
+                        alternativa.questao = questao
+                        alternativa.ordem = i
+                        alternativa.save()
+                    
+                    for obj in alternativa_formset.deleted_objects:
+                        obj.delete()
+                else:
+                    is_specific_formset_valid = False
+            
+            elif questao.tipo == 'vf':
+                frase_vf_formset = FraseVFFormSet(request.POST, request.FILES, instance=questao)
+                if frase_vf_formset.is_valid():
+                    frases = frase_vf_formset.save(commit=False)
+                    for i, frase in enumerate(frases):
+                        frase.questao = questao
+                        frase.ordem = i
+                        frase.save()
+                    
+                    for obj in frase_vf_formset.deleted_objects:
+                        obj.delete()
+                else:
+                    is_specific_formset_valid = False
+            
+            if is_specific_formset_valid:
+                messages.success(request, "Questão atualizada com sucesso!")
+                return redirect(f"questao_manage?questao_id={questao_id}")
+        
+        # Se chegou aqui, houve erro em algum formulário
+        messages.error(request, "Erro ao atualizar questão. Verifique os dados informados.")
+        context = {
+            'questao': questao,
+            'questao_form': questao_form,
+            'imagem_formset': imagem_formset,
+            'questoes': Questao.objects.all().order_by('-data_criacao')[:50]
+        }
+        
+        # Adicionar formsets específicos ao contexto, se necessário
+        if questao.tipo == 'multipla':
+            context['alternativa_formset'] = alternativa_formset or AlternativaFormSet(instance=questao)
+        elif questao.tipo == 'vf':
+            context['frase_vf_formset'] = frase_vf_formset or FraseVFFormSet(instance=questao)
+        
+        return render(request, self.template_name, context)
