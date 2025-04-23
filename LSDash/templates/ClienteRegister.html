@@ -11,8 +11,9 @@
   {% include "global/partials/navbar.html" %}
 </header>
 
+
 <main>
-  <form class="form" id="ClientRegisterForm" method="POST" action="{% url 'ClienteRegister' %}" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
 
     <div class="container-top">
@@ -45,22 +46,20 @@
 
     <div class="container-form-center">
       <div class="container-form-center-left">
-        <label for="{{ form.subdominio.id_for_label }}">Subdomínio:</label>
+        <label for="{{ form.subdominio.id_for_label }}">URL DO USUÁRIO:</label>
         {{ form.subdominio }}
 
-        <label for="{{ form.email_master.id_for_label }}">Email do Usuário Master:</label>
+        <label for="{{ form.email_master.id_for_label }}">Email:</label>
         {{ form.email_master }}
 
-        <label for="{{ form.senha_master.id_for_label }}">Senha do Usuário Master:</label>
+        <label for="{{ form.senha_master.id_for_label }}">Senha:</label>
         {{ form.senha_master }}
 
-        <label for="{{ form.responsavel.id_for_label }}">Responsável:</label>
-        {{ form.responsavel }}
 
-        <label for="{{ form.email_contato.id_for_label }}">Email de Contato:</label>
-        {{ form.email_contato }}
 
-        <label for="{{ form.nome.id_for_label }}">Nome da Instituição:</label>
+
+
+        <label for="{{ form.nome.id_for_label }}">LOGIN (Nome da Instituição):</label>
         {{ form.nome }}
 
         <label for="{{ form.qtd_usuarios.id_for_label }}">Quantidade Máxima de Usuários:</label>
@@ -95,4 +94,14 @@
     </div>
   </form>
 </main>
+
+<script>
+  document.querySelector('button[type="submit"]').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelector('form').submit();
+  });
+</script>
+
 {% endblock page-content %}
+
+

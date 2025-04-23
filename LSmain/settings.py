@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'LSDash',
-    'LSCliente'
+    'LSCliente',
     
 ]
 
@@ -163,7 +163,7 @@ TENANT_APPS = [
     'django.contrib.auth',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'LSClient'
+    'LSCliente'
 ]
 
 SHARED_APPS = [

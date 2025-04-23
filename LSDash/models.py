@@ -100,12 +100,11 @@ class ClienteManager(models.Manager):
         """
         cliente = self.create(nome=nome, **kwargs)
         
-        # Criar usuário master
+        # Criar usuário master sem nome/responsável
         usuario_master = UsuarioMaster.objects.create_user(
             cliente=cliente,
             email=email_master,
             password=password_master,
-            nome=kwargs.get('responsavel', 'Administrador'),
             is_master=True
         )
         
@@ -125,8 +124,8 @@ class Cliente(TenantMixin):
     observacoes = models.TextField(blank=True, null=True)
     logo = models.ImageField(upload_to='logos_clientes/', blank=True, null=True)
     qtd_usuarios = models.IntegerField(default=5)
-    responsavel = models.CharField(max_length=100)
-    email_contato = models.EmailField()
+    
+    
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
     
@@ -179,7 +178,7 @@ class UsuarioMaster(AbstractBaseUser, PermissionsMixin):
     Este modelo fica no schema compartilhado (public).
     """
     id = models.AutoField(primary_key=True)
-    nome = models.CharField(max_length=100)
+    
     email = models.EmailField(unique=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)  # Acesso ao admin
@@ -210,10 +209,10 @@ class UsuarioMaster(AbstractBaseUser, PermissionsMixin):
     objects = UsuarioMasterManager()
     
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['nome', 'cliente']
+    REQUIRED_FIELDS = ['cliente']  # Removido 'nome' daqui também
     
     def __str__(self):
-        return f"{self.nome} ({self.cliente.nome})"
+        return f"{self.email} ({self.cliente.nome})"
 
 class GrupoEnsino(models.Model):
     nome = models.CharField(max_length=50)  # Ex: "Fundamental 1", "Fundamental 2", "Ensino Médio"

@@ -302,8 +302,7 @@ class CadastroClienteView(LoginRequiredMixin, View):
                     observacoes=dados['observacoes'],
                     logo=dados.get('logo'),
                     qtd_usuarios=dados['qtd_usuarios'],
-                    responsavel=dados['responsavel'],
-                    email_contato=dados['email_contato'],
+                    
                     schema_name = slugify(dados['nome'])
                 )
                 
@@ -318,25 +317,30 @@ class CadastroClienteView(LoginRequiredMixin, View):
                 dominio.is_primary = True
                 dominio.save()
                 
+                # ADICIONAR ESTE BLOCO: Executar migrações para o novo tenant
+                from django.core.management import call_command
+                with tenant_context(cliente):
+                    call_command('migrate', '--schema', cliente.schema_name)
+                
                 # Sincronizar usuário master dentro do tenant
                 with tenant_context(cliente):
                     from LSCliente.models import UsuarioCliente
                     
-                    # Criar um usuário equivalente dentro do tenant
+                    # Criar um usuário equivalente dentro do tenant (sem nome)
                     usuario_tenant = UsuarioCliente.objects.create_superuser(
                         email=dados['email_master'],
-                        password=dados['senha_master'],
-                        nome=dados['responsavel'],
+                        password=dados['senha_master']
+                        # Campo nome foi removido
                     )
                 
                 messages.success(request, f"Cliente {cliente.nome} cadastrado com sucesso!")
-                return redirect('lista_clientes')
+                return redirect('ClienteRegister')
                 
             except Exception as e:
                 messages.error(request, f"Erro ao cadastrar cliente: {str(e)}")
         
         return render(request, self.template_name, {'form': form})
-    
+        
 
 AlternativaFormSet = forms.inlineformset_factory(
     Questao, 
@@ -561,3 +565,125 @@ class QuestaoManageView(LoginRequiredMixin, View):
             context['frase_vf_formset'] = frase_vf_formset or FraseVFFormSet(instance=questao)
         
         return render(request, self.template_name, context)
+
+class EditarClienteView(LoginRequiredMixin, View):
+    template_name = 'ClienteEdit.html'
+    
+    def get(self, request):
+        cliente_id = request.GET.get('cliente_id')
+        abrir_modal = False
+        
+        # Buscar todos os clientes para o modal
+        todos_clientes = Cliente.objects.all().order_by('nome')
+        
+        # Se um ID de cliente foi fornecido, buscar o cliente
+        if cliente_id:
+            try:
+                cliente = get_object_or_404(Cliente, id=cliente_id)
+                
+                # Obter o domínio principal para extrair o subdomínio
+                dominio_principal = cliente.domains.filter(is_primary=True).first()
+                subdominio = dominio_principal.domain.split('.')[0] if dominio_principal else ""
+                
+                # Obter dados do usuário master para preencher o formulário
+                usuario_master = cliente.usuario_master
+                
+                # Inicializar o formulário com os dados do cliente
+                initial_data = {
+                    'subdominio': subdominio,
+                    'email_master': usuario_master.email if usuario_master else "",
+                    'senha_master': "",  # Deixar em branco por segurança
+                    'data_inicio_assinatura': cliente.data_inicio_assinatura.strftime('%Y-%m-%d') if cliente.data_inicio_assinatura else "",
+                    'data_validade_assinatura': cliente.data_validade_assinatura.strftime('%Y-%m-%d') if cliente.data_validade_assinatura else ""
+                }
+                
+                form = ClienteForm(instance=cliente, initial=initial_data)
+                
+            except Exception as e:
+                messages.error(request, f"Erro ao carregar cliente: {str(e)}")
+                abrir_modal = True
+                form = ClienteForm()  # Formulário vazio em caso de erro
+        else:
+            # Formulário vazio quando não há cliente selecionado
+            form = ClienteForm()
+        
+        return render(request, self.template_name, {
+            'form': form, 
+            'todos_clientes': todos_clientes,
+            'abrir_modal': abrir_modal,
+            'cliente_id': cliente_id,
+            'cliente_selecionado': cliente_id is not None and len(cliente_id) > 0
+        })
+    
+    def post(self, request):
+        cliente_id = request.POST.get('cliente_id')
+        
+        if not cliente_id:
+            messages.error(request, "ID do cliente não fornecido. Selecione um cliente antes de salvar.")
+            return redirect('ClienteEdit')
+        
+        cliente = get_object_or_404(Cliente, id=cliente_id)
+        form = ClienteForm(request.POST, request.FILES, instance=cliente)
+        
+        if form.is_valid():
+            dados = form.cleaned_data
+            
+            try:
+                # Atualizar os dados do cliente
+                cliente = form.save(commit=False)
+                
+                
+                cliente.save()
+                
+                # Atualizar o domínio se o subdomínio foi alterado
+                subdominio = dados['subdominio']
+                dominio_base = 'seudominio.com.br'
+                dominio_completo = f"{subdominio}.{dominio_base}"
+                
+                dominio = cliente.domains.filter(is_primary=True).first()
+                if dominio and dominio.domain != dominio_completo:
+                    dominio.domain = dominio_completo
+                    dominio.save()
+                elif not dominio:
+                    # Criar novo domínio se não existir
+                    dominio = Dominio()
+                    dominio.domain = dominio_completo
+                    dominio.tenant = cliente
+                    dominio.is_primary = True
+                    dominio.save()
+                
+                # Atualizar usuário master se a senha foi fornecida
+                if dados['senha_master']:
+                    usuario_master = cliente.usuario_master
+                    if usuario_master:
+                        usuario_master.set_password(dados['senha_master'])
+                        usuario_master.email = dados['email_master']
+                        usuario_master.save()
+                        
+                        # Atualizar o usuário equivalente dentro do tenant
+                        with tenant_context(cliente):
+                            from LSCliente.models import UsuarioCliente
+                            try:
+                                usuario_tenant = UsuarioCliente.objects.get(email=usuario_master.email)
+                                usuario_tenant.set_password(dados['senha_master'])
+                                usuario_tenant.save()
+                            except UsuarioCliente.DoesNotExist:
+                                pass  # Usuário não existe no tenant
+                
+                messages.success(request, f"Cliente {cliente.nome} atualizado com sucesso!")
+                return redirect('ClienteEdit')
+                
+            except Exception as e:
+                messages.error(request, f"Erro ao atualizar cliente: {str(e)}")
+        else:
+            messages.error(request, "Erro no formulário. Verifique os campos.")
+        
+        # Se houver erro, voltar ao formulário mantendo os dados
+        todos_clientes = Cliente.objects.all().order_by('nome')
+        return render(request, self.template_name, {
+            'form': form, 
+            'todos_clientes': todos_clientes,
+            'cliente_id': cliente_id,
+            'cliente_selecionado': True
+        })
+

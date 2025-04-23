@@ -16,7 +16,7 @@ urlpatterns = [
     path('logout/', views.custom_logout_view, name='logout'),
     path('ClienteRegister/', views.CadastroClienteView.as_view(), name='ClienteRegister'),
     path('questoes/', views.QuestaoManageView.as_view(), name='questao_manage'),
-    #path('ClienteEdit/', views.EditarClienteView.as_view(), name='ClienteEdit'),
+    path('ClienteEdit/', views.EditarClienteView.as_view(), name='ClienteEdit'),
 
 
     #urls para recuperação de conta

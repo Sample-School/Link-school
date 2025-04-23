@@ -164,28 +164,19 @@ class ClienteForm(forms.ModelForm):
     subdominio = forms.CharField(max_length=50, help_text="Será usado como: subdominio.seudominio.com.br")
     email_master = forms.EmailField(help_text="Email do usuário master")
     senha_master = forms.CharField(widget=forms.PasswordInput, help_text="Senha do usuário master")
-    responsavel = forms.CharField(max_length=100, help_text="Nome do responsável/administrador")
-    email_contato = forms.EmailField(help_text="Email de contato da instituição")
+    data_inicio_assinatura = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
+    data_validade_assinatura = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
+    
     
 
     class Meta:
         model = Cliente
-        fields = [
-            'nome',
-            'cor_primaria',
-            'cor_secundaria',
-            'data_inicio_assinatura',
-            'data_validade_assinatura',
-            'observacoes',
-            'logo',
-            'qtd_usuarios',
-            'subdominio',
-            'email_master',
-            'senha_master',
-            'responsavel',
-            'email_contato',
-
-        ]
+        fields = ['nome', 'cor_primaria', 'cor_secundaria', 'data_inicio_assinatura', 
+                    'data_validade_assinatura', 'observacoes', 'logo', 'qtd_usuarios']
         widgets = {
             'data_inicio_assinatura': forms.DateInput(attrs={'type': 'date'}),
             'data_validade_assinatura': forms.DateInput(attrs={'type': 'date'}),

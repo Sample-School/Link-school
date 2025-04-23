@@ -65,8 +65,8 @@ class CustomUserAdmin(BaseUserAdmin):
 
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'responsavel', 'email_contato', 'data_inicio_assinatura', 'data_validade_assinatura', 'esta_ativo')
-    search_fields = ('nome', 'responsavel', 'email_contato')
+    list_display = ('nome', 'data_inicio_assinatura', 'data_validade_assinatura', 'esta_ativo')
+    search_fields = ('nome', )
     list_filter = ('data_validade_assinatura',)
     readonly_fields = ('criado_em', 'atualizado_em')
 
@@ -79,8 +79,8 @@ class DominioAdmin(admin.ModelAdmin):
 
 @admin.register(UsuarioMaster)
 class UsuarioMasterAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'email', 'cliente', 'is_master', 'is_active')
-    search_fields = ('nome', 'email', 'cliente__nome')
+    list_display = ( 'email', 'cliente', 'is_master', 'is_active')
+    search_fields = ( 'email', 'cliente__nome')
     list_filter = ('is_master', 'is_active')
 
 
