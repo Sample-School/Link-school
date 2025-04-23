@@ -1,0 +1,171 @@
+{% extends "global/base.html" %}
+
+{% block style %}
+<!-- Bootstrap já deve estar incluído no base.html -->
+{% endblock %}
+
+{% block navbar %}
+  {% include "global/partials/navbar.html" %}
+{% endblock %}
+
+{% block page-content %}
+
+{% if messages %}
+  <div class="alert-container">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}" role="alert">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- 🔍 Pesquisa por ID -->
+<form method="get" class="mb-4">
+  <label for="cliente_id">Buscar Cliente por ID:</label>
+  <input type="text" name="cliente_id" id="cliente_id" class="form-control w-50 d-inline-block" placeholder="Digite o ID do cliente">
+  <button type="submit" class="btn btn-primary">Buscar</button>
+</form>
+
+<!-- ✅ Mostrar nome da instituição se cliente estiver carregado -->
+{% if form.instance.id %}
+  <div class="mb-3">
+    <strong>Cliente selecionado:</strong> {{ form.instance.nome }} (ID: {{ form.instance.id }})
+  </div>
+{% endif %}
+
+<!-- 📋 Botão para abrir modal -->
+<button type="button" class="btn btn-secondary mb-4" data-bs-toggle="modal" data-bs-target="#modalClientes">
+  Ver Lista de Clientes
+</button>
+
+<!-- 🧾 Modal com lista de clientes -->
+<div class="modal fade" id="modalClientes" tabindex="-1" aria-labelledby="modalClientesLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalClientesLabel">Lista de Clientes</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <ul class="list-group">
+          {% for cliente in todos_clientes %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>ID: {{ cliente.id }} — {{ cliente.nome }}</span>
+              <a href="?cliente_id={{ cliente.id }}" class="btn btn-sm btn-outline-primary">Selecionar</a>
+            </li>
+          {% empty %}
+            <li class="list-group-item">Nenhum cliente encontrado.</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2>Cliente: {{ cliente.nome }} (ID: {{ cliente.id }})</h2>
+
+<!-- 📝 Formulário de Edição -->
+<form method="post" enctype="multipart/form-data" class="mt-4">
+  {% csrf_token %}
+
+  <!-- 🛠 CAMPO OCULTO PARA POSTAR O ID DO CLIENTE -->
+  {% if form.instance.id %}
+    <input type="hidden" name="cliente_id" value="{{ form.instance.id }}">
+  {% endif %}
+
+  <div class="mb-3">
+    <label for="{{ form.subdominio.id_for_label }}" class="form-label">Subdomínio:</label>
+    {{ form.subdominio }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.email_master.id_for_label }}" class="form-label">Email:</label>
+    {{ form.email_master }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.senha_master.id_for_label }}" class="form-label">Senha:</label>
+    {{ form.senha_master }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.responsavel.id_for_label }}" class="form-label">Responsável:</label>
+    {{ form.responsavel }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.email_contato.id_for_label }}" class="form-label">Email de Contato:</label>
+    {{ form.email_contato }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.nome.id_for_label }}" class="form-label">Nome da Instituição:</label>
+    {{ form.nome }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.cor_primaria.id_for_label }}" class="form-label">Cor Primária:</label>
+    {{ form.cor_primaria }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.cor_secundaria.id_for_label }}" class="form-label">Cor Secundária:</label>
+    {{ form.cor_secundaria }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.data_inicio_assinatura.id_for_label }}" class="form-label">Início da Assinatura:</label>
+    {{ form.data_inicio_assinatura }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.data_validade_assinatura.id_for_label }}" class="form-label">Validade da Assinatura:</label>
+    {{ form.data_validade_assinatura }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.observacoes.id_for_label }}" class="form-label">Observações:</label>
+    {{ form.observacoes }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.logo.id_for_label }}" class="form-label">Logo:</label>
+    {{ form.logo }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.qtd_usuarios.id_for_label }}" class="form-label">Quantidade Máxima de Usuários:</label>
+    {{ form.qtd_usuarios }}
+  </div>
+
+  <!-- ✅ CAMPOS ADICIONADOS NOVAMENTE -->
+  <div class="mb-3">
+    <label for="{{ form.url_usuario.id_for_label }}" class="form-label">URL do Usuário:</label>
+    {{ form.url_usuario }}
+  </div>
+
+  <div class="mb-3">
+    <label for="{{ form.login_cliente.id_for_label }}" class="form-label">Login do Cliente:</label>
+    {{ form.login_cliente }}
+  </div>
+
+  <button type="submit" class="btn btn-success">Salvar Alterações</button>
+
+  <input type="hidden" name="cliente_id" value="{{ cliente_id }}">
+</form>
+
+<!-- ✅ Script para abrir modal automaticamente se busca for feita -->
+{% if abrir_modal %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const modal = new bootstrap.Modal(document.getElementById('modalClientes'));
+      modal.show();
+    });
+  </script>
+{% endif %}
+
+{% endblock %}

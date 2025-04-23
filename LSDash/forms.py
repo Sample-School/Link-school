@@ -167,10 +167,25 @@ class ClienteForm(forms.ModelForm):
     responsavel = forms.CharField(max_length=100, help_text="Nome do responsável/administrador")
     email_contato = forms.EmailField(help_text="Email de contato da instituição")
     
+
     class Meta:
         model = Cliente
-        fields = ['nome', 'cor_primaria', 'cor_secundaria', 'data_inicio_assinatura', 
-                    'data_validade_assinatura', 'observacoes', 'logo', 'qtd_usuarios']
+        fields = [
+            'nome',
+            'cor_primaria',
+            'cor_secundaria',
+            'data_inicio_assinatura',
+            'data_validade_assinatura',
+            'observacoes',
+            'logo',
+            'qtd_usuarios',
+            'subdominio',
+            'email_master',
+            'senha_master',
+            'responsavel',
+            'email_contato',
+
+        ]
         widgets = {
             'data_inicio_assinatura': forms.DateInput(attrs={'type': 'date'}),
             'data_validade_assinatura': forms.DateInput(attrs={'type': 'date'}),

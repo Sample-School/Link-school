@@ -130,6 +130,7 @@ class Cliente(TenantMixin):
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
     
+    
     # Referência ao usuário master (relação um-para-um)
     usuario_master = models.OneToOneField(
         'UsuarioMaster', 
