@@ -286,3 +286,35 @@ class FraseVerdadeiroFalso(models.Model):
     
     def __str__(self):
         return f"{self.texto[:30]}... {'(V)' if self.verdadeira else '(F)'}"
+
+
+class ConfiguracaoSistema(models.Model):
+    imagem_home_1 = models.ImageField(upload_to='imagens_sistema/home/', null=True, blank=True)
+    imagem_home_2 = models.ImageField(upload_to='imagens_sistema/home/', null=True, blank=True)
+    observacoes = models.TextField(blank=True, null=True)
+    tempo_maximo_inatividade = models.IntegerField(default=30, help_text="Tempo máximo de inatividade em minutos")
+    
+    @classmethod
+    def obter_configuracao(cls):
+        """Retorna a configuração atual ou cria uma nova se não existir"""
+        configuracao, created = cls.objects.get_or_create(id=1)
+        return configuracao
+    
+    def __str__(self):
+        return "Configurações do Sistema"
+
+
+class SessaoUsuario(models.Model):
+    """Modelo para rastrear sessões ativas de usuários"""
+    usuario = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='sessoes')
+    chave_sessao = models.CharField(max_length=40)
+    data_inicio = models.DateTimeField(auto_now_add=True)
+    ultima_atividade = models.DateTimeField(auto_now=True)
+    endereco_ip = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ('usuario', 'chave_sessao')
+    
+    def __str__(self):
+        return f"Sessão de {self.usuario.username} - {self.chave_sessao[:8]}"

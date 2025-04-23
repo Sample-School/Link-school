@@ -1,0 +1,195 @@
+{% extends "global/base.html" %}
+{% load static %}
+
+{% block style %}
+
+{% endblock style %}
+
+{% block page-content %}
+<header>
+  {% include "global/partials/navbar.html" %}
+</header>
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Configurações do Sistema</h1>
+    </div>
+
+    <div class="row">
+        <!-- Formulário de Configurações -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Configurações Gerais</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Mensagens de erro/sucesso -->
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        <!-- Imagem Home 1 -->
+                        <div class="form-group">
+                            <label for="{{ form.imagem_home_1.id_for_label }}">Imagem Home 1</label>
+                            {% if form.instance.imagem_home_1 %}
+                                <div class="mb-2">
+                                    <img src="{{ form.instance.imagem_home_1.url }}" alt="Imagem Home 1" 
+                                         class="img-thumbnail" style="max-height: 150px;">
+                                </div>
+                            {% endif %}
+                            <div class="custom-file">
+                                {{ form.imagem_home_1 }}
+                                <label class="custom-file-label" for="{{ form.imagem_home_1.id_for_label }}">
+                                    Escolher arquivo
+                                </label>
+                            </div>
+                            {% if form.imagem_home_1.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.imagem_home_1.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Imagem Home 2 -->
+                        <div class="form-group">
+                            <label for="{{ form.imagem_home_2.id_for_label }}">Imagem Home 2</label>
+                            {% if form.instance.imagem_home_2 %}
+                                <div class="mb-2">
+                                    <img src="{{ form.instance.imagem_home_2.url }}" alt="Imagem Home 2" 
+                                         class="img-thumbnail" style="max-height: 150px;">
+                                </div>
+                            {% endif %}
+                            <div class="custom-file">
+                                {{ form.imagem_home_2 }}
+                                <label class="custom-file-label" for="{{ form.imagem_home_2.id_for_label }}">
+                                    Escolher arquivo
+                                </label>
+                            </div>
+                            {% if form.imagem_home_2.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.imagem_home_2.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Tempo Máximo de Inatividade -->
+                        <div class="form-group">
+                            <label for="{{ form.tempo_maximo_inatividade.id_for_label }}">
+                                Tempo Máximo de Inatividade (minutos)
+                            </label>
+                            {{ form.tempo_maximo_inatividade }}
+                            {% if form.tempo_maximo_inatividade.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.tempo_maximo_inatividade.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Tempo máximo que um usuário pode ficar inativo antes de ser desconectado automaticamente.
+                            </small>
+                        </div>
+                        
+                        <!-- Observações -->
+                        <div class="form-group">
+                            <label for="{{ form.observacoes.id_for_label }}">Observações do Sistema</label>
+                            {{ form.observacoes }}
+                            {% if form.observacoes.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.observacoes.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Observações gerais exibidas na página inicial para todos os usuários.
+                            </small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Salvar Configurações
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Usuários Ativos -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Usuários Ativos</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTableUsuariosAtivos" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Usuário</th>
+                                    <th>Início</th>
+                                    <th>Última Atividade</th>
+                                    <th>IP</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sessao in sessoes_ativas %}
+                                <tr>
+                                    <td>
+                                        {% if sessao.usuario.user_img %}
+                                            <img src="{{ sessao.usuario.user_img.url }}" alt="{{ sessao.usuario.username }}" 
+                                                 class="rounded-circle mr-2" style="width: 30px; height: 30px;">
+                                        {% endif %}
+                                        {{ sessao.usuario.username }}
+                                    </td>
+                                    <td>{{ sessao.data_inicio|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ sessao.ultima_atividade|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ sessao.endereco_ip }}</td>
+                                    <td>
+                                        <form method="post" action="{% url 'encerrar_sessao' sessao.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-sign-out-alt"></i> Deslogar
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">Nenhum usuário ativo no momento.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Inicializar DataTable
+    $(document).ready(function() {
+        $('#dataTableUsuariosAtivos').DataTable({
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json"
+            },
+            "order": [[2, "desc"]]
+        });
+        
+        // Script para mostrar o nome do arquivo selecionado no input de imagem
+        $('.custom-file-input').on('change', function() {
+            let fileName = $(this).val().split('\\').pop();
+            $(this).next('.custom-file-label').addClass("selected").html(fileName);
+        });
+    });
+</script>
+{% endblock  %}

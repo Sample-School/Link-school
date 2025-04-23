@@ -17,7 +17,8 @@ urlpatterns = [
     path('ClienteRegister/', views.CadastroClienteView.as_view(), name='ClienteRegister'),
     path('questoes/', views.QuestaoManageView.as_view(), name='questao_manage'),
     path('ClienteEdit/', views.EditarClienteView.as_view(), name='ClienteEdit'),
-
+    path('configuracao-sistema/', views.ConfiguracaoSistemaView.as_view(), name='configuracao_sistema'),
+    path('encerrar-sessao/<int:sessao_id>/',  views.EncerrarSessaoUsuarioView.as_view(), name='encerrar_sessao'),
 
     #urls para recuperação de conta
 path('password_reset/', auth_views.PasswordResetView.as_view(

@@ -22,9 +22,10 @@ from django.db import IntegrityError
 from django_tenants.utils import tenant_context
 from django.utils.text import slugify
 from django import forms
+from django.utils import timezone
 #Imports Locais
-from .forms import UserLoginForm, CollabManageForm, ClienteForm, QuestaoForm, ImagemQuestaoFormSet, AlternativaMultiplaEscolhaForm, FraseVerdadeiroFalsoForm
-from .models import UserModel, Pagina, Cliente, Dominio, UsuarioMaster, Questao, ImagemQuestao, AlternativaMultiplaEscolha, FraseVerdadeiroFalso
+from .forms import UserLoginForm, CollabManageForm, ClienteForm, QuestaoForm, ImagemQuestaoFormSet, AlternativaMultiplaEscolhaForm, FraseVerdadeiroFalsoForm, ConfiguracaoSistemaForm
+from .models import UserModel, Pagina, Cliente, Dominio, UsuarioMaster, Questao, ImagemQuestao, AlternativaMultiplaEscolha, FraseVerdadeiroFalso, ConfiguracaoSistema, SessaoUsuario
 
 
 class UserLoginView(LoginView):
@@ -687,3 +688,84 @@ class EditarClienteView(LoginRequiredMixin, View):
             'cliente_selecionado': True
         })
 
+class ConfiguracaoSistemaView(LoginRequiredMixin, View):
+    template_name = 'systemSettings.html'
+    
+    def get(self, request):
+        # Verificar se o usuário tem permissão de administrador
+        if not request.user.is_superuser:
+            messages.error(request, "Você não tem permissão para acessar esta página.")
+            return redirect('home')
+        
+        # Obter ou criar configuração
+        configuracao = ConfiguracaoSistema.obter_configuracao()
+        form = ConfiguracaoSistemaForm(instance=configuracao)
+        
+        # Obter sessões ativas dos usuários
+        sessoes_ativas = SessaoUsuario.objects.select_related('usuario').filter(
+            ultima_atividade__gte=timezone.now() - timezone.timedelta(minutes=30)
+        ).order_by('-ultima_atividade')
+        
+        context = {
+            'form': form,
+            'sessoes_ativas': sessoes_ativas,
+            'title': 'Configurações do Sistema'
+        }
+        
+        return render(request, self.template_name, context)
+    
+    def post(self, request):
+        if not request.user.is_superuser:
+            messages.error(request, "Você não tem permissão para acessar esta página.")
+            return redirect('home')
+        
+        configuracao = ConfiguracaoSistema.obter_configuracao()
+        form = ConfiguracaoSistemaForm(request.POST, request.FILES, instance=configuracao)
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Configurações atualizadas com sucesso!")
+            return redirect('systemSettings')
+        
+        # Se houver erros no formulário
+        sessoes_ativas = SessaoUsuario.objects.select_related('usuario').filter(
+            ultima_atividade__gte=timezone.now() - timezone.timedelta(minutes=30)
+        ).order_by('-ultima_atividade')
+        
+        context = {
+            'form': form,
+            'sessoes_ativas': sessoes_ativas,
+            'title': 'Configurações do Sistema'
+        }
+        
+        return render(request, self.template_name, context)
+
+
+# View para encerrar sessão de um usuário
+class EncerrarSessaoUsuarioView(LoginRequiredMixin, View):
+    def post(self, request, sessao_id):
+        if not request.user.is_superuser:
+            messages.error(request, "Você não tem permissão para esta ação.")
+            return redirect('home')
+        
+        try:
+            sessao = SessaoUsuario.objects.get(id=sessao_id)
+            
+            # Registrar a ação de encerramento
+            usuario_deslogado = sessao.usuario.username
+            
+            # Encerrar a sessão
+            from django.contrib.sessions.models import Session
+            try:
+                Session.objects.get(session_key=sessao.chave_sessao).delete()
+            except Session.DoesNotExist:
+                pass
+            
+            # Remover do nosso rastreamento
+            sessao.delete()
+            
+            messages.success(request, f"Sessão do usuário {usuario_deslogado} encerrada com sucesso.")
+        except SessaoUsuario.DoesNotExist:
+            messages.error(request, "Sessão não encontrada.")
+        
+        return redirect('systemSettings')

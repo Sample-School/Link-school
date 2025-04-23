@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django import forms
 
 #imports locais
-from .models import UserModel, Pagina, Cliente, GrupoEnsino, AnoEscolar, Materia, Questao, ImagemQuestao, AlternativaMultiplaEscolha, FraseVerdadeiroFalso
+from .models import UserModel, Pagina, Cliente, GrupoEnsino, AnoEscolar, Materia, Questao, ImagemQuestao, AlternativaMultiplaEscolha, FraseVerdadeiroFalso, ConfiguracaoSistema
 from django.contrib.auth.forms import PasswordResetForm
 
 class UserLoginForm(AuthenticationForm):
@@ -258,4 +258,13 @@ class FraseVerdadeiroFalsoForm(forms.ModelForm):
             'texto': forms.TextInput(attrs={'class': 'form-control'}),
             'verdadeira': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'ordem': forms.HiddenInput(),
+        }
+
+class ConfiguracaoSistemaForm(forms.ModelForm):
+    class Meta:
+        model = ConfiguracaoSistema
+        fields = ['imagem_home_1', 'imagem_home_2', 'observacoes', 'tempo_maximo_inatividade']
+        widgets = {
+            'observacoes': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+            'tempo_maximo_inatividade': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 1440}),
         }
