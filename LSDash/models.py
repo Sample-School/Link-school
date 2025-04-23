@@ -214,4 +214,75 @@ class UsuarioMaster(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return f"{self.nome} ({self.cliente.nome})"
 
+class GrupoEnsino(models.Model):
+    nome = models.CharField(max_length=50)  # Ex: "Fundamental 1", "Fundamental 2", "Ensino Médio"
+    
+    def __str__(self):
+        return self.nome
 
+class AnoEscolar(models.Model):
+    grupo_ensino = models.ForeignKey(GrupoEnsino, on_delete=models.CASCADE, related_name='anos')
+    nome = models.CharField(max_length=50)  # Ex: "1º Ano", "2º Ano", etc.
+    ordem = models.IntegerField(default=0)  # Para ordenação (1º ano = 1, 2º ano = 2, etc.)
+    
+    class Meta:
+        ordering = ['grupo_ensino', 'ordem']
+    
+    def __str__(self):
+        return f"{self.nome} - {self.grupo_ensino.nome}"
+
+class Materia(models.Model):
+    nome = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.nome
+
+class Questao(models.Model):
+    TIPO_CHOICES = [
+        ('aberta', 'Questão Aberta'),
+        ('multipla', 'Múltipla Escolha'),
+        ('vf', 'Verdadeiro ou Falso'),
+    ]
+    
+    titulo = models.CharField(max_length=255)  # Enunciado da questão
+    materia = models.ForeignKey(Materia, on_delete=models.CASCADE, related_name='questoes')
+    ano_escolar = models.ForeignKey(AnoEscolar, on_delete=models.CASCADE, related_name='questoes')
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    criado_por = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='questoes')
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    data_atualizacao = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.titulo[:50]}... ({self.get_tipo_display()})"
+
+class ImagemQuestao(models.Model):
+    questao = models.ForeignKey(Questao, on_delete=models.CASCADE, related_name='imagens')
+    imagem = models.ImageField(upload_to='imagens_questoes/')
+    legenda = models.CharField(max_length=255, blank=True, null=True)
+    
+    def __str__(self):
+        return f"Imagem para questão {self.questao.id}"
+
+class AlternativaMultiplaEscolha(models.Model):
+    questao = models.ForeignKey(Questao, on_delete=models.CASCADE, related_name='alternativas')
+    texto = models.CharField(max_length=255)
+    correta = models.BooleanField(default=False)
+    ordem = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['ordem']
+    
+    def __str__(self):
+        return f"{self.texto[:30]}... {'(Correta)' if self.correta else ''}"
+
+class FraseVerdadeiroFalso(models.Model):
+    questao = models.ForeignKey(Questao, on_delete=models.CASCADE, related_name='frases_vf')
+    texto = models.CharField(max_length=255)
+    verdadeira = models.BooleanField(default=True)
+    ordem = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['ordem']
+    
+    def __str__(self):
+        return f"{self.texto[:30]}... {'(V)' if self.verdadeira else '(F)'}"

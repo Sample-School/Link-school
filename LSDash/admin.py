@@ -1,67 +1,116 @@
 from django.contrib import admin
 from .models import (
-    UserModel,
-    Pagina,
-    FamiliaPagina,
-    Cliente,
-    Dominio,
-    UsuarioMaster,
+    FamiliaPagina, Pagina, UserModel, Cliente, Dominio,
+    UsuarioMaster, GrupoEnsino, AnoEscolar, Materia,
+    Questao, ImagemQuestao, AlternativaMultiplaEscolha, FraseVerdadeiroFalso
 )
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 
-@admin.register(UserModel)
-class UserModelAdmin(admin.ModelAdmin):
-    list_display = ('username', 'fullname', 'email', 'is_active', 'is_staff', 'is_superuser', 'date_joined')
-    search_fields = ('username', 'email', 'fullname')
-    list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined')
-    readonly_fields = ('date_joined',)
-    ordering = ('-date_joined',)
-    list_per_page = 20
-    filter_horizontal = ('paginas',)
+# ========== Inline Models ==========
+class ImagemQuestaoInline(admin.TabularInline):
+    model = ImagemQuestao
+    extra = 1
 
-    actions = ['activate_users', 'deactivate_users']
 
-    def activate_users(self, request, queryset):
-        queryset.update(is_active=True)
-    activate_users.short_description = "Ativar usuários selecionados"
+class AlternativaMultiplaEscolhaInline(admin.TabularInline):
+    model = AlternativaMultiplaEscolha
+    extra = 2
 
-    def deactivate_users(self, request, queryset):
-        queryset.update(is_active=False)
-    deactivate_users.short_description = "Desativar usuários selecionados"
+
+class FraseVerdadeiroFalsoInline(admin.TabularInline):
+    model = FraseVerdadeiroFalso
+    extra = 2
+
+
+# ========== ModelAdmin Configs ==========
+
+@admin.register(FamiliaPagina)
+class FamiliaPaginaAdmin(admin.ModelAdmin):
+    list_display = ('nome_exibicao', 'descricao')
+    search_fields = ('nome_exibicao',)
 
 
 @admin.register(Pagina)
 class PaginaAdmin(admin.ModelAdmin):
     list_display = ('nome', 'codigo', 'familia')
-    search_fields = ('nome', 'codigo')
     list_filter = ('familia',)
+    search_fields = ('nome', 'codigo')
 
 
-@admin.register(FamiliaPagina)
-class FamiliaPaginaAdmin(admin.ModelAdmin):
-    list_display = ('nome_exibicao',)
-    search_fields = ('nome_exibicao',)
+@admin.register(UserModel)
+class CustomUserAdmin(BaseUserAdmin):
+    model = UserModel
+    list_display = ('email', 'username', 'fullname', 'is_active', 'is_staff')
+    list_filter = ('is_staff', 'is_active', 'paginas')
+    search_fields = ('email', 'username', 'fullname')
+    ordering = ('email',)
+    filter_horizontal = ('paginas', 'groups', 'user_permissions')
+
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Informações Pessoais', {'fields': ('username', 'fullname', 'user_img', 'observacoes')}),
+        ('Permissões', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Relacionamentos', {'fields': ('paginas',)}),
+        ('Datas', {'fields': ('date_joined',)}),
+    )
+
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'username', 'password1', 'password2', 'is_active', 'is_staff', 'is_superuser'),
+        }),
+    )
 
 
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'responsavel', 'email_contato', 'qtd_usuarios', 'esta_ativo', 'criado_em')
+    list_display = ('nome', 'responsavel', 'email_contato', 'data_inicio_assinatura', 'data_validade_assinatura', 'esta_ativo')
     search_fields = ('nome', 'responsavel', 'email_contato')
-    list_filter = ('criado_em', 'data_validade_assinatura')
+    list_filter = ('data_validade_assinatura',)
     readonly_fields = ('criado_em', 'atualizado_em')
-    date_hierarchy = 'criado_em'
 
 
 @admin.register(Dominio)
 class DominioAdmin(admin.ModelAdmin):
     list_display = ('domain', 'tenant', 'is_primary')
     search_fields = ('domain',)
-    list_filter = ('is_primary',)
 
 
 @admin.register(UsuarioMaster)
 class UsuarioMasterAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'email', 'cliente', 'is_active', 'is_staff', 'is_master', 'date_joined')
-    search_fields = ('nome', 'email')
-    list_filter = ('is_active', 'is_master', 'is_staff')
-    readonly_fields = ('date_joined',)
+    list_display = ('nome', 'email', 'cliente', 'is_master', 'is_active')
+    search_fields = ('nome', 'email', 'cliente__nome')
+    list_filter = ('is_master', 'is_active')
+
+
+@admin.register(GrupoEnsino)
+class GrupoEnsinoAdmin(admin.ModelAdmin):
+    list_display = ('nome',)
+    search_fields = ('nome',)
+
+
+@admin.register(AnoEscolar)
+class AnoEscolarAdmin(admin.ModelAdmin):
+    list_display = ('nome', 'grupo_ensino', 'ordem')
+    list_filter = ('grupo_ensino',)
+    ordering = ('grupo_ensino', 'ordem')
+    search_fields = ('nome', 'grupo_ensino__nome')  # Necessário para autocomplete
+
+
+@admin.register(Materia)
+class MateriaAdmin(admin.ModelAdmin):
+    list_display = ('nome',)
+    search_fields = ('nome',)  # Necessário para autocomplete
+
+
+@admin.register(Questao)
+class QuestaoAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'materia', 'ano_escolar', 'tipo', 'criado_por', 'data_criacao')
+    list_filter = ('materia', 'ano_escolar', 'tipo')
+    search_fields = ('titulo', 'materia__nome')
+    inlines = [ImagemQuestaoInline, AlternativaMultiplaEscolhaInline, FraseVerdadeiroFalsoInline]
+    autocomplete_fields = ('materia', 'ano_escolar', 'criado_por')
+
+
+# As inlines estão ligadas à Questao, então não é necessário registrar ImagemQuestao, AlternativaMultiplaEscolha e FraseVerdadeiroFalso separadamente

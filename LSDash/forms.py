@@ -3,8 +3,7 @@ from django.core.exceptions import ValidationError
 from django import forms
 
 #imports locais
-from .models import UserModel, Pagina, Cliente
-
+from .models import UserModel, Pagina, Cliente, GrupoEnsino, AnoEscolar, Materia, Questao, ImagemQuestao, AlternativaMultiplaEscolha, FraseVerdadeiroFalso
 from django.contrib.auth.forms import PasswordResetForm
 
 class UserLoginForm(AuthenticationForm):
@@ -177,4 +176,80 @@ class ClienteForm(forms.ModelForm):
             'data_validade_assinatura': forms.DateInput(attrs={'type': 'date'}),
             'cor_primaria': forms.TextInput(attrs={'type': 'color'}),
             'cor_secundaria': forms.TextInput(attrs={'type': 'color'}),
+        }
+
+class QuestaoForm(forms.ModelForm):
+    class Meta:
+        model = Questao
+        fields = ['titulo', 'materia', 'ano_escolar', 'tipo']
+        widgets = {
+            'titulo': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+            'materia': forms.Select(attrs={'class': 'form-control'}),
+            'ano_escolar': forms.Select(attrs={'class': 'form-control'}),
+            'tipo': forms.RadioSelect(),
+        }
+        labels = {
+            'titulo': 'Enunciado da questão',
+            'materia': 'Matéria',
+            'ano_escolar': 'Ano Escolar',
+            'tipo': 'Tipo de questão',
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Agrupar anos escolares por grupo de ensino para o select
+        anos_por_grupo = {}
+        for ano in AnoEscolar.objects.select_related('grupo_ensino').all():
+            grupo_nome = ano.grupo_ensino.nome
+            if grupo_nome not in anos_por_grupo:
+                anos_por_grupo[grupo_nome] = []
+            anos_por_grupo[grupo_nome].append((ano.id, ano.nome))
+        
+        # Criar as opções do campo com grupos
+        choices = []
+        for grupo_nome, anos in anos_por_grupo.items():
+            group_options = [(id, nome) for id, nome in anos]
+            choices.append((grupo_nome, group_options))
+        
+        # Atualizar o campo ano_escolar com as opções agrupadas
+        self.fields['ano_escolar'].choices = choices
+
+class ImagemQuestaoForm(forms.ModelForm):
+    class Meta:
+        model = ImagemQuestao
+        fields = ['imagem', 'legenda']
+        widgets = {
+            'legenda': forms.TextInput(attrs={'class': 'form-control'}),
+            'imagem': forms.FileInput(attrs={'class': 'form-control-file'}),
+        }
+
+# FormSet para múltiplas imagens
+ImagemQuestaoFormSet = forms.inlineformset_factory(
+    Questao, 
+    ImagemQuestao,
+    form=ImagemQuestaoForm,
+    extra=1,  # Começa com 1 formulário vazio
+    can_delete=True  # Permite excluir imagens
+)
+
+
+class AlternativaMultiplaEscolhaForm(forms.ModelForm):
+    class Meta:
+        model = AlternativaMultiplaEscolha
+        fields = ['texto', 'correta', 'ordem']
+        widgets = {
+            'texto': forms.TextInput(attrs={'class': 'form-control'}),
+            'correta': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'ordem': forms.HiddenInput(),
+        }
+
+class FraseVerdadeiroFalsoForm(forms.ModelForm):
+    class Meta:
+        model = FraseVerdadeiroFalso
+        fields = ['texto', 'verdadeira', 'ordem']
+        widgets = {
+            'texto': forms.TextInput(attrs={'class': 'form-control'}),
+            'verdadeira': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'ordem': forms.HiddenInput(),
         }

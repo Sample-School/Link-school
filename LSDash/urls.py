@@ -14,6 +14,8 @@ urlpatterns = [
     path('RegistroColaborador/', views.CollabRegisterView.as_view(), name='collabregister'),
     path('logout/', views.custom_logout_view, name='logout'),
     path('ClienteRegister/', views.CadastroClienteView.as_view(), name='ClienteRegister'),
+    path('questoes/', views.QuestaoManageView.as_view(), name='questao_manage'),
+    
     #urls para recuperação de conta
 path('password_reset/', auth_views.PasswordResetView.as_view(
     template_name='password_reset/password_reset_email_form.html',
