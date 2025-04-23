@@ -79,3 +79,4 @@ Thumbs.db
 local_settings.py
 .env.local
 .env.*.local
+*.pyc
