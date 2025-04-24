@@ -2,194 +2,179 @@
 {% load static %}
 
 {% block style %}
-
+<link rel="stylesheet" href="{% static 'LSDash/css/style-systemSettings.css' %}">
 {% endblock style %}
 
 {% block page-content %}
 <header>
   {% include "global/partials/navbar.html" %}
 </header>
-<div class="container-fluid">
+
+<div id="webcrumbs" class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Configurações do Sistema</h1>
+        <h1 class="h3 mb-0 text-gray-800">Parâmetros do Sistema</h1>
+        <div class="d-flex gap-3">
+            <button id="btn-redefinir" class="bg-slate-200 hover:bg-slate-300 text-slate-700 transition-all px-6 py-2 rounded-full">
+                Redefinir
+            </button>
+            <button id="btn-salvar" class="bg-teal-500 hover:bg-teal-600 text-white transition-all px-6 py-2 rounded-full">
+                Salvar
+            </button>
+        </div>
     </div>
 
-    <div class="row">
-        <!-- Formulário de Configurações -->
-        <div class="col-lg-6">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Configurações Gerais</h6>
-                </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <!-- Mensagens de erro/sucesso -->
-                        {% if messages %}
-                            {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                        
-                        <!-- Imagem Home 1 -->
-                        <div class="form-group">
-                            <label for="{{ form.imagem_home_1.id_for_label }}">Imagem Home 1</label>
-                            {% if form.instance.imagem_home_1 %}
-                                <div class="mb-2">
-                                    <img src="{{ form.instance.imagem_home_1.url }}" alt="Imagem Home 1" 
-                                         class="img-thumbnail" style="max-height: 150px;">
-                                </div>
-                            {% endif %}
-                            <div class="custom-file">
-                                {{ form.imagem_home_1 }}
-                                <label class="custom-file-label" for="{{ form.imagem_home_1.id_for_label }}">
-                                    Escolher arquivo
-                                </label>
-                            </div>
-                            {% if form.imagem_home_1.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.imagem_home_1.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Imagem Home 2 -->
-                        <div class="form-group">
-                            <label for="{{ form.imagem_home_2.id_for_label }}">Imagem Home 2</label>
-                            {% if form.instance.imagem_home_2 %}
-                                <div class="mb-2">
-                                    <img src="{{ form.instance.imagem_home_2.url }}" alt="Imagem Home 2" 
-                                         class="img-thumbnail" style="max-height: 150px;">
-                                </div>
-                            {% endif %}
-                            <div class="custom-file">
-                                {{ form.imagem_home_2 }}
-                                <label class="custom-file-label" for="{{ form.imagem_home_2.id_for_label }}">
-                                    Escolher arquivo
-                                </label>
-                            </div>
-                            {% if form.imagem_home_2.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.imagem_home_2.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Tempo Máximo de Inatividade -->
-                        <div class="form-group">
-                            <label for="{{ form.tempo_maximo_inatividade.id_for_label }}">
-                                Tempo Máximo de Inatividade (minutos)
-                            </label>
-                            {{ form.tempo_maximo_inatividade }}
-                            {% if form.tempo_maximo_inatividade.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.tempo_maximo_inatividade.errors }}
-                                </div>
-                            {% endif %}
-                            <small class="form-text text-muted">
-                                Tempo máximo que um usuário pode ficar inativo antes de ser desconectado automaticamente.
-                            </small>
-                        </div>
-                        
-                        <!-- Observações -->
-                        <div class="form-group">
-                            <label for="{{ form.observacoes.id_for_label }}">Observações do Sistema</label>
-                            {{ form.observacoes }}
-                            {% if form.observacoes.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.observacoes.errors }}
-                                </div>
-                            {% endif %}
-                            <small class="form-text text-muted">
-                                Observações gerais exibidas na página inicial para todos os usuários.
-                            </small>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Salvar Configurações
-                        </button>
-                    </form>
-                </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Usuários Logados -->
+        <div class="bg-white rounded-2xl shadow-md overflow-hidden border-2 border-slate-100">
+            <div class="bg-slate-50 p-4 font-semibold text-center text-slate-800">
+                Usuários Logados
             </div>
-        </div>
-        
-        <!-- Usuários Ativos -->
-        <div class="col-lg-6">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Usuários Ativos</h6>
+            <div class="p-4">
+                <div class="flex items-center justify-center mb-4">
+                    <div class="text-lg font-bold text-slate-800">4 / 10</div>
+                    <div class="w-48 h-1 bg-slate-200 rounded-full ml-4 relative">
+                        <div class="absolute top-0 left-0 h-1 w-2/5 bg-pink-500 rounded-full"></div>
+                        <div
+                            class="absolute top-0 left-2/5 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-pink-500 rounded-full">
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered" id="dataTableUsuariosAtivos" width="100%" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th>Usuário</th>
-                                    <th>Início</th>
-                                    <th>Última Atividade</th>
-                                    <th>IP</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for sessao in sessoes_ativas %}
-                                <tr>
-                                    <td>
-                                        {% if sessao.usuario.user_img %}
-                                            <img src="{{ sessao.usuario.user_img.url }}" alt="{{ sessao.usuario.username }}" 
-                                                 class="rounded-circle mr-2" style="width: 30px; height: 30px;">
-                                        {% endif %}
-                                        {{ sessao.usuario.username }}
-                                    </td>
-                                    <td>{{ sessao.data_inicio|date:"d/m/Y H:i" }}</td>
-                                    <td>{{ sessao.ultima_atividade|date:"d/m/Y H:i" }}</td>
-                                    <td>{{ sessao.endereco_ip }}</td>
-                                    <td>
-                                        <form method="post" action="{% url 'encerrar_sessao' sessao.id %}">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="fas fa-sign-out-alt"></i> Deslogar
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="5" class="text-center">Nenhum usuário ativo no momento.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-teal-50 rounded-lg p-4 text-teal-800">
+                        <div class="font-medium">001 - XYZ</div>
+                        <div class="font-medium">002 - ZYX</div>
+                        <div class="font-medium">003 - YZX</div>
+                        <div class="font-medium">004 - ZXY</div>
+                    </div>
+                    <div class="bg-teal-50 rounded-lg p-4"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="bg-slate-50 rounded-lg p-3">
+                        <div class="text-center text-slate-800 font-medium mb-2">
+                            Deslogar Usuário
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-sm text-slate-600">Cód:</div>
+                            <input type="text" class="flex-1 border border-slate-300 rounded-md h-8 px-2 text-sm" />
+                            <button
+                                class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm">
+                                Aplicar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 rounded-lg p-3">
+                        <div class="text-center text-slate-800 font-medium mb-2">
+                            Permanência em Inatividade
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-sm text-slate-600">Tempo:</div>
+                            <input type="text"
+                                class="flex-1 border border-slate-300 rounded-md h-8 px-2 text-sm" value="00:45" />
+                            <button
+                                class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm">
+                                Aplicar
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Imagens da Home -->
+        <div class="bg-white rounded-2xl shadow-md overflow-hidden border-2 border-slate-100">
+            <div class="bg-slate-50 p-4 font-semibold text-center text-slate-800">
+                Imagens da Home
+            </div>
+            <div class="p-4">
+                <div class="mb-4">
+                    <div class="mb-2 text-slate-800 font-medium">1ª Imagem</div>
+                    <div class="flex items-center gap-3">
+                        <div class="flex-1 bg-slate-100 rounded-lg h-24 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-5xl text-slate-400">upload</span>
+                        </div>
+                        <div>
+                            <button
+                                class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm w-24 mb-2">
+                                Aplicar
+                            </button>
+                            <button
+                                class="bg-slate-200 hover:bg-slate-300 text-slate-700 transition-all px-4 py-1 rounded-full text-sm w-24">
+                                Carregar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="mb-2 text-slate-800 font-medium">2ª Imagem</div>
+                    <div class="flex items-center gap-3">
+                        <div class="flex-1 bg-slate-100 rounded-lg h-24 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-5xl text-slate-400">upload</span>
+                        </div>
+                        <div>
+                            <button
+                                class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm w-24 mb-2">
+                                Aplicar
+                            </button>
+                            <button
+                                class="bg-slate-200 hover:bg-slate-300 text-slate-700 transition-all px-4 py-1 rounded-full text-sm w-24">
+                                Carregar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-sm text-slate-600 italic">OBS: A imagem deve ter YYYY x YYYY</div>
+            </div>
+        </div>
+
+        <!-- Observações do Administrador -->
+        <div class="bg-white rounded-2xl shadow-md overflow-hidden border-2 border-slate-100 lg:col-span-2">
+            <div class="bg-slate-50 p-4 font-semibold text-center text-slate-800">
+                Observações do Administrador
+            </div>
+            <div class="p-4">
+                <textarea class="w-full h-24 bg-slate-100 rounded-lg p-4 resize-none"
+                    placeholder="Digite suas observações aqui..."></textarea>
+            </div>
+        </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Inicializar DataTable
-    $(document).ready(function() {
+    $(document).ready(function () {
+        // Inicializar DataTable
         $('#dataTableUsuariosAtivos').DataTable({
             language: {
                 url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json"
             },
             "order": [[2, "desc"]]
         });
-        
-        // Script para mostrar o nome do arquivo selecionado no input de imagem
-        $('.custom-file-input').on('change', function() {
-            let fileName = $(this).val().split('\\').pop();
-            $(this).next('.custom-file-label').addClass("selected").html(fileName);
+
+        // Funcionalidade do botão "Redefinir"
+        $('#btn-redefinir').on('click', function () {
+            // Limpar campos de entrada
+            $('input[type="text"]').val('');
+            $('textarea').val('');
+            alert('Os campos foram redefinidos!');
+        });
+
+        // Funcionalidade do botão "Salvar"
+        $('#btn-salvar').on('click', function () {
+            // Simular salvamento
+            alert('As configurações foram salvas com sucesso!');
+        });
+
+        // Funcionalidade dos botões "Aplicar"
+        $('.btn-aplicar').on('click', function () {
+            const input = $(this).siblings('input').val();
+            if (input) {
+                alert(`Valor aplicado: ${input}`);
+            } else {
+                alert('Por favor, insira um valor antes de aplicar.');
+            }
         });
     });
 </script>
-{% endblock  %}
+{% endblock %}
