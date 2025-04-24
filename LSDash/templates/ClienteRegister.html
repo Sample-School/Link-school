@@ -13,11 +13,11 @@
 
 
 <main>
-  <form method="post" enctype="multipart/form-data">
+  <form method="post" class="formulario" enctype="multipart/form-data">
     {% csrf_token %}
 
     <div class="container-top">
-      <h1>Cadastrar Usuário</h1>
+      <h1>Cadastrar Cliente</h1>
       <div class="buttons">
         <button class="btn-reset" id="btnReset" type="reset">Redefinir</button>
         <button class="btn-save" id="btnSave" type="submit">Salvar</button>
@@ -46,62 +46,158 @@
 
     <div class="container-form-center">
       <div class="container-form-center-left">
+        
+        <div class="input">
         <label for="{{ form.subdominio.id_for_label }}">URL DO USUÁRIO:</label>
         {{ form.subdominio }}
+        </div>
 
+        <div class="input">
         <label for="{{ form.email_master.id_for_label }}">Email:</label>
         {{ form.email_master }}
+        </div>
 
+        <div class="input">
         <label for="{{ form.senha_master.id_for_label }}">Senha:</label>
         {{ form.senha_master }}
+        </div>
 
-
-
-
-
+        <div class="input">
         <label for="{{ form.nome.id_for_label }}">LOGIN (Nome da Instituição):</label>
         {{ form.nome }}
+        </div>
+        
+        <div class="inputnumber">
+          <label for="{{ form.qtd_usuarios.id_for_label }}">Quantidade Máxima de Usuários:</label>
+          {{ form.qtd_usuarios }}
+        </div>
 
-        <label for="{{ form.qtd_usuarios.id_for_label }}">Quantidade Máxima de Usuários:</label>
-        {{ form.qtd_usuarios }}
       </div>
 
       <div class="container-form-center-right">
-        <label for="{{ form.cor_primaria.id_for_label }}">Cor Primária:</label>
-        {{ form.cor_primaria }}
-
-        <label for="{{ form.cor_secundaria.id_for_label }}">Cor Secundária:</label>
-        {{ form.cor_secundaria }}
-
-        <label for="{{ form.data_inicio_assinatura.id_for_label }}">Data de Início da Assinatura:</label>
-        {{ form.data_inicio_assinatura }}
-
-        <label for="{{ form.data_validade_assinatura.id_for_label }}">Data de Validade da Assinatura:</label>
-        {{ form.data_validade_assinatura }}
+        <div class="color-and-dates-container">
+    
+          <!-- Linha das Cores -->
+          <div class="color-row">
+            <div class="color-item">
+              <label>Cor Primária</label>
+              {{ form.cor_primaria }}
+              <span class="hex-code" id="primary-hex">#FFFFFF</span>
+            </div>
+            
+            <div class="color-item">
+              <label>Cor Secundária</label>
+              {{ form.cor_secundaria }}
+              <span class="hex-code" id="secondary-hex">#FFFFFF</span>
+            </div>
+          </div>
+          
+          <!-- Linha das Datas -->
+          <div class="date-row">
+            <label>Data de Início:</label>
+            {{ form.data_inicio_assinatura }}
+            
+            <label>Data de Validade:</label>
+            {{ form.data_validade_assinatura }}
+          </div>
+          
+        </div>
       </div>
     </div>
 
     <div class="container-form-bottom">
       <div class="container-form-bottom-left">
-        <label for="{{ form.logo.id_for_label }}">Logo da Instituição:</label>
-        {{ form.logo }}
-      </div>
+        
+      
+        <h2>Logo da Instituição</h2>
+        <div class="content">
+            <!-- Botão de Upload (igual ao da foto do usuário) -->
+            <div class="upload">
+                <i class="fas fa-upload" id="uploadLogoIcon"></i>
+                <input type="file" name="logo" id="id_logo" accept="image/*" style="display: none;">
+            </div>
+            <!-- Preview do Logo (círculo como o da foto) -->
+            <div class="photo" id="logoPreviewContainer">
+                <i class="fas fa-circle-user" id="logoIcon"></i>
+                <img id="logoPreview" src="{% if form.logo.value %}{{ form.logo.value.url }}{% endif %}" 
+                     alt="Preview do Logo" style="max-width: 100%; max-height: 100%; display: none; border-radius: 50%;">
+            </div>
+
+        </div>
+        
+    </div>
 
       <div class="container-form-bottom-right">
         <label for="{{ form.observacoes.id_for_label }}">Observações:</label>
         {{ form.observacoes }}
       </div>
     </div>
+    
   </form>
 </main>
 
+
+<!--Pra atualizar o hexadecimal das cores-->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Função para atualizar os códigos de cor
+    function updateColorHex() {
+      document.getElementById('primary-hex').textContent = 
+        document.getElementById('{{ form.cor_primaria.id_for_label }}').value;
+      document.getElementById('secondary-hex').textContent = 
+        document.getElementById('{{ form.cor_secundaria.id_for_label }}').value;
+    }
+    
+    // Ouvintes de evento para as cores
+    document.getElementById('{{ form.cor_primaria.id_for_label }}')
+      .addEventListener('input', updateColorHex);
+    document.getElementById('{{ form.cor_secundaria.id_for_label }}')
+      .addEventListener('input', updateColorHex);
+    
+    // Atualiza inicialmente
+    updateColorHex();
+  });
+</script>
 <script>
   document.querySelector('button[type="submit"]').addEventListener('click', function(e) {
     e.preventDefault();
     document.querySelector('form').submit();
   });
 </script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // Configuração do upload do logo (igual ao da foto do usuário)
+      const uploadLogoIcon = document.getElementById('uploadLogoIcon');
+      const logoInput = document.getElementById('id_logo');
+      const logoPreview = document.getElementById('logoPreview');
+      const logoIcon = document.getElementById('logoIcon');
+      
+      // Quando clicar no ícone de upload
+      uploadLogoIcon.addEventListener('click', function() {
+          logoInput.click();
+      });
+      
+      // Quando um arquivo for selecionado
+      logoInput.addEventListener('change', function() {
+          if (this.files && this.files[0]) {
+              const reader = new FileReader();
+              
+              reader.onload = function(e) {
+                  logoPreview.src = e.target.result;
+                  logoPreview.style.display = 'block';
+                  logoIcon.style.display = 'none';
+              };
+              
+              reader.readAsDataURL(this.files[0]);
+          }
+      });
+      
+      // Se já existir um logo carregado
+      if (logoPreview.src && logoPreview.src !== window.location.href) {
+          logoPreview.style.display = 'block';
+          logoIcon.style.display = 'none';
+      }
+  });
+  </script>
 
 {% endblock page-content %}
-
-
