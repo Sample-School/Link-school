@@ -1,0 +1,105 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+:root {
+  --container-color: #e1e1e1;
+  --font-family: "Inter", sans-serif;
+}
+main {
+  width: 100%;
+  height: 100%;
+}
+.container{
+width: 100%;
+height: 100%;
+display: flex;
+flex-direction: column;
+}
+.container-top {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  height: 10%;
+  margin-bottom: 15px;
+}
+.container-top h1 {
+  background-color: var(--container-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 300px;
+  border-bottom-left-radius: 45px;
+  border-bottom-right-radius: 45px;
+  color: #01335c;
+  font-family: var(--font-family);
+  font-size: 1.8em;
+  font-style: italic;
+}
+.buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 300px;
+  gap:10px ;
+}
+.btn-reset {
+  background: var(--container-color);
+  width: 140px;
+  height: 35px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  color: #01335c;
+  font-family: var(--font-family);
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.btn-save {
+  background: linear-gradient(to bottom, #0fc9B0, #048089);
+  width: 140px;
+  height: 35px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.pop-up-user-list-container{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-left: 20px;
+}
+.pop-up-user-list-container button{
+  background: linear-gradient(to bottom, #0fc9B0, #048089);
+  width: 220px;
+  height: 35px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1.2em;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.vaidarcertoessamerda{
+  display: flex;
+  justify-content: space-between;
+}
+.container-main{
+  width: 100%;
+  height: 100%;
+}
+.center{
+  width: 100%;
+  height: 100%;
+  background-color: brown;
+  display: flex;
+  flex-direction: column;
+  
+}
