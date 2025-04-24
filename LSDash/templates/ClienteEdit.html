@@ -133,7 +133,7 @@
                   <!-- Pesquisa por ID -->
                   <div class="buscar-cliente">
                     <div class="container-form-card-body">
-                      <div class="card-body">
+                      <div class="card-body">                    
                         <h5 class="mb-0">Buscar Cliente:</h5>
                         <form class="search-user-id" method="get" class="mb-3">
                             <input type="text" name="cliente_id" id="cliente_id" class="form-control" placeholder="Digite o ID do cliente" value="{{ cliente_id|default:'' }}">
@@ -153,7 +153,7 @@
                   </div>
                 <div class="content-form">
                   <div class="name-inst">
-                    <label for="{{ form.nome.id_for_label }}" class="form-label">Nome da Instituição:</label>
+                   <div class="fist-info"><label for="{{ form.nome.id_for_label }}" class="form-label">Nome da Instituição:</label></div>
                     {{ form.nome }}
                     {% if form.nome.errors %}
                       <div class="invalid-feedback d-block">{{ form.nome.errors }}</div>
@@ -163,31 +163,8 @@
                     {% endif %}
                   </div>
                   
-                  <div class="mb-3">
-                    <label for="{{ form.qtd_usuarios.id_for_label }}" class="form-label">Quantidade de Usuários:</label>
-                    {{ form.qtd_usuarios }}
-                    {% if form.qtd_usuarios.errors %}
-                      <div class="invalid-feedback d-block">{{ form.qtd_usuarios.errors }}</div>
-                    {% endif %}
-                    {% if form.qtd_usuarios.help_text %}
-                      <small class="form-text text-muted">{{ form.qtd_usuarios.help_text }}</small>
-                    {% endif %}
-                  </div>
-                  <h5 class="mb-3">Acesso e Domínio</h5>
-                  
-                  <div class="mb-3">
-                    <label for="{{ form.subdominio.id_for_label }}" class="form-label">Subdomínio:</label>
-                    {{ form.subdominio }}
-                    {% if form.subdominio.errors %}
-                      <div class="invalid-feedback d-block">{{ form.subdominio.errors }}</div>
-                    {% endif %}
-                    {% if form.subdominio.help_text %}
-                      <small class="form-text text-muted">{{ form.subdominio.help_text }}</small>
-                    {% endif %}
-                  </div>
-                  
-                  <div class="mb-3">
-                    <label for="{{ form.email_master.id_for_label }}" class="form-label">Email do Administrador:</label>
+                  <div class="name-inst2">
+                    <div class="second-info"><label for="{{ form.email_master.id_for_label }}" class="form-label">Email do Administrador:</label></div>
                     {{ form.email_master }}
                     {% if form.email_master.errors %}
                       <div class="invalid-feedback d-block">{{ form.email_master.errors }}</div>
@@ -196,9 +173,10 @@
                       <small class="form-text text-muted">{{ form.email_master.help_text }}</small>
                     {% endif %}
                   </div>
+            
                   
-                  <div class="mb-3">
-                    <label for="{{ form.senha_master.id_for_label }}" class="form-label">Nova Senha (deixe em branco para manter):</label>
+                  <div class="name-inst3">
+                    <div class="third-info"><label for="{{ form.senha_master.id_for_label }}" class="form-label">Nova Senha (deixe em branco para manter):</label></div>
                     {{ form.senha_master }}
                     {% if form.senha_master.errors %}
                       <div class="invalid-feedback d-block">{{ form.senha_master.errors }}</div>
@@ -208,6 +186,28 @@
                     {% endif %}
                   </div>
                                 </div>
+                </div>
+
+                <div class="name-inst4">
+                  <div class="fourth-info"><label for="{{ form.qtd_usuarios.id_for_label }}" class="form-label">Quantidade de Usuários:</label></div>
+                  {{ form.qtd_usuarios }}
+                  {% if form.qtd_usuarios.errors %}
+                    <div class="invalid-feedback d-block">{{ form.qtd_usuarios.errors }}</div>
+                  {% endif %}
+                  {% if form.qtd_usuarios.help_text %}
+                    <small class="form-text text-muted">{{ form.qtd_usuarios.help_text }}</small>
+                  {% endif %}
+                </div>
+
+                <div class="name-inst5">
+                  <div class="fifth-infor"><label for="{{ form.subdominio.id_for_label }}" class="form-label">Subdomínio:</label></div>
+                  {{ form.subdominio }}
+                  {% if form.subdominio.errors %}
+                    <div class="invalid-feedback d-block">{{ form.subdominio.errors }}</div>
+                  {% endif %}
+                  {% if form.subdominio.help_text %}
+                    <div class="menssage"><small class="form-text text-muted">{{ form.subdominio.help_text }}</small></div>
+                  {% endif %}
                 </div>
                 
                 
@@ -223,7 +223,7 @@
                     {% endif %}
                   </div>
                   
-                  <div class="mb-3">
+                  <div class="upload">
                     <label for="{{ form.logo.id_for_label }}" class="form-label">Logo:</label>
                     {{ form.logo }}
                     {% if form.logo.errors %}
@@ -233,7 +233,7 @@
                       <small class="form-text text-muted">{{ form.logo.help_text }}</small>
                     {% endif %}
                     {% if form.instance.logo %}
-                      <div class="mt-2">
+                      <div class="photo">
                         <img src="{{ form.instance.logo.url }}" alt="Logo atual" class="img-thumbnail" style="max-height: 100px;">
                       </div>
                     {% endif %}
