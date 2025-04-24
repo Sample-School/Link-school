@@ -8,7 +8,7 @@ main {
   width: 100%;
   height: 100%;
 }
-.container{
+.container {
 width: 100%;
 height: 100%;
 display: flex;
@@ -36,10 +36,10 @@ flex-direction: column;
 }
 .buttons {
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
+  align-items: center;
   width: 300px;
-  gap:10px ;
+  gap: 10px;
 }
 .btn-reset {
   background: var(--container-color);
@@ -65,13 +65,13 @@ flex-direction: column;
   font-size: 1.2em;
   font-weight: bold;
 }
-.pop-up-user-list-container{
+.pop-up-user-list-container {
   width: 100%;
   display: flex;
   justify-content: center;
   padding-left: 20px;
 }
-.pop-up-user-list-container button{
+.pop-up-user-list-container button {
   background: linear-gradient(to bottom, #0fc9B0, #048089);
   width: 220px;
   height: 35px;
@@ -87,30 +87,118 @@ flex-direction: column;
   justify-content: center;
   gap: 10px;
 }
-.vaidarcertoessamerda{
+.container-main {
   display: flex;
-  justify-content: space-between;
-}
-.container-main{
   width: 100%;
   height: 100%;
 }
-.center{
+.center {
   width: 100%;
   height: 100%;
+  display: flex;
+  justify-content: center;
+}
+.row {
+  display: flex;
+}
+.content-right {
   display: flex;
   flex-direction: column;
-  
+  justify-content: center;
+  height: 100%;
+  width: 50%;
+  gap: 10px;
 }
-.buscar-cliente{
+.infor-1 {
+  background-color: var(--container-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 500px;
+  height: 400px;
+  border-radius: 40px;
+  box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
+}
+.search-user-id {
+  width: 100%;
+}
+.buscar-cliente {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 20%;
+}
+.container-form-card-body {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.container-form-card-body h5 {
+  color: #01335c;
+  font-family: var(--font-family);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.buscar-cliente input {
+  background-color: #9b9fa0;
+  height: 35px;
+  border: none;
+  border-radius: 20px;
+  outline: none;
+  cursor: text;
+}
+.buscar-cliente .card-body {
+  display: flex;
+  gap: 5px;
+  padding-left: 20px;
+  width: 100%;
+}
+.buscar-cliente form {
+  display: flex;
+  width: 100%;
+}
+.buscar-cliente input::placeholder {
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1em;
+  padding: 0px 10px;
+}
+.buscar-cliente button {
+  background: linear-gradient(to bottom, #0fc9B0, #048089);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 90px;
+  height: 35px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.content-form {
+  width: 100%;
+  height: 80%;
+}
+.infor-3 {
+  position: relative;
+  left: 0px;
+  top: 0px;
+}
+.card, .form {
+  width: 100%;
+}
+/* .buscar-cliente{
     display: flex;
     flex-direction: column;
-  
-    /* Espaço interno e largura */
     padding: 10px;
     max-width: 500px;
-  
-    /* Centraliza horizontalmente */
     margin: 20px auto; 
 }
 .card-header{
@@ -132,8 +220,6 @@ textarea {
   font-size: 1rem;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
-  
-  /* Exemplo: arredondar só os cantos superiores */
   border-top-left-radius: 12px;  
   border-top-right-radius: 12px; 
   border-bottom-right-radius: 12px;  
@@ -158,10 +244,7 @@ textarea {
   align-items: center;
   justify-content: center;
   gap: 10px;
-
-  /* margem para separar cada botão do anterior */
-  margin-top: 10px;  /* vertical */
-  /* ou, se estiverem lado a lado: margin-left: 10px; */
+  margin-top: 10px;
 }
 .infor input{
   position: relative;
@@ -172,15 +255,12 @@ textarea {
   height: 50%;
   display: flex;
   flex-direction: column;
-  /* borda de 2px sólida com cor cinza escuro */
   border: 2px solid #444;
-  /* cantos arredondados (opcional) */
   border-radius: 12px;
-  /* espaço interno para o conteúdo não encostar na borda */
   padding: 16px;
 }
 
-
+ */
 
 
 
