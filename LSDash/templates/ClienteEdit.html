@@ -85,9 +85,9 @@
   <div class="container-main">
     <div class="center">
       <!-- Pesquisa por ID -->
-      <div class="card mb-4">
+      <div class="buscar-cliente">
         <div class="card-header">
-          <h5 class="mb-0">Buscar Cliente</h5>
+          <h5 class="mb-0">Buscar Cliente:</h5>
         </div>
         <div class="card-body">
           <form method="get" class="mb-3">
@@ -99,7 +99,6 @@
               </button>
             </div>
           </form>
-          
           <!-- Mostrar nome da instituição se cliente estiver carregado -->
           {% if form.instance.id %}
             <div class="alert alert-info mb-0">
@@ -160,8 +159,8 @@
               <div class="col-md-6">
                 <!-- Informações Básicas -->
                 
-                
-                <div class="mb-3">
+                <div class="infor">
+                <div class="name-inst">
                   <label for="{{ form.nome.id_for_label }}" class="form-label">Nome da Instituição:</label>
                   {{ form.nome }}
                   {% if form.nome.errors %}
@@ -171,10 +170,6 @@
                     <small class="form-text text-muted">{{ form.nome.help_text }}</small>
                   {% endif %}
                 </div>
-                
-                
-                
-                
                 
                 <div class="mb-3">
                   <label for="{{ form.qtd_usuarios.id_for_label }}" class="form-label">Quantidade de Usuários:</label>
@@ -186,37 +181,7 @@
                     <small class="form-text text-muted">{{ form.qtd_usuarios.help_text }}</small>
                   {% endif %}
                 </div>
-                
-                <div class="mb-3">
-                  <label for="{{ form.observacoes.id_for_label }}" class="form-label">Observações:</label>
-                  {{ form.observacoes }}
-                  {% if form.observacoes.errors %}
-                    <div class="invalid-feedback d-block">{{ form.observacoes.errors }}</div>
-                  {% endif %}
-                  {% if form.observacoes.help_text %}
-                    <small class="form-text text-muted">{{ form.observacoes.help_text }}</small>
-                  {% endif %}
-                </div>
-                
-                <div class="mb-3">
-                  <label for="{{ form.logo.id_for_label }}" class="form-label">Logo:</label>
-                  {{ form.logo }}
-                  {% if form.logo.errors %}
-                    <div class="invalid-feedback d-block">{{ form.logo.errors }}</div>
-                  {% endif %}
-                  {% if form.logo.help_text %}
-                    <small class="form-text text-muted">{{ form.logo.help_text }}</small>
-                  {% endif %}
-                  {% if form.instance.logo %}
-                    <div class="mt-2">
-                      <img src="{{ form.instance.logo.url }}" alt="Logo atual" class="img-thumbnail" style="max-height: 100px;">
-                    </div>
-                  {% endif %}
-                </div>
-              </div>
-              
-              <div class="col-md-6">
-                <!-- Informações de Acesso e Aparência -->
+
                 <h5 class="mb-3">Acesso e Domínio</h5>
                 
                 <div class="mb-3">
@@ -251,7 +216,39 @@
                     <small class="form-text text-muted">{{ form.senha_master.help_text }}</small>
                   {% endif %}
                 </div>
+              </div>
                 
+                
+                <div class="mb-3">
+                  <label for="{{ form.observacoes.id_for_label }}" class="form-label">Observações:</label>
+                  {{ form.observacoes }}
+                  {% if form.observacoes.errors %}
+                    <div class="invalid-feedback d-block">{{ form.observacoes.errors }}</div>
+                  {% endif %}
+                  {% if form.observacoes.help_text %}
+                    <small class="form-text text-muted">{{ form.observacoes.help_text }}</small>
+                  {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                  <label for="{{ form.logo.id_for_label }}" class="form-label">Logo:</label>
+                  {{ form.logo }}
+                  {% if form.logo.errors %}
+                    <div class="invalid-feedback d-block">{{ form.logo.errors }}</div>
+                  {% endif %}
+                  {% if form.logo.help_text %}
+                    <small class="form-text text-muted">{{ form.logo.help_text }}</small>
+                  {% endif %}
+                  {% if form.instance.logo %}
+                    <div class="mt-2">
+                      <img src="{{ form.instance.logo.url }}" alt="Logo atual" class="img-thumbnail" style="max-height: 100px;">
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <!-- Informações de Acesso e Aparência -->
                 <h5 class="mb-3 mt-4">Aparência e Datas</h5>
                 
                 <div class="row">

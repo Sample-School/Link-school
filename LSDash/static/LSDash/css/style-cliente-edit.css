@@ -98,8 +98,89 @@ flex-direction: column;
 .center{
   width: 100%;
   height: 100%;
-  background-color: brown;
   display: flex;
   flex-direction: column;
   
 }
+.buscar-cliente{
+    display: flex;
+    flex-direction: column;
+  
+    /* Espaço interno e largura */
+    padding: 10px;
+    max-width: 500px;
+  
+    /* Centraliza horizontalmente */
+    margin: 20px auto; 
+}
+.card-header{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  top: 27px;
+  left: -400px;
+  font-size: 24px
+}
+.input-group{
+  position: relative;
+  left: -260px;
+}
+input,
+textarea {
+  border: 0px solid ;
+  padding: 8px 12px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  
+  /* Exemplo: arredondar só os cantos superiores */
+  border-top-left-radius: 12px;  
+  border-top-right-radius: 12px; 
+  border-bottom-right-radius: 12px;  
+  border-bottom-left-radius: 12px;   
+}
+.buscar-cliente button{
+  position: relative;
+  display: flex;
+  top: -70px;
+  left: 240px;
+  background: linear-gradient(to bottom, #0fc9B0, #048089);
+  width: 120px;
+  height: 35px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1.2em;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  /* margem para separar cada botão do anterior */
+  margin-top: 10px;  /* vertical */
+  /* ou, se estiverem lado a lado: margin-left: 10px; */
+}
+.infor input{
+  position: relative;
+  left: 60px;
+  top: -50px;
+  background-color: #fff;
+  width: 50%;
+  height: 50%;
+  display: flex;
+  flex-direction: column;
+  /* borda de 2px sólida com cor cinza escuro */
+  border: 2px solid #444;
+  /* cantos arredondados (opcional) */
+  border-radius: 12px;
+  /* espaço interno para o conteúdo não encostar na borda */
+  padding: 16px;
+}
+
+
+
+
+
