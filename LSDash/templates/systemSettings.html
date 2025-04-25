@@ -3,6 +3,35 @@
 
 {% block style %}
 <link rel="stylesheet" href="{% static 'LSDash/css/style-systemSettings.css' %}">
+<link rel="icon" type="image/x-icon" href="{% static 'LSDash/img/favicon.ico' %}">
+<style>
+    /* Ajuste para a tabela com conteúdo centralizado */
+    .table th, .table td {
+        text-align: center;
+        vertical-align: middle;
+        padding: 12px 15px; /* Aumentando o espaçamento nas células da tabela */
+    }
+
+    /* Outros ajustes */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table th {
+        background-color: #f8f9fc;
+        font-weight: bold;
+    }
+
+    /* Ajuste para a estrutura das divs */
+    .usuarios-logados-container {
+        margin-top: 20px;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+</style>
 {% endblock style %}
 
 {% block page-content %}
@@ -13,7 +42,7 @@
 <div id="webcrumbs" class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Parâmetros do Sistema</h1>
-        <div class="d-flex gap-3">
+        <div class="ml-auto d-flex gap-3">
             <button id="btn-redefinir" class="bg-slate-200 hover:bg-slate-300 text-slate-700 transition-all px-6 py-2 rounded-full">
                 Redefinir
             </button>
@@ -29,52 +58,80 @@
             <div class="bg-slate-50 p-4 font-semibold text-center text-slate-800">
                 Usuários Logados
             </div>
-            <div class="p-4">
-                <div class="flex items-center justify-center mb-4">
-                    <div class="text-lg font-bold text-slate-800">4 / 10</div>
-                    <div class="w-48 h-1 bg-slate-200 rounded-full ml-4 relative">
-                        <div class="absolute top-0 left-0 h-1 w-2/5 bg-pink-500 rounded-full"></div>
-                        <div
-                            class="absolute top-0 left-2/5 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-pink-500 rounded-full">
+            <div class="p-4 usuarios-logados-container">
+                <!-- Box de Usuários Ativos -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Usuários Ativos</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTableUsuariosAtivos" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Usuário</th>
+                                        <th>Início</th>
+                                        <th>Última Atividade</th>
+                                        <th>IP</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for sessao in sessoes_ativas %}
+                                    <tr>
+                                        <td>
+                                            {% if sessao.usuario.user_img %}
+                                                <img src="{{ sessao.usuario.user_img.url }}" alt="{{ sessao.usuario.username }}" 
+                                                     class="rounded-circle mr-2" style="width: 30px; height: 30px;">
+                                            {% endif %}
+                                            {{ sessao.usuario.username }}
+                                        </td>
+                                        <td>{{ sessao.data_inicio|date:"d/m/Y H:i" }}</td>
+                                        <td>{{ sessao.ultima_atividade|date:"d/m/Y H:i" }}</td>
+                                        <td>{{ sessao.endereco_ip }}</td>
+                                        <td>
+                                            <form method="post" action="{% url 'encerrar_sessao' sessao.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-sign-out-alt"></i> Deslogar
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-slate-500">Nenhum usuário ativo.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-teal-50 rounded-lg p-4 text-teal-800">
-                        <div class="font-medium">001 - XYZ</div>
-                        <div class="font-medium">002 - ZYX</div>
-                        <div class="font-medium">003 - YZX</div>
-                        <div class="font-medium">004 - ZXY</div>
+
+                <!-- Box de Deslogar Usuário -->
+                <div class="bg-slate-50 rounded-lg p-4">
+                    <div class="font-semibold text-slate-800 mb-2">Deslogar Usuário</div>
+                    <div class="flex items-center gap-2">
+                        <div class="text-sm text-slate-600">Cód:</div>
+                        <input type="text" class="flex-1 border border-slate-300 rounded-md h-8 px-2 text-sm" />
+                        <button class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm">
+                            Aplicar
+                        </button>
                     </div>
-                    <div class="bg-teal-50 rounded-lg p-4"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-4 mt-4">
-                    <div class="bg-slate-50 rounded-lg p-3">
-                        <div class="text-center text-slate-800 font-medium mb-2">
-                            Deslogar Usuário
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="text-sm text-slate-600">Cód:</div>
-                            <input type="text" class="flex-1 border border-slate-300 rounded-md h-8 px-2 text-sm" />
-                            <button
-                                class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm">
-                                Aplicar
-                            </button>
-                        </div>
+
+                <!-- Box de Permanência em Inatividade -->
+                <div class="bg-slate-50 rounded-lg p-3">
+                    <div class="text-center text-slate-800 font-medium mb-2">
+                        Permanência em Inatividade
                     </div>
-                    <div class="bg-slate-50 rounded-lg p-3">
-                        <div class="text-center text-slate-800 font-medium mb-2">
-                            Permanência em Inatividade
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="text-sm text-slate-600">Tempo:</div>
-                            <input type="text"
-                                class="flex-1 border border-slate-300 rounded-md h-8 px-2 text-sm" value="00:45" />
-                            <button
-                                class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm">
-                                Aplicar
-                            </button>
-                        </div>
+                    <div class="flex items-center gap-2">
+                        <div class="text-sm text-slate-600">Tempo:</div>
+                        <input type="text" id="input-tempo-inatividade" class="flex-1 border border-slate-300 rounded-md h-8 px-2 text-sm" value="00:45" />
+                        <button class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm">
+                            Aplicar
+                        </button>
                     </div>
                 </div>
             </div>
@@ -86,43 +143,26 @@
                 Imagens da Home
             </div>
             <div class="p-4">
+                {% for i in "12" %}
                 <div class="mb-4">
-                    <div class="mb-2 text-slate-800 font-medium">1ª Imagem</div>
+                    <div class="mb-2 text-slate-800 font-medium">{{ forloop.counter }}ª Imagem</div>
                     <div class="flex items-center gap-3">
                         <div class="flex-1 bg-slate-100 rounded-lg h-24 flex items-center justify-center">
-                            <span class="material-symbols-outlined text-5xl text-slate-400">upload</span>
+                            <span class="material-symbols-outlined text-5xl text-slate-400" aria-label="Upload de imagem">upload</span>
                         </div>
                         <div>
-                            <button
-                                class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm w-24 mb-2">
-                                Aplicar
-                            </button>
-                            <button
-                                class="bg-slate-200 hover:bg-slate-300 text-slate-700 transition-all px-4 py-1 rounded-full text-sm w-24">
+                            <input type="file" id="upload{{ forloop.counter }}" class="hidden" />
+                            <button onclick="document.getElementById('upload{{ forloop.counter }}').click()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 transition-all px-4 py-1 rounded-full text-sm w-24 mb-2">
                                 Carregar
+                            </button>
+                            <button class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm w-24">
+                                Aplicar
                             </button>
                         </div>
                     </div>
                 </div>
-                <div class="mb-4">
-                    <div class="mb-2 text-slate-800 font-medium">2ª Imagem</div>
-                    <div class="flex items-center gap-3">
-                        <div class="flex-1 bg-slate-100 rounded-lg h-24 flex items-center justify-center">
-                            <span class="material-symbols-outlined text-5xl text-slate-400">upload</span>
-                        </div>
-                        <div>
-                            <button
-                                class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm w-24 mb-2">
-                                Aplicar
-                            </button>
-                            <button
-                                class="bg-slate-200 hover:bg-slate-300 text-slate-700 transition-all px-4 py-1 rounded-full text-sm w-24">
-                                Carregar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-sm text-slate-600 italic">OBS: A imagem deve ter YYYY x YYYY</div>
+                {% endfor %}
+                <div class="text-sm text-slate-600 italic" title="A imagem deve ter YYYY x YYYY">OBS: A imagem deve ter tamanho adequado</div>
             </div>
         </div>
 
@@ -132,47 +172,46 @@
                 Observações do Administrador
             </div>
             <div class="p-4">
-                <textarea class="w-full h-24 bg-slate-100 rounded-lg p-4 resize-none"
-                    placeholder="Digite suas observações aqui..."></textarea>
+                <textarea class="w-full h-24 bg-slate-100 rounded-lg p-4 resize-none" placeholder="Digite suas observações aqui..."></textarea>
             </div>
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
 <script>
     $(document).ready(function () {
-        // Inicializar DataTable
-        $('#dataTableUsuariosAtivos').DataTable({
-            language: {
-                url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json"
-            },
-            "order": [[2, "desc"]]
-        });
+        // Barra de progresso dinâmica
+        const usuariosAtivos = 4;
+        const totalUsuarios = 10;
+        const percentual = (usuariosAtivos / totalUsuarios) * 100;
+        $('.barra-progresso').css('width', `${percentual}%`);
 
-        // Funcionalidade do botão "Redefinir"
+        // Redefinir campos
         $('#btn-redefinir').on('click', function () {
-            // Limpar campos de entrada
             $('input[type="text"]').val('');
             $('textarea').val('');
             alert('Os campos foram redefinidos!');
         });
 
-        // Funcionalidade do botão "Salvar"
+        // Simular salvamento
         $('#btn-salvar').on('click', function () {
-            // Simular salvamento
             alert('As configurações foram salvas com sucesso!');
         });
 
-        // Funcionalidade dos botões "Aplicar"
+        // Validação e aplicação de dados
         $('.btn-aplicar').on('click', function () {
-            const input = $(this).siblings('input').val();
-            if (input) {
-                alert(`Valor aplicado: ${input}`);
-            } else {
+            const input = $(this).siblings('input[type="text"]').val();
+            const isTimeInput = $(this).siblings('input').attr('id') === 'input-tempo-inatividade';
+            const regexTime = /^\d{2}:\d{2}$/;
+
+            if (!input) {
                 alert('Por favor, insira um valor antes de aplicar.');
+            } else if (isTimeInput && !regexTime.test(input)) {
+                alert('Formato inválido. Use o padrão HH:MM.');
+            } else {
+                alert(`Valor aplicado: ${input}`);
             }
         });
     });
