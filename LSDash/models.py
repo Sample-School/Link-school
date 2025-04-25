@@ -244,7 +244,7 @@ class Questao(models.Model):
         ('vf', 'Verdadeiro ou Falso'),
     ]
     
-    titulo = models.CharField(max_length=255)  # Enunciado da questão
+    titulo = models.CharField(max_length=255, verbose_name="Enunciado")  # Enunciado da questão
     materia = models.ForeignKey(Materia, on_delete=models.CASCADE, related_name='questoes')
     ano_escolar = models.ForeignKey(AnoEscolar, on_delete=models.CASCADE, related_name='questoes')
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)

@@ -189,15 +189,15 @@ class QuestaoForm(forms.ModelForm):
         model = Questao
         fields = ['titulo', 'materia', 'ano_escolar', 'tipo']
         widgets = {
-            'titulo': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enunciado da Questão'}),
             'materia': forms.Select(attrs={'class': 'form-control'}),
             'ano_escolar': forms.Select(attrs={'class': 'form-control'}),
-            'tipo': forms.RadioSelect(),
+            'tipo': forms.Select(attrs={'class': 'form-control'}),
         }
         labels = {
             'titulo': 'Enunciado da questão',
             'materia': 'Matéria',
-            'ano_escolar': 'Ano Escolar',
+            'ano_escolar': 'Série',
             'tipo': 'Tipo de questão',
         }
     
@@ -226,7 +226,7 @@ class ImagemQuestaoForm(forms.ModelForm):
         model = ImagemQuestao
         fields = ['imagem', 'legenda']
         widgets = {
-            'legenda': forms.TextInput(attrs={'class': 'form-control'}),
+            'legenda': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Legenda'}),
             'imagem': forms.FileInput(attrs={'class': 'form-control-file'}),
         }
 
@@ -255,7 +255,7 @@ class FraseVerdadeiroFalsoForm(forms.ModelForm):
         model = FraseVerdadeiroFalso
         fields = ['texto', 'verdadeira', 'ordem']
         widgets = {
-            'texto': forms.TextInput(attrs={'class': 'form-control'}),
+            'texto': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Texto da Frase'}),
             'verdadeira': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'ordem': forms.HiddenInput(),
         }

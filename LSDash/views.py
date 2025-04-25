@@ -389,12 +389,10 @@ class QuestaoManageView(LoginRequiredMixin, View):
                 context['questao_form'] = QuestaoForm(instance=questao)
                 context['imagem_formset'] = ImagemQuestaoFormSet(instance=questao)
                 
-                # Adicionar formsets específicos baseados no tipo da questão
-                if questao.tipo == 'multipla':
-                    context['alternativa_formset'] = AlternativaFormSet(instance=questao)
-                elif questao.tipo == 'vf':
-                    context['frase_vf_formset'] = FraseVFFormSet(instance=questao)
-                
+                # Sempre inicializar todos os formsets, independente do tipo da questão
+                context['alternativa_formset'] = AlternativaFormSet(instance=questao if questao.tipo == 'multipla' else None)
+                context['frase_vf_formset'] = FraseVFFormSet(instance=questao if questao.tipo == 'vf' else None)
+                    
             except Questao.DoesNotExist:
                 messages.error(request, f"Questão com ID {questao_id} não encontrada.")
                 context['questao_form'] = QuestaoForm()
@@ -408,7 +406,7 @@ class QuestaoManageView(LoginRequiredMixin, View):
             context['frase_vf_formset'] = FraseVFFormSet()
         
         # Lista de questões para seleção
-        context['questoes'] = Questao.objects.select_related('materia', 'ano_escolar', 'criado_por').all().order_by('-data_criacao')[:50]  # Limitando a 50 para performance
+        context['questoes'] = Questao.objects.select_related('materia', 'ano_escolar', 'criado_por').all().order_by('-data_criacao')[:50]
         
         return context
     
