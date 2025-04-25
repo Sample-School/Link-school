@@ -192,7 +192,7 @@ flex-direction: column;
 }
 .content-form{
   position: relative;
-  left: -30px;
+  left: 60px;
   top: 40px;
   background-color: var(--container-color);
   display: flex;
@@ -216,7 +216,7 @@ flex-direction: column;
 .card-body{
   position: relative;
   display: flex;
-  left: -80px;
+  left: -50px;
   top: 15px;
 }
 .name-inst2{
@@ -239,7 +239,7 @@ flex-direction: column;
 }
 .name-inst4 input{
   position: relative;  
-  left: -25px;
+  left: 50px;
   top: -70px;
   background-color: #9b9fa0;
   height: 35px;
@@ -250,13 +250,13 @@ flex-direction: column;
 } 
 .fourth-info{
   position: relative;
-  left: -20px;
+  left: 60px;
   top: -70px;
 }
 .name-inst5 input{
   position: relative;  
-  left: 240px;
-  top: -130px;
+  left: 340px;
+  top: -135px;
   background-color: #9b9fa0;
   height: 35px;
   border: none;
@@ -266,30 +266,130 @@ flex-direction: column;
 }
 .fifth-infor{
   position: relative;
-  left: 270px;
-  top: -130px;
+  left: 380px;
+  top: -135px;
 }
 .menssage{
   position: relative;
-  left: 240px;
+  left: 340px;
   top: -130px;
+}
+.upload {
+  position: relative;
+  left: -110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  width: 150px;
+  height: 120px;
 }
 .upload i {
   color: #048089;
   font-size: 4em;
 }
 .photo {
+  position: relative;
+  left: 100px;
+  top: -110px;
   background-color: #10858e;
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 140px;
-  height: 110px;
+  width: 110px;
+  height: 100px;
 }
 .photo i {
   color: #fff;
   font-size: 6em;
 }
+
+.color-image{
+  position: relative;
+  left: 650px;
+  top: -80px;
+}
+.insti-logo{
+  position: relative;
+  top: -100px;
+}
+.container-form-bottom { 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 880px;
+  height: 200px;
+}
+.container-form-bottom-left {
+  background-color: var(--container-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 300px; /* Aumentado */
+  height: 200px; /* Aumentado */
+  margin-bottom: 10px;
+  border-radius: 40px;
+  box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
+}
+.container-form-bottom-left h2 {
+  color: #01335c;
+  font-family: var(--font-family);
+  font-size: 1.4em;
+  text-align: center;
+}
+.container-form-bottom-right {
+  position: relative;
+  left: -120px;
+  background-color: var(--container-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  width: -550px;
+  height: 170px;
+  margin-bottom: 10px;
+  border-radius: 40px;
+  box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
+}
+.container-form-bottom label {
+  color: #01335c;
+  font-family: var(--font-family);
+  font-size: 1.2em;
+  cursor: pointer;
+}
+.container-form-bottom textarea {
+  background-color: #9b9fa0;
+  width: 90%;
+  height: 150px;
+  outline: none;
+  border-radius: 30px;
+  resize: none;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1.1em;
+  cursor: text;
+  padding: 5px 20px;
+
+}
+.container-form-bottom-left {
+  position: relative;
+  top: -250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  width: 48%;
+  height: -150px;
+}
+.container-form-bottom-left img {
+  width: 100px; /* ou o valor que quiser */
+  height: auto; /* mantém proporção */
+}
+
 /* .buscar-cliente{
     display: flex;
     flex-direction: column;
@@ -383,40 +483,4 @@ textarea {
 .content-form input {
     width: 90% !important;
     margin: 0 auto !important;
-}
-.content {
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-  background-color: red;
-}
-.container-form-bottom-left {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
-  width: 48%;
-}
-.container-form-bottom label {
-  color: #01335c;
-  font-family: var(--font-family);
-  font-size: 1.2em;
-  cursor: pointer;
-}
-.container-form-bottom textarea {
-  background-color: #9b9fa0;
-  width: 90%;
-  height: 100px;
-  outline: none;
-  border-radius: 30px;
-  resize: none;
-  color: #fff;
-  font-family: var(--font-family);
-  font-size: 1.1em;
-  cursor: text;
-  padding: 5px 20px;
-}
-.colorimage{
-  position: relative;
-  top: 30px;
 }
