@@ -1,7 +1,12 @@
 {% extends "global/base.html" %}
+{% load static %}
 
 {% block style %}
+<link rel="stylesheet" href="{% static "LSDash/css/style-cliente-edit.css" %}">
+<link rel="shortcut icon" href="{% static 'LSDash/img/favicon.ico' %}" type="image/x-icon">
+<!-- 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <style>
   .alert-container {
@@ -38,14 +43,16 @@
     align-items: center;
     text-align: center;
     z-index: 10;
-    border-radius: 0.25rem;
-    padding: 1rem;
-  }
-</style>
+    border-radius: 0.25rem;  }
+</style> -->
 {% endblock %}
 
 {% block page-content %}
+<header>
+  {% include "global/partials/navbar.html" %}
+</header>
 
+<main>
 <!-- Alertas de mensagens -->
 {% if messages %}
   <div class="alert-container">
@@ -59,37 +66,20 @@
 {% endif %}
 
 <div class="container">
-  <h1 class="my-4">Editar Cliente</h1>
+  <div class="container-top">
+    <h1>Editar Cliente</h1>
+      <!-- Exibir mensagens de sucesso ou erro -->
+    <div class="buttons">
+      <a href="{% url 'collabmanage' %}"> <button class="btn-reset" id="btnReset" type="submit">Redefinir</button></a>
+      <button class="btn-save" id="btnSave" type="submit">Salvar</button>
+    </div>
+  </div>
   
-  <div class="row">
-    <div class="col-md-12">
-      <!-- Pesquisa por ID -->
-      <div class="card mb-4">
-        <div class="card-header">
-          <h5 class="mb-0">Buscar Cliente</h5>
-        </div>
-        <div class="card-body">
-          <form method="get" class="mb-3">
-            <div class="input-group">
-              <input type="text" name="cliente_id" id="cliente_id" class="form-control" placeholder="Digite o ID do cliente" value="{{ cliente_id|default:'' }}">
-              <button type="submit" class="btn btn-primary">Buscar</button>
-              <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalClientes">
-                Ver Lista
-              </button>
-            </div>
-          </form>
-          
-          <!-- Mostrar nome da instituição se cliente estiver carregado -->
-          {% if form.instance.id %}
-            <div class="alert alert-info mb-0">
-              <strong>Cliente selecionado:</strong> {{ form.instance.nome }} (ID: {{ form.instance.id }})
-            </div>
-          {% endif %}
-        </div>
-      </div>
-      
+  
+  <div class="container-main">
+    <div class="center">
       <!-- Modal com lista de clientes -->
-      <div class="modal fade" id="modalClientes" tabindex="-1" aria-labelledby="modalClientesLabel" aria-hidden="true">
+       {% comment %} <div class="modal fade" id="modalClientes" tabindex="-1" aria-labelledby="modalClientesLabel" aria-hidden="true"> 
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
           <div class="modal-content">
             <div class="modal-header">
@@ -115,13 +105,13 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> {% endcomment %}
       
       <!-- Formulário de Edição - SEMPRE VISÍVEL -->
       <div class="card">
-        <div class="card-header">
-          <h5 class="mb-0">Informações do Cliente</h5>
-        </div>
+        
+       
+        
         <div class="card-body form-overlay">
           
           <!-- Overlay com mensagem quando não há cliente selecionado -->
@@ -136,27 +126,70 @@
             {% endif %}
             
             <div class="row">
-              <div class="col-md-6">
+              <div class="content-right">
                 <!-- Informações Básicas -->
-                <h5 class="mb-3">Informações Básicas</h5>
                 
-                <div class="mb-3">
-                  <label for="{{ form.nome.id_for_label }}" class="form-label">Nome da Instituição:</label>
-                  {{ form.nome }}
-                  {% if form.nome.errors %}
-                    <div class="invalid-feedback d-block">{{ form.nome.errors }}</div>
-                  {% endif %}
-                  {% if form.nome.help_text %}
-                    <small class="form-text text-muted">{{ form.nome.help_text }}</small>
-                  {% endif %}
+                <div class="infor-1">
+                  <!-- Pesquisa por ID -->
+                  <div class="buscar-cliente">
+                    <div class="container-form-card-body">
+                      <div class="card-body">                    
+                        <h5 class="mb-0">Buscar Cliente:</h5>
+                        <form class="search-user-id" method="get" class="mb-3">
+                            <input type="text" name="cliente_id" id="cliente_id" class="form-control" placeholder="Digite o ID do cliente" value="{{ cliente_id|default:'' }}">
+                            <button type="submit" class="btn btn-primary">Buscar</button>
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalClientes">
+                              Ver Lista
+                            </button>
+                        </form>
+                        <!-- Mostrar nome da instituição se cliente estiver carregado -->
+                        {% if form.instance.id %}
+                          <div class="alert alert-info mb-0">
+                            <strong>Cliente selecionado:</strong> {{ form.instance.nome }} (ID: {{ form.instance.id }})
+                          </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                <div class="content-form">
+                  <div class="name-inst">
+                   <div class="fist-info"><label for="{{ form.nome.id_for_label }}" class="form-label">Nome da Instituição:</label></div>
+                    {{ form.nome }}
+                    {% if form.nome.errors %}
+                      <div class="invalid-feedback d-block">{{ form.nome.errors }}</div>
+                    {% endif %}
+                    {% if form.nome.help_text %}
+                      <small class="form-text text-muted">{{ form.nome.help_text }}</small>
+                    {% endif %}
+                  </div>
+                  
+                  <div class="name-inst2">
+                    <div class="second-info"><label for="{{ form.email_master.id_for_label }}" class="form-label">Email do Administrador:</label></div>
+                    {{ form.email_master }}
+                    {% if form.email_master.errors %}
+                      <div class="invalid-feedback d-block">{{ form.email_master.errors }}</div>
+                    {% endif %}
+                    {% if form.email_master.help_text %}
+                      <small class="form-text text-muted">{{ form.email_master.help_text }}</small>
+                    {% endif %}
+                  </div>
+            
+                  
+                  <div class="name-inst3">
+                    <div class="third-info"><label for="{{ form.senha_master.id_for_label }}" class="form-label">Nova Senha (deixe em branco para manter):</label></div>
+                    {{ form.senha_master }}
+                    {% if form.senha_master.errors %}
+                      <div class="invalid-feedback d-block">{{ form.senha_master.errors }}</div>
+                    {% endif %}
+                    {% if form.senha_master.help_text %}
+                      <small class="form-text text-muted">{{ form.senha_master.help_text }}</small>
+                    {% endif %}
+                  </div>
+                                </div>
                 </div>
-                
-                
-                
-                
-                
-                <div class="mb-3">
-                  <label for="{{ form.qtd_usuarios.id_for_label }}" class="form-label">Quantidade de Usuários:</label>
+
+                <div class="name-inst4">
+                  <div class="fourth-info"><label for="{{ form.qtd_usuarios.id_for_label }}" class="form-label">Quantidade de Usuários:</label></div>
                   {{ form.qtd_usuarios }}
                   {% if form.qtd_usuarios.errors %}
                     <div class="invalid-feedback d-block">{{ form.qtd_usuarios.errors }}</div>
@@ -165,126 +198,106 @@
                     <small class="form-text text-muted">{{ form.qtd_usuarios.help_text }}</small>
                   {% endif %}
                 </div>
-                
-                <div class="mb-3">
-                  <label for="{{ form.observacoes.id_for_label }}" class="form-label">Observações:</label>
-                  {{ form.observacoes }}
-                  {% if form.observacoes.errors %}
-                    <div class="invalid-feedback d-block">{{ form.observacoes.errors }}</div>
-                  {% endif %}
-                  {% if form.observacoes.help_text %}
-                    <small class="form-text text-muted">{{ form.observacoes.help_text }}</small>
-                  {% endif %}
-                </div>
-                
-                <div class="mb-3">
-                  <label for="{{ form.logo.id_for_label }}" class="form-label">Logo:</label>
-                  {{ form.logo }}
-                  {% if form.logo.errors %}
-                    <div class="invalid-feedback d-block">{{ form.logo.errors }}</div>
-                  {% endif %}
-                  {% if form.logo.help_text %}
-                    <small class="form-text text-muted">{{ form.logo.help_text }}</small>
-                  {% endif %}
-                  {% if form.instance.logo %}
-                    <div class="mt-2">
-                      <img src="{{ form.instance.logo.url }}" alt="Logo atual" class="img-thumbnail" style="max-height: 100px;">
-                    </div>
-                  {% endif %}
-                </div>
-              </div>
-              
-              <div class="col-md-6">
-                <!-- Informações de Acesso e Aparência -->
-                <h5 class="mb-3">Acesso e Domínio</h5>
-                
-                <div class="mb-3">
-                  <label for="{{ form.subdominio.id_for_label }}" class="form-label">Subdomínio:</label>
+
+                <div class="name-inst5">
+                  <div class="fifth-infor"><label for="{{ form.subdominio.id_for_label }}" class="form-label">Subdomínio:</label></div>
                   {{ form.subdominio }}
                   {% if form.subdominio.errors %}
                     <div class="invalid-feedback d-block">{{ form.subdominio.errors }}</div>
                   {% endif %}
                   {% if form.subdominio.help_text %}
-                    <small class="form-text text-muted">{{ form.subdominio.help_text }}</small>
+                    <div class="menssage"><small class="form-text text-muted">{{ form.subdominio.help_text }}</small></div>
                   {% endif %}
                 </div>
                 
-                <div class="mb-3">
-                  <label for="{{ form.email_master.id_for_label }}" class="form-label">Email do Administrador:</label>
-                  {{ form.email_master }}
-                  {% if form.email_master.errors %}
-                    <div class="invalid-feedback d-block">{{ form.email_master.errors }}</div>
-                  {% endif %}
-                  {% if form.email_master.help_text %}
-                    <small class="form-text text-muted">{{ form.email_master.help_text }}</small>
-                  {% endif %}
+                
+                <div class="infor-2">
+                  <div class="mb-3">
+                    <label for="{{ form.observacoes.id_for_label }}" class="form-label">Observações:</label>
+                    {{ form.observacoes }}
+                    {% if form.observacoes.errors %}
+                      <div class="invalid-feedback d-block">{{ form.observacoes.errors }}</div>
+                    {% endif %}
+                    {% if form.observacoes.help_text %}
+                      <small class="form-text text-muted">{{ form.observacoes.help_text }}</small>
+                    {% endif %}
+                  </div>
+                  
+                  <div class="upload">
+                    <label for="{{ form.logo.id_for_label }}" class="form-label">Logo:</label>
+                    {{ form.logo }}
+                    {% if form.logo.errors %}
+                      <div class="invalid-feedback d-block">{{ form.logo.errors }}</div>
+                    {% endif %}
+                    {% if form.logo.help_text %}
+                      <small class="form-text text-muted">{{ form.logo.help_text }}</small>
+                    {% endif %}
+                    {% if form.instance.logo %}
+                      <div class="photo">
+                        <img src="{{ form.instance.logo.url }}" alt="Logo atual" class="img-thumbnail" style="max-height: 100px;">
+                      </div>
+                    {% endif %}
+                  </div>
+                                </div>
                 </div>
+              
+              <div class="infor-3">
+                <div class="col-md-6">
+                  <!-- Informações de Acesso e Aparência -->
+                  <h5 class="mb-3 mt-4">Aparência e Datas</h5>
                 
-                <div class="mb-3">
-                  <label for="{{ form.senha_master.id_for_label }}" class="form-label">Nova Senha (deixe em branco para manter):</label>
-                  {{ form.senha_master }}
-                  {% if form.senha_master.errors %}
-                    <div class="invalid-feedback d-block">{{ form.senha_master.errors }}</div>
-                  {% endif %}
-                  {% if form.senha_master.help_text %}
-                    <small class="form-text text-muted">{{ form.senha_master.help_text }}</small>
-                  {% endif %}
-                </div>
-                
-                <h5 class="mb-3 mt-4">Aparência e Datas</h5>
-                
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <label for="{{ form.cor_primaria.id_for_label }}" class="form-label">Cor Primária:</label>
-                      {{ form.cor_primaria }}
-                      {% if form.cor_primaria.errors %}
-                        <div class="invalid-feedback d-block">{{ form.cor_primaria.errors }}</div>
-                      {% endif %}
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label for="{{ form.cor_primaria.id_for_label }}" class="form-label">Cor Primária:</label>
+                        {{ form.cor_primaria }}
+                        {% if form.cor_primaria.errors %}
+                          <div class="invalid-feedback d-block">{{ form.cor_primaria.errors }}</div>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label for="{{ form.cor_secundaria.id_for_label }}" class="form-label">Cor Secundária:</label>
+                        {{ form.cor_secundaria }}
+                        {% if form.cor_secundaria.errors %}
+                          <div class="invalid-feedback d-block">{{ form.cor_secundaria.errors }}</div>
+                        {% endif %}
+                      </div>
                     </div>
                   </div>
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <label for="{{ form.cor_secundaria.id_for_label }}" class="form-label">Cor Secundária:</label>
-                      {{ form.cor_secundaria }}
-                      {% if form.cor_secundaria.errors %}
-                        <div class="invalid-feedback d-block">{{ form.cor_secundaria.errors }}</div>
-                      {% endif %}
-                    </div>
+                
+                
+                  <div class="mb-3">
+                    <label for="{{ form.data_inicio_assinatura.id_for_label }}" class="form-label">Início da Assinatura:</label>
+                    {{ form.data_inicio_assinatura }}
+                    {% if form.data_inicio_assinatura.errors %}
+                      <div class="invalid-feedback d-block">{{ form.data_inicio_assinatura.errors }}</div>
+                    {% endif %}
                   </div>
-                </div>
                 
-                
-                <div class="mb-3">
-                  <label for="{{ form.data_inicio_assinatura.id_for_label }}" class="form-label">Início da Assinatura:</label>
-                  {{ form.data_inicio_assinatura }}
-                  {% if form.data_inicio_assinatura.errors %}
-                    <div class="invalid-feedback d-block">{{ form.data_inicio_assinatura.errors }}</div>
-                  {% endif %}
-                </div>
-                
-                <div class="mb-3">
-                  <label for="{{ form.data_validade_assinatura.id_for_label }}" class="form-label">Validade da Assinatura:</label>
-                  {{ form.data_validade_assinatura }}
-                  {% if form.data_validade_assinatura.errors %}
-                    <div class="invalid-feedback d-block">{{ form.data_validade_assinatura.errors }}</div>
-                  {% endif %}
+                  <div class="mb-3">
+                    <label for="{{ form.data_validade_assinatura.id_for_label }}" class="form-label">Validade da Assinatura:</label>
+                    {{ form.data_validade_assinatura }}
+                    {% if form.data_validade_assinatura.errors %}
+                      <div class="invalid-feedback d-block">{{ form.data_validade_assinatura.errors }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <button type="submit" class="btn btn-success" {% if not cliente_selecionado %}disabled{% endif %}>
+                      Salvar Alterações
+                    </button>
+                    <a href="?cliente_id=" class="btn btn-outline-secondary">Limpar Seleção</a>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-              <button type="submit" class="btn btn-success" {% if not cliente_selecionado %}disabled{% endif %}>
-                Salvar Alterações
-              </button>
-              <a href="?cliente_id=" class="btn btn-outline-secondary">Limpar Seleção</a>
-            </div>
           </form>
         </div>
       </div>
     </div>
   </div>
 </div>
+</main>
 
 <!-- Script para filtrar clientes no modal -->
 <script>

@@ -9,9 +9,8 @@ body, input, button, select, textarea {
   }
 
 main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  
+  
   width: 100%;
   height: 100%;
 }
@@ -51,7 +50,7 @@ main {
   font-family: var(--font-family);
   font-size: 1.2em;
   font-weight: bold;
-}
+} 
 .btn-save {
   background: linear-gradient(to bottom, #0fc9B0, #048089);
   width: 140px;
@@ -84,14 +83,14 @@ main {
   background-color: var(--container-color);
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
-    gap: 2px;
+    
     width: 500px;
     height: 80%;
     border-radius: 40px;
     box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
-    margin-top: 40px;
+    margin-top: 5px;
 }
 .input-name, .input-user, .input-email, .input-password {
   display: flex;
@@ -127,12 +126,12 @@ main {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
     width: 500px;
     height: 80%;
     border-radius: 40px;
     box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
-    margin-top: 40px;
+    /* margin-top: 10px; */
 }
 .top {
   display: flex;
@@ -336,4 +335,270 @@ main {
 }
 .alert.alert-success {
   color: green;
+}
+/* ESTILO UNIFICADO PARA TODOS OS CAMPOS */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+
+input[type="color"],
+select {
+  background-color: #9b9fa0 !important; /* Fundo cinza */
+  border: none !important;
+  border-radius: 30px !important; /* Bordas arredondadas */
+  color: #fff !important;
+  font-family: var(--font-family) !important;
+  font-size: 1.1em !important;
+  padding: 12px 20px !important; /* Espaçamento igual ao textarea */
+  width: 90% !important;
+  
+  height: 20px !important;
+  outline: none !important;
+  resize: none !important; /* Só afeta textarea */
+  cursor: text !important;
+  box-shadow: none !important;
+}
+
+/* Ajuste para inputs menores (opcional) */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"]{
+  height: 30px !important; /* Altura fixa (menor que o textarea) */
+}
+
+/* Input de Cor - Estilo Quadrado Pequeno */
+input[type="color"] {
+  width: 50px !important;  /* Largura reduzida */
+  height: 50px !important; /* Altura igual à largura (quadrado) */
+  padding: 0 !important;   /* Remove padding interno */
+  border-radius: 8px !important; /* Cantos levemente arredondados */
+  cursor: pointer !important;
+}
+
+/* Ajuste opcional para o rótulo */
+label[for="{{ form.cor_primaria.id_for_label }}"],
+label[for="{{ form.cor_secundaria.id_for_label }}"] {
+  display: block;
+  margin-bottom: 8px; /* Espaço entre label e input */
+}
+/* Garante que TODAS as labels usem a fonte Inter */
+label {
+  font-family: var(--font-family) !important; /* Fonte Inter */
+  color: #01335c; /* Cor consistente com seu tema */
+  font-size: 1.1em; /* Tamanho padrão */
+  cursor: pointer; /* Mantém o cursor como ponteiro */
+}
+
+/* Ajuste específico para labels dentro de container-form-bottom */
+.container-form-bottom label {
+ 
+  font-size: 1.2em; /* Mantém o tamanho original para observações */
+}
+/* Container para as cores lado a lado */
+.color-picker-group {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+/* Cada grupo de cor individual */
+.color-picker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 150px;
+}
+
+/* Estilo do input de cor */
+.color-picker-item input[type="color"] {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 10px !important;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+/* Texto do código hexadecimal */
+.color-hex {
+  font-family: var(--font-family);
+  color: #01335c;
+  font-size: 0.9em;
+  background: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+/* Container das datas */
+.date-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+/* Container das cores (lado a lado) */
+.color-picker-group {
+  display: flex;
+  justify-content: center; /* Centraliza horizontalmente */
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+/* Cada grupo de cor (primária/secundária) */
+.color-picker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 150px;
+}
+
+/* Container das datas (uma embaixo da outra, centralizado) */
+.date-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centraliza horizontalmente */
+  gap: 10px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* Inputs de data */
+input[type="date"] {
+  background-color: #9b9fa0 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 20px !important;
+  padding: 8px 15px !important;
+  height: 35px !important;
+  width: 200px !important; /* Largura fixa para uniformidade */
+  text-align: center;
+}
+
+/* Labels das datas */
+.date-group label {
+  margin-bottom: 5px;
+  font-family: var(--font-family);
+  color: #01335c;
+  font-weight: bold;
+}
+/* Container principal das cores e datas */
+.color-and-dates-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Linha das cores */
+.color-row {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+/* Cada item de cor */
+.color-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Input de cor */
+.color-item input[type="color"] {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  border: 2px solid #01335c;
+  margin-bottom: 5px;
+}
+
+/* Código hexadecimal */
+.hex-code {
+  font-family: monospace;
+  background: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* Linha das datas */
+.date-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Input de data */
+.date-row input[type="date"] {
+  background-color: #9b9fa0;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 15px;
+  width: 200px;
+  text-align: center;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  width: 100%;
+  height: 100%;
+} 
+.input{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 30px;
+}
+
+.input input{
+  background-color: #9b9fa0;
+  width: 90%;
+  height: 30px; 
+  border: none;
+  border-radius: 20px;
+  outline: none;
+  cursor: text;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1em;
+  padding: 0px 10px;
+}
+
+.inputnumber {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 30px;
+
+  
+}
+
+.inputnumber input{
+  background-color: #9b9fa0;
+  width: 90%;
+  height: 30px; 
+  border: none;
+  border-radius: 20px;
+  outline: none;
+  cursor: text;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1em;
+  padding: 5px 10px;
 }
