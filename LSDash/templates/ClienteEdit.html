@@ -222,24 +222,36 @@
                       <small class="form-text text-muted">{{ form.observacoes.help_text }}</small>
                     {% endif %}
                   </div>
-                  
-                  <div class="upload">
-                    <label for="{{ form.logo.id_for_label }}" class="form-label">Logo:</label>
-                    {{ form.logo }}
-                    {% if form.logo.errors %}
-                      <div class="invalid-feedback d-block">{{ form.logo.errors }}</div>
-                    {% endif %}
-                    {% if form.logo.help_text %}
-                      <small class="form-text text-muted">{{ form.logo.help_text }}</small>
-                    {% endif %}
-                    {% if form.instance.logo %}
-                      <div class="photo">
-                        <img src="{{ form.instance.logo.url }}" alt="Logo atual" class="img-thumbnail" style="max-height: 100px;">
+                  <div class="container-form-bottom-left">
+        
+      
+                    <h2>Logo da Instituição</h2>
+                    <div class="content">
+                        <!-- Botão de Upload (igual ao da foto do usuário) -->
+                        <div class="upload">
+                          <div claa="colorimage">
+                            <i class="fas fa-upload" id="uploadLogoIcon"></i>
+                            <input type="file" name="logo" id="id_logo" accept="image/*" style="display: none;">
+                          </div>
+                        </div>
+                        <!-- Preview do Logo (círculo como o da foto) -->
+                        <div class="photo" id="logoPreviewContainer">
+                          <!--<i class="fas fa-circle-user" id="logoIcon"></i>-->
+                            <img id="logoPreview" src="{% if form.logo.value %}{{ form.logo.value.url }}{% endif %}" 
+                                 alt="Preview do Logo" style="max-width: 100%; max-height: 100%; display: none; border-radius: 50%;">
+                        </div>
                       </div>
-                    {% endif %}
-                  </div>
-                                </div>
+                      
+                  
+                  
+                  
+                
+              
+                    </div>
+
                 </div>
+                            </div>
+              </div>
               
               <div class="infor-3">
                 <div class="col-md-6">
