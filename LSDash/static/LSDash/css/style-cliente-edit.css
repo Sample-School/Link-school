@@ -7,6 +7,8 @@
 main {
   width: 100%;
   height: 100%;
+  overflow: hidden;
+  height: 100%
 }
 .container {
 width: 100%;
@@ -35,6 +37,8 @@ flex-direction: column;
   font-style: italic;
 }
 .buttons {
+  position: relative;
+  left: 5%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -131,6 +135,7 @@ flex-direction: column;
 
 .container-form-card-body h5 {
   position: relative;
+  left: 7%;
   color: #01335c;
   font-family: var(--font-family);
   display: flex;
@@ -192,7 +197,7 @@ flex-direction: column;
 }
 .content-form{
   position: relative;
-  left: 60px;
+  left: 125px;
   top: 40px;
   background-color: var(--container-color);
   display: flex;
@@ -216,7 +221,7 @@ flex-direction: column;
 .card-body{
   position: relative;
   display: flex;
-  left: -50px;
+  left: 10px;
   top: 15px;
 }
 .name-inst2{
@@ -239,7 +244,7 @@ flex-direction: column;
 }
 .name-inst4 input{
   position: relative;  
-  left: 50px;
+  left: 120px;
   top: -70px;
   background-color: #9b9fa0;
   height: 35px;
@@ -250,13 +255,13 @@ flex-direction: column;
 } 
 .fourth-info{
   position: relative;
-  left: 60px;
+  left: 110px;
   top: -70px;
 }
 .name-inst5 input{
   position: relative;  
-  left: 340px;
-  top: -135px;
+  left: 410px;
+  top: -138px;
   background-color: #9b9fa0;
   height: 35px;
   border: none;
@@ -266,13 +271,13 @@ flex-direction: column;
 }
 .fifth-infor{
   position: relative;
-  left: 380px;
-  top: -135px;
+  left: 450px;
+  top: -138px;
 }
 .menssage{
   position: relative;
-  left: 340px;
-  top: -130px;
+  left: 400px;
+  top: -138px;
 }
 .upload {
   position: relative;
@@ -304,12 +309,6 @@ flex-direction: column;
   color: #fff;
   font-size: 6em;
 }
-
-.color-image{
-  position: relative;
-  left: 650px;
-  top: -80px;
-}
 .insti-logo{
   position: relative;
   top: -100px;
@@ -322,6 +321,8 @@ flex-direction: column;
   height: 200px;
 }
 .container-form-bottom-left {
+  position: relative;
+  left: 9%;
   background-color: var(--container-color);
   display: flex;
   flex-direction: column;
@@ -342,7 +343,7 @@ flex-direction: column;
 }
 .container-form-bottom-right {
   position: relative;
-  left: -120px;
+  left: -140px;
   background-color: var(--container-color);
   display: flex;
   flex-direction: column;
@@ -377,16 +378,16 @@ flex-direction: column;
 }
 .container-form-bottom-left {
   position: relative;
-  top: -250px;
+  top: -145%;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
   width: 48%;
-  height: -150px;
+  height: -15%;
 }
 .container-form-bottom-left img {
-  width: 100px; /* ou o valor que quiser */
+  width: 10%; /* ou o valor que quiser */
   height: auto; /* mantém proporção */
 }
 
@@ -466,9 +467,7 @@ input[type="email"],
 input[type="password"],
 input[type="number"],
 input[type="date"],
-textarea {
-    padding-left: 15px !important;  /* Aumente este valor conforme necessário */
-}
+
 
 /* Ajuste específico para os campos do formulário */
 .name-inst input,
@@ -483,4 +482,160 @@ textarea {
 .content-form input {
     width: 90% !important;
     margin: 0 auto !important;
+}
+.alert-cli{
+  position: relative;
+  left: 150%;
+}
+.color-image{
+  position: relative;
+  left: 128%;
+  top: -85px;
+  background-color: var(--container-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 138%;
+  height: 200px;
+  margin-bottom: 10px;
+  border-radius: 40px;
+  box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
+}
+.color-image textarea{
+  padding-left: 120px;
+  background-color: #9b9fa0; 
+  width: 90%;
+  height: 130px;
+  outline: none;
+  border-radius: 30px;
+  resize: none;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1.1em;
+  cursor: text;
+  padding: 5px 20px;
+}
+
+.color-image label {
+  color: #01335c;
+  font-family: var(--font-family);
+  font-size: 1.2em;
+  cursor: pointer;
+}
+.data-cor{
+  position: relative;
+  left: -13%;
+  background-color: var(--container-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 500px;
+  height: 430px;
+  border-radius: 40px;
+  box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
+   margin-top: 10px; 
+}
+.data-cor section{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 40%;
+  height: 80%;
+}
+.color-row{
+  display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 20px;
+    width: 80%;
+}
+.color-item {
+  position: relative;
+  left: 50%;
+  top: -45%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.color-item input[type="color"] {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  border: 2px solid #01335c;
+  margin-bottom: 5px;
+}
+
+/* Código hexadecimal */
+.hex-code {
+  font-family: monospace;
+  background: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.color-pri{
+  position: relative;
+  left: -100%;
+  top: -32%;
+}
+label{
+  font-family: var(--font-family) !important;
+  color: #01335c;
+  font-size: 1.1em;
+  cursor: pointer;
+}
+.cor-1{
+  position: relative;
+  top: -10%;
+  left: -20%;
+}
+.cor-2{
+  position: relative;
+
+}
+/* Linha das datas */
+.date-row {
+  position: relative;
+  top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Input de data */
+.date-row input[type="date"] {
+  background-color: #9b9fa0;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 15px;
+  width: 200px;
+  text-align: center;
+}
+.limpar_sec{
+  position: relative;
+  top: 60px;
+  left: 35%;
+  background: linear-gradient(to bottom, #0fc9B0, #048089);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 120px;
+  height: 55px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 0.9em;
+  font-weight: bold;
 }
