@@ -38,8 +38,14 @@ class UserLoginForm(AuthenticationForm):
 class NewResetPasswordForm(SetPasswordForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.fields['new_password1'].help_text = mark_safe("<h1>tenho tdah</h1>")
-
+        self.fields['new_password1'].widget.attrs.update({
+            'placeholder': 'Nova senha',
+            'class': 'password-input'
+        })
+        self.fields['new_password2'].widget.attrs.update({
+            'placeholder': 'Confirme a nova senha',
+            'class': 'password-input'
+        })
 
 class CollabManageForm(forms.ModelForm):
     tipo_usuario = forms.ChoiceField(
@@ -268,3 +274,10 @@ class ConfiguracaoSistemaForm(forms.ModelForm):
             'observacoes': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'tempo_maximo_inatividade': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 1440}),
         }
+class CustomPasswordResetForm(PasswordResetForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({
+            'placeholder': 'Seu endereço de e-mail',
+            'class': 'email-input'
+        })

@@ -259,7 +259,7 @@
                 </div>
                 
                 <div class="img-form-container">
-                    <h5 class="mb-3">Imagens da Questão</h5>
+                    <h5 class="img-container-title">Imagens da Questão</h5>
                     
                     {{ imagem_formset.management_form }}
                     <div id="imagem-formset">
@@ -429,7 +429,12 @@ document.addEventListener('DOMContentLoaded', function() {
             totalForms.value = parseInt(totalForms.value) + 1;
         });
     }
-    
+    if (tipoSelect && !tipoSelect.value) {
+        tipoSelect.value = 'aberta';
+        // Disparar o evento change para atualizar a exibição das seções
+        tipoSelect.dispatchEvent(new Event('change'));
+    }
+
     // Controlar a exibição dos tipos de questão
     if (tipoSelect) {
         tipoSelect.addEventListener('change', function() {
@@ -439,6 +444,7 @@ document.addEventListener('DOMContentLoaded', function() {
             multiplaSection.style.display = 'none';
             vfSection.style.display = 'none';
             dissertativaSection.style.display = 'none';
+            
             
             // Mostrar a seção apropriada
             if (tipoValue === 'multipla') {
@@ -492,23 +498,27 @@ document.addEventListener('DOMContentLoaded', function() {
         // Configurar inicialmente com base na seleção atual
         if (tipoSelect.value) {
             tipoSelect.dispatchEvent(new Event('change'));
+        }else {
+            // Se não houver valor selecionado, definir como "aberta" e mostrar a seção de dissertativa
+            tipoSelect.value = 'aberta';
+            dissertativaSection.style.display = 'block';
         }
     }
     
     // Adicionar validação para garantir apenas uma alternativa correta em múltipla escolha
     const alternativaCheckboxes = document.querySelectorAll('input[name^="alternativamultiplaescolha_set-"][name$="-correta"]');
-    alternativaCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            if (this.checked) {
-                // Desmarcar as outras caixas de seleção
-                alternativaCheckboxes.forEach(cb => {
-                    if (cb !== this) {
-                        cb.checked = false;
-                    }
-                });
-            }
-        });
+alternativaCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            // Desmarcar as outras caixas de seleção
+            alternativaCheckboxes.forEach(cb => {
+                if (cb !== this) {
+                    cb.checked = false;
+                }
+            });
+        }
     });
+});
     
     // Função para garantir que o estilo custom-radio seja aplicado a novos elementos
     function observeMutations() {
@@ -553,11 +563,10 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Validar se pelo menos uma alternativa está marcada como correta para múltipla escolha
             if (tipoSelect.value === 'multipla') {
-                const isAnyCorrect = Array.from(alternativaCheckboxes).some(cb => cb.checked);
-                if (!isAnyCorrect) {
-                    alert('Pelo menos uma alternativa deve ser marcada como correta.');
-                    return;
-                }
+                // Obter uma coleção atualizada de todos os checkboxes atualmente no formulário
+                const currentAlternativaCheckboxes = document.querySelectorAll('input[name^="alternativamultiplaescolha_set-"][name$="-correta"]');
+                const isAnyCorrect = Array.from(currentAlternativaCheckboxes).some(cb => cb.checked);
+                
             }
             
             // Enviar o formulário se passar na validação

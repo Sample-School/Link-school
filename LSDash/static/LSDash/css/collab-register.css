@@ -212,6 +212,7 @@ main {
   align-items: center;
   width: 95%;
   height: 200px;
+  margin-bottom: 10%;
 }
 .container-form-bottom-left {
   background-color: var(--container-color);

@@ -39,8 +39,9 @@
     display: flex;
     flex-direction: row;
     width: 40%;
-    height: 25%;
+    height: 15%;
     margin-left: 10%;
+    margin-bottom: 5%;
 }
 .input-group{
     display: flex;
@@ -515,7 +516,7 @@
     
 }
 
-/
+
 
 /* Melhorar visual dos botões de exclusão */
 .form-check input[type="checkbox"][name$="-DELETE"] {
@@ -927,4 +928,8 @@ input[name$="-legenda"] {
 }
 .img-input{
     margin-right: 1%;
+}
+
+.img-container-title{
+    margin-left: 40%;
 }
