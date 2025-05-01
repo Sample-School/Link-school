@@ -280,6 +280,8 @@ main {
   width: 100%;
 }
 .upload {
+  position: relative;
+  left: 50px;
   display: flex;
   flex-direction: column;
   justify-content: center;

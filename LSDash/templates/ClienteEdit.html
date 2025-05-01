@@ -4,47 +4,8 @@
 {% block style %}
 <link rel="stylesheet" href="{% static "LSDash/css/style-cliente-edit.css" %}">
 <link rel="shortcut icon" href="{% static 'LSDash/img/favicon.ico' %}" type="image/x-icon">
-<!-- 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Garanta que o Bootstrap CSS está incluído aqui ou no template base -->
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<style>
-  .alert-container {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 1050;
-    width: 300px;
-  }
-  
-  .alert {
-    margin-bottom: 10px;
-    transition: opacity 0.5s ease-in-out;
-  }
-  
-  .fade-out {
-    opacity: 0;
-  }
-  
-  .form-overlay {
-    position: relative;
-  }
-  
-  .form-overlay-message {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(250, 250, 250, 0.85);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    z-index: 10;
-    border-radius: 0.25rem;  }
-</style> -->
 {% endblock %}
 
 {% block page-content %}
@@ -71,15 +32,14 @@
       <!-- Exibir mensagens de sucesso ou erro -->
     <div class="buttons">
       <a href="{% url 'collabmanage' %}"> <button class="btn-reset" id="btnReset" type="submit">Redefinir</button></a>
-      <button class="btn-save" id="btnSave" type="submit">Salvar</button>
+      <button class="btn-save" id="btnSave" type="submit" {% if not cliente_selecionado %}disabled{% endif %}>Salvar</button>
     </div>
   </div>
-  
   
   <div class="container-main">
     <div class="center">
       <!-- Modal com lista de clientes -->
-       {% comment %} <div class="modal fade" id="modalClientes" tabindex="-1" aria-labelledby="modalClientesLabel" aria-hidden="true"> 
+      <div class="modal fade" id="modalClientes" tabindex="-1" aria-labelledby="modalClientesLabel" aria-hidden="true"> 
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
           <div class="modal-content">
             <div class="modal-header">
@@ -105,18 +65,11 @@
             </div>
           </div>
         </div>
-      </div> {% endcomment %}
+      </div> 
       
       <!-- Formulário de Edição - SEMPRE VISÍVEL -->
       <div class="card">
-        
-       
-        
         <div class="card-body form-overlay">
-          
-          <!-- Overlay com mensagem quando não há cliente selecionado -->
-          
-          
           <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             
@@ -144,9 +97,9 @@
                         </form>
                         <!-- Mostrar nome da instituição se cliente estiver carregado -->
                         {% if form.instance.id %}
-                          <div class="alert alert-info mb-0">
+                          <!--<div class="alert-cli">
                             <strong>Cliente selecionado:</strong> {{ form.instance.nome }} (ID: {{ form.instance.id }})
-                          </div>
+                          </div>-->
                         {% endif %}
                       </div>
                     </div>
@@ -185,7 +138,7 @@
                       <small class="form-text text-muted">{{ form.senha_master.help_text }}</small>
                     {% endif %}
                   </div>
-                                </div>
+                </div>
                 </div>
 
                 <div class="name-inst4">
@@ -213,7 +166,7 @@
                 
                 <div class="infor-2">
                   <div class="mb-3">
-                    <label for="{{ form.observacoes.id_for_label }}" class="form-label">Observações:</label>
+                    <div class="color-image"><label for="{{ form.observacoes.id_for_label }}" class="form-label">Observações:</label>
                     {{ form.observacoes }}
                     {% if form.observacoes.errors %}
                       <div class="invalid-feedback d-block">{{ form.observacoes.errors }}</div>
@@ -221,99 +174,100 @@
                     {% if form.observacoes.help_text %}
                       <small class="form-text text-muted">{{ form.observacoes.help_text }}</small>
                     {% endif %}
-                  </div>
-                  <div class="container-form-bottom-left">
-        
-      
-                    <h2>Logo da Instituição</h2>
-                    <div class="content">
-                        <!-- Botão de Upload (igual ao da foto do usuário) -->
-                        <div class="upload">
-                          <div claa="colorimage">
-                            <i class="fas fa-upload" id="uploadLogoIcon"></i>
-                            <input type="file" name="logo" id="id_logo" accept="image/*" style="display: none;">
-                          </div>
-                        </div>
-                        <!-- Preview do Logo (círculo como o da foto) -->
-                        <div class="photo" id="logoPreviewContainer">
-                          <!--<i class="fas fa-circle-user" id="logoIcon"></i>-->
-                            <img id="logoPreview" src="{% if form.logo.value %}{{ form.logo.value.url }}{% endif %}" 
-                                 alt="Preview do Logo" style="max-width: 100%; max-height: 100%; display: none; border-radius: 50%;">
-                        </div>
-                      </div>
-                      
-                  
-                  
-                  
-                
-              
-                    </div>
-
                 </div>
-                            </div>
               </div>
-              
-              <div class="infor-3">
-                <div class="col-md-6">
-                  <!-- Informações de Acesso e Aparência -->
-                  <h5 class="mb-3 mt-4">Aparência e Datas</h5>
-                
-                  <div class="row">
-                    <div class="col-md-6">
-                      <div class="mb-3">
-                        <label for="{{ form.cor_primaria.id_for_label }}" class="form-label">Cor Primária:</label>
-                        {{ form.cor_primaria }}
-                        {% if form.cor_primaria.errors %}
-                          <div class="invalid-feedback d-block">{{ form.cor_primaria.errors }}</div>
-                        {% endif %}
+             <div class="container-form-bottom">
+                <div class="container-form-bottom-left">
+                  <h2>Logo da Instituição</h2>
+                  <div class="content">
+                      <!-- Botão de Upload (igual ao da foto do usuário) -->
+                      <div class="upload">
+                          <i class="fas fa-upload" id="uploadLogoIcon"></i>
+                          <input type="file" name="logo" id="id_logo" accept="image/*" style="display: none;">
                       </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="mb-3">
-                        <label for="{{ form.cor_secundaria.id_for_label }}" class="form-label">Cor Secundária:</label>
-                        {{ form.cor_secundaria }}
-                        {% if form.cor_secundaria.errors %}
-                          <div class="invalid-feedback d-block">{{ form.cor_secundaria.errors }}</div>
-                        {% endif %}
+                      <!-- Preview do Logo (círculo como o da foto) -->
+                      <div class="photo" id="logoPreviewContainer">
+                          <i class="fas fa-circle-user" id="logoIcon"></i>
+                          <img id="logoPreview" src="{% if form.logo.value %}{{ form.logo.value.url }}{% endif %}" 
+                               alt="Preview do Logo" style="max-width: 100%; max-height: 100%; display: none; border-radius: 50%;">
                       </div>
-                    </div>
-                  </div>
-                
-                
-                  <div class="mb-3">
-                    <label for="{{ form.data_inicio_assinatura.id_for_label }}" class="form-label">Início da Assinatura:</label>
-                    {{ form.data_inicio_assinatura }}
-                    {% if form.data_inicio_assinatura.errors %}
-                      <div class="invalid-feedback d-block">{{ form.data_inicio_assinatura.errors }}</div>
-                    {% endif %}
-                  </div>
-                
-                  <div class="mb-3">
-                    <label for="{{ form.data_validade_assinatura.id_for_label }}" class="form-label">Validade da Assinatura:</label>
-                    {{ form.data_validade_assinatura }}
-                    {% if form.data_validade_assinatura.errors %}
-                      <div class="invalid-feedback d-block">{{ form.data_validade_assinatura.errors }}</div>
-                    {% endif %}
-                  </div>
-                  <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                    <button type="submit" class="btn btn-success" {% if not cliente_selecionado %}disabled{% endif %}>
-                      Salvar Alterações
-                    </button>
-                    <a href="?cliente_id=" class="btn btn-outline-secondary">Limpar Seleção</a>
                   </div>
                 </div>
               </div>
-          </form>
+            </div>
+          </div>
         </div>
-      </div>
+
+        <div class="data-cor">
+          <div class="infor-3">
+            <div class="col-md-6">
+              <!-- Informações de Acesso e Aparência -->
+              <div class="color-row">
+                <div class="color-item">
+                  <div class="color-pri">
+                    <div class="cor-1"><label for="{{ form.cor_primaria.id_for_label }}" class="form-label">Cor Primária:</label></div>
+                    {{ form.cor_primaria }}
+                    <span class="hex-code" id="primary-hex">#FFFFFF</span>
+                    {% if form.cor_primaria.errors %}
+                      <div class="invalid-feedback d-block">{{ form.cor_primaria.errors }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="color-item">
+                    <div class="cor-2"><label for="{{ form.cor_secundaria.id_for_label }}" class="form-label">Cor Secundária:</label></div>
+                    {{ form.cor_secundaria }}
+                    <span class="hex-code" id="secondary-hex">#FFFFFF</span>
+                    {% if form.cor_secundaria.errors %}
+                      <div class="invalid-feedback d-block">{{ form.cor_secundaria.errors }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            
+              <div class="date-row">
+                <div class="mb-3">
+                  <label for="{{ form.data_inicio_assinatura.id_for_label }}" class="form-label">Início da Assinatura:</label>
+                  {{ form.data_inicio_assinatura }}
+                  {% if form.data_inicio_assinatura.errors %}
+                    <div class="invalid-feedback d-block">{{ form.data_inicio_assinatura.errors }}</div>
+                  {% endif %}
+                </div>
+            
+                <div class="mb-3">
+                  <label for="{{ form.data_validade_assinatura.id_for_label }}" class="form-label">Validade da Assinatura:</label>
+                  {{ form.data_validade_assinatura }}
+                  {% if form.data_validade_assinatura.errors %}
+                    <div class="invalid-feedback d-block">{{ form.data_validade_assinatura.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="limpar_sec">
+                <a href="?cliente_id=" class="btn btn-outline-secondary">Limpar Seleção</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 </div>
+</div>
+</div>
 </main>
+
+<!-- IMPORTANTE: Scripts do Bootstrap (jQuery + Popper.js + Bootstrap JS) -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
 <!-- Script para filtrar clientes no modal -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Verifica se o Bootstrap está disponível
+    if (typeof bootstrap === 'undefined') {
+      console.error('Bootstrap não está carregado! O modal não funcionará corretamente.');
+    }
+    
     // Função para filtrar clientes na lista
     const filtroInput = document.getElementById('filtroClientes');
     const listaClientes = document.getElementById('listaClientes');
@@ -344,14 +298,99 @@
         }, 500);
       }, 5000);
     });
+    
+    // Configurar botão salvar para enviar o formulário
+    const btnSave = document.getElementById('btnSave');
+    if (btnSave) {
+      btnSave.addEventListener('click', function() {
+        document.querySelector('form').submit();
+      });
+    }
   });
   
   // Abrir modal automaticamente se necessário
   {% if abrir_modal %}
     document.addEventListener('DOMContentLoaded', function() {
-      const modalClientes = new bootstrap.Modal(document.getElementById('modalClientes'));
-      modalClientes.show();
+      const modalElem = document.getElementById('modalClientes');
+      if (modalElem) {
+        const modalClientes = new bootstrap.Modal(modalElem);
+        modalClientes.show();
+      }
     });
   {% endif %}
+</script>
+
+<!--Script da logo-->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // Configuração do upload do logo (igual ao da foto do usuário)
+      const uploadLogoIcon = document.getElementById('uploadLogoIcon');
+      const logoInput = document.getElementById('id_logo');
+      const logoPreview = document.getElementById('logoPreview');
+      const logoIcon = document.getElementById('logoIcon');
+      
+      // Quando clicar no ícone de upload
+      if (uploadLogoIcon && logoInput) {
+        uploadLogoIcon.addEventListener('click', function() {
+            logoInput.click();
+        });
+      }
+      
+      // Quando um arquivo for selecionado
+      if (logoInput && logoPreview && logoIcon) {
+        logoInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    logoPreview.src = e.target.result;
+                    logoPreview.style.display = 'block';
+                    logoIcon.style.display = 'none';
+                };
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        // Se já existir um logo carregado
+        if (logoPreview.src && logoPreview.src !== window.location.href) {
+            logoPreview.style.display = 'block';
+            logoIcon.style.display = 'none';
+        }
+      }
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Função para atualizar os códigos de cor
+    function updateColorHex() {
+      const primaryColor = document.getElementById('{{ form.cor_primaria.id_for_label }}');
+      const secondaryColor = document.getElementById('{{ form.cor_secundaria.id_for_label }}');
+      const primaryHex = document.getElementById('primary-hex');
+      const secondaryHex = document.getElementById('secondary-hex');
+      
+      if (primaryColor && primaryHex) {
+        primaryHex.textContent = primaryColor.value;
+      }
+      
+      if (secondaryColor && secondaryHex) {
+        secondaryHex.textContent = secondaryColor.value;
+      }
+    }
+    
+    // Ouvintes de evento para as cores
+    const primaryColor = document.getElementById('{{ form.cor_primaria.id_for_label }}');
+    const secondaryColor = document.getElementById('{{ form.cor_secundaria.id_for_label }}');
+    
+    if (primaryColor) {
+      primaryColor.addEventListener('input', updateColorHex);
+    }
+    
+    if (secondaryColor) {
+      secondaryColor.addEventListener('input', updateColorHex);
+    }
+    
+    // Atualiza inicialmente
+    updateColorHex();
+  });
 </script>
 {% endblock %}
