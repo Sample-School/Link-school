@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-ylxmjhqh%ug3b)jizt*m47&(d7_d1xs@obias%yx!-5io0tm-#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testejaum.localhost', 'clienteteste.localhost']
 
 #User model
 AUTH_USER_MODEL = 'LSDash.UserModel'
@@ -57,7 +57,8 @@ EMAIL_HOST_PASSWORD = 'marw oycd lsqy bhxq'
 DEFAULT_FROM_EMAIL = 'jaumamaralpessoal@gmail.com'
 
 MIDDLEWARE = [
-    'LSmain.middleware.SelectiveTenantMiddleware',
+    'django_tenants.middleware.main.TenantMainMiddleware',
+    
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -180,3 +181,6 @@ SHARED_APPS = [
 
 TENANT_MODEL = "LSDash.Cliente"  # Seu modelo de tenant
 TENANT_DOMAIN_MODEL = "LSDash.Dominio"  # Seu modelo de domínio
+PUBLIC_SCHEMA_NAME = 'public'
+PUBLIC_SCHEMA_URLCONF = 'LSmain.urls'
+TENANT_URLCONF = 'LSmain.tenant_urls'

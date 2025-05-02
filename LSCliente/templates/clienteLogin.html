@@ -1,0 +1,23 @@
+<form id="formLogin" class="form-login" method="post">
+          {% csrf_token %}
+          {{ form.non_field_errors }}  
+          
+        <div>
+            <label for="{{ form.email_for_label }}">
+            </label>
+            {{ form.email }}  <!-- Renderiza o campo de email (ainda chamado username no form) -->
+            {{ form.email.errors }}  <!-- Exibe erros relacionados ao campo -->
+        </div>
+        
+        <div >
+            <label for="{{ form.password.id_for_label }}">
+              
+            </label>
+            {{ form.password }}  <!-- Renderiza o campo de senha -->
+            {{ form.password.errors }}  <!-- Exibe erros relacionados ao campo -->
+        </div>
+          <!-- Campos de (Esqueceu Senha)  -->
+          <div >
+            <a href="{% url 'LSCliente:clientepassword_reset' %}">ESQUECI MINHA SENHA</a>
+          </div>
+        </form>

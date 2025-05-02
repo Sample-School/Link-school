@@ -4,10 +4,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    
     path('admin/', admin.site.urls),
     path('', include('LSDash.urls')),  # Suas URLs customizadas
 ]
 
 if settings.DEBUG:
+    urlpatterns += [
+        path('', include('LSCliente.urls')),  # URLs adicionais em modo DEBUG
+    ]
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

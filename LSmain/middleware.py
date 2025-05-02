@@ -1,24 +1,17 @@
 from django_tenants.middleware import TenantMainMiddleware
-from LSDash.models import ConfiguracaoSistema, SessaoUsuario
+from LSDash.models import Dominio, ConfiguracaoSistema, SessaoUsuario
 from django.utils import timezone
 from django.contrib.auth import logout
 from django.contrib import messages
 from django.urls import reverse
 from django.shortcuts import redirect
+import logging
+from django.http import HttpResponseNotFound
+from django_tenants.utils import get_tenant_model, get_public_schema_name
+from django.db import connections
 
 
-class SelectiveTenantMiddleware(TenantMainMiddleware):
-    def process_request(self, request):
-        # Lista de domínios que devem ignorar o sistema de tenants
-        public_domains = ['127.0.0.1', 'localhost', 'sampletext.com']
-        
-        # Se o domínio estiver na lista de públicos, não processe como tenant
-        if request.get_host().split(':')[0] in public_domains:
-            return None
-            
-        # Caso contrário, use o processamento padrão de tenants
-        return super().process_request(request)
-    
+logger = logging.getLogger(__name__)
 
 
 class SessionTrackingMiddleware:
@@ -29,7 +22,6 @@ class SessionTrackingMiddleware:
         # Processar a requisição antes da view
         if request.user.is_authenticated:
             # Verificar inatividade
-            
             
             # Obter configurações
             configuracao = ConfiguracaoSistema.obter_configuracao()
