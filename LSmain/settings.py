@@ -179,6 +179,8 @@ SHARED_APPS = [
     
 ]
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 TENANT_MODEL = "LSDash.Cliente"  # Seu modelo de tenant
 TENANT_DOMAIN_MODEL = "LSDash.Dominio"  # Seu modelo de domínio
 PUBLIC_SCHEMA_NAME = 'public'

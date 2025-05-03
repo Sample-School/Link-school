@@ -32,7 +32,7 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 130px;
+  width: 130px; 
   height: 130px;
   position: absolute;
   top: -60px;
