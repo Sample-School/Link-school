@@ -1,25 +1,41 @@
-<form id="formLogin" class="form-login" method="post">
-  {% csrf_token %} {{ form.non_field_errors }}
+{% extends "global/cliente-base.html" %} 
+{% load static %}
 
-  <div>
-    <label for="{{ form.email_for_label }}"> </label>
-    {{ form.email }}
-    <!-- Renderiza o campo de email (ainda chamado username no form) -->
-    {{ form.email.errors }}
-    <!-- Exibe erros relacionados ao campo -->
-  </div>
+{% block styles %}
+  <link rel="stylesheet" href="{% static "LSCliente/css/style-login.css" %}"> 
+{% endblock styles %}
 
-  <div>
-    <label for="{{ form.password.id_for_label }}"> </label>
-    {{ form.password }}
-    <!-- Renderiza o campo de senha -->
-    {{ form.password.errors }}
-    <!-- Exibe erros relacionados ao campo -->
-  </div>
-  <!-- Campos de (Esqueceu Senha)  -->
-  <div>
-    <a href="{% url 'LSCliente:clientepassword_reset' %}"
-      >ESQUECI MINHA SENHA</a
-    >
-  </div>
-</form>
+{% block content %}
+  <main>
+    <div class="container-form">
+      <!-- Logo do formulário: -->
+      <div class="container-logo">
+        <div class="logo"></div>
+      </div>
+      <form id="formLogin" class="form-login" method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div>
+          <label for="{{ form.email_for_label }}"> </label>
+          {{ form.email }}
+          <!-- Renderiza o campo de email (ainda chamado username no form) -->
+          {{ form.email.errors }}
+          <!-- Exibe erros relacionados ao campo -->
+        </div>
+        <div>
+          <label for="{{ form.password.id_for_label }}"> </label>
+          {{ form.password }}
+          <!-- Renderiza o campo de senha -->
+          {{ form.password.errors }}
+          <!-- Exibe erros relacionados ao campo -->
+        </div>
+        <!-- Campos de (Esqueceu Senha)  -->
+        <div>
+          <a href="{% url 'LSCliente:clientepassword_reset' %}"
+            >ESQUECI MINHA SENHA</a
+          >
+        </div>
+      </form>
+    </div>
+  </main>
+{% endblock content %}
