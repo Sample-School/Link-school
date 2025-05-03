@@ -21,3 +21,22 @@
             <a href="{% url 'LSCliente:clientepassword_reset' %}">ESQUECI MINHA SENHA</a>
           </div>
         </form>
+        <button id="btnSend" class="btn-send" type="submit">LOGIN</button>
+        {% if messages %}
+          <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        <script>
+          const formLogin = document.getElementById("formLogin");
+
+const btnSend = document.getElementById("btnSend");
+btnSend.addEventListener("click", () => {
+  // Envia o formulário de login.
+  formLogin.submit();
+});
+
+        </script>
