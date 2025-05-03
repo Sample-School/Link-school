@@ -152,7 +152,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "base" / 'static'
 ]
@@ -184,7 +184,7 @@ SHARED_APPS = [
     
 ]
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 TENANT_MODEL = "LSDash.Cliente"  # Seu modelo de tenant
 TENANT_DOMAIN_MODEL = "LSDash.Dominio"  # Seu modelo de domínio
