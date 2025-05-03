@@ -32,7 +32,7 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 130px;
+  width: 130px; 
   height: 130px;
   position: absolute;
   top: -60px;
@@ -46,8 +46,8 @@ main {
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-  width: 85px;
-  height: 85px;
+  width: 95px;
+  height: 80px;
 }
 .form-login {
   display: flex;
@@ -141,7 +141,7 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 300px;
+  width: 30%;
   height: 55px;
   border: none;
   border-bottom-right-radius: 60px;

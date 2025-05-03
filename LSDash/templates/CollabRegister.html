@@ -22,7 +22,10 @@
     </div>
 
     <!-- Exibição de erros no topo -->
-    {% if messages %}
+    
+
+    <form class="form" id="userRegisterForm" method="POST" action="{% url 'collabregister' %}" enctype="multipart/form-data">
+      {% if messages %}
       <div class="alert-container">
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }}" role="alert">
@@ -41,8 +44,7 @@
         {% endfor %}
       </div>
     {% endif %}
-
-    <form class="form" id="userRegisterForm" method="POST" action="{% url 'collabregister' %}">
+    
       {% csrf_token %}
 
       <div class="container-form-center">
@@ -100,27 +102,42 @@
             </section>
           </div>
 
-          <section>
-            <div class="title"><label for="id_paginas">Páginas vinculadas</label></div>
-            <div class="input-select">
-                <select name="paginas" id="id_paginas" class="form-control" multiple>
-                    {% for pagina in form.fields.paginas.queryset %}
-                      <option value="{{ pagina.id }}"
-                        {% if pagina.id|stringformat:"s" in form.paginas.value %}selected{% endif %}
-                      >
-                        {{ pagina }}
-                      </option>
-                    {% endfor %}
-                  </select>
-              <small class="form-text text-muted">Segure Ctrl (Windows) ou Cmd (Mac) para selecionar várias.</small>
-            </div>
-          </section>
+          <div class="bottom">
+            <section>
+              <div class="title"><label for="id_paginas">Páginas vinculadas</label></div>
+              <div class="input-select">
+                  <select name="paginas" id="id_paginas" class="form-control" multiple>
+                      {% for pagina in form.fields.paginas.queryset %}
+                        
+                        <option value="{{ pagina.id }}"
+                          {% if pagina.id|stringformat:"s" in form.paginas.value %}selected{% endif %}
+                        >
+                          {{ pagina }}
+                        </option>
+                        
+                      {% endfor %}
+                    </select>
+              </div>
+            </section>
+          </div>
         </div>
       </div>
 
       <div class="container-form-bottom">
         <div class="container-form-bottom-left">
           <h2>Foto do Usuário</h2>
+          <div class="content">
+            <div class="upload">
+              <i class="fas fa-upload" id="uploadIcon"></i>
+              <input type="file" name="user_img" id="user_img" accept="image/*" style="display: none;">
+            </div>
+            <div class="photo" id="userPhotoContainer">
+              <!-- O ícone será substituído pela imagem quando selecionada -->
+              <i class="fa-regular fa-circle-user" id="userIcon"></i>
+              <img id="imagePreview" src="{% if form.user_img.value %}{{ form.user_img.value.url }}{% endif %}" 
+                   alt="Preview" style="max-width: 100%; max-height: 100%; display: none; border-radius: 50%;">
+            </div>
+          </div>
         </div>
         <div class="container-form-bottom-right">
           <label for="id_observacoes">Observações sobre o usuário</label>
@@ -132,11 +149,46 @@
   </main>
 
   <script>
-    // Script para submeter o formulário quando o botão Salvar for clicado
     document.addEventListener('DOMContentLoaded', function() {
+      // Setup para o botão salvar
       document.getElementById('btnSave').addEventListener('click', function() {
         document.getElementById('userRegisterForm').submit();
       });
+      
+      // Setup para o upload de imagem
+      const uploadIcon = document.getElementById('uploadIcon');
+      const fileInput = document.getElementById('user_img');
+      const imagePreview = document.getElementById('imagePreview');
+      const userIcon = document.getElementById('userIcon');
+      
+      // Quando clicar no ícone de upload, aciona o input de arquivo
+      uploadIcon.addEventListener('click', function() {
+        fileInput.click();
+      });
+      
+      // Quando um arquivo é selecionado, mostra a prévia
+      fileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+          const reader = new FileReader();
+          
+          reader.onload = function(e) {
+            // Define o src da imagem
+            imagePreview.src = e.target.result;
+            
+            // Mostra a imagem e esconde o ícone
+            imagePreview.style.display = 'block';
+            userIcon.style.display = 'none';
+          }
+          
+          reader.readAsDataURL(this.files[0]);
+        }
+      });
+    
+      // Se já existe uma imagem (carregada anteriormente), mostra ela e esconde o ícone
+      if (imagePreview.src && imagePreview.src !== window.location.href) {
+        imagePreview.style.display = 'block';
+        userIcon.style.display = 'none';
+      }
     });
   </script>
   <script src="{% static 'LSDash/js/script-collab-register.js' %}"></script>

@@ -1,0 +1,606 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+:root {
+  --container-color: #e1e1e1;
+  --font-family: "Inter", sans-serif;
+}
+body, input, button, select, textarea {
+    font-family: var(--font-family);
+  }
+
+main {
+  
+  
+  width: 100%;
+  height: 100%;
+}
+.container-top {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  height: 10%;
+}
+.container-top h1 {
+  background-color: var(--container-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 300px;
+  border-bottom-left-radius: 45px;
+  border-bottom-right-radius: 45px;
+  color: #01335c;
+  font-family: var(--font-family);
+  font-size: 1.8em;
+  font-style: italic;
+}
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 300px;
+}
+.btn-reset {
+  background: var(--container-color);
+  width: 140px;
+  height: 35px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  color: #01335c;
+  font-family: var(--font-family);
+  font-size: 1.2em;
+  font-weight: bold;
+} 
+.btn-save {
+  background: linear-gradient(to bottom, #0fc9B0, #048089);
+  width: 140px;
+  height: 35px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.form {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+.container-form-center {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 95%;
+  height: 450px;
+  gap: 30px;
+}
+.container-form-center-left {
+  background-color: var(--container-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    
+    width: 500px;
+    height: 80%;
+    border-radius: 40px;
+    box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
+    margin-top: 5px;
+}
+.input-name, .input-user, .input-email, .input-password {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 90%;
+  height: 70px;
+}
+.input-name label, .input-user label, .input-email label, .input-password label {
+  color: #01335c;
+  font-family: var(--font-family);
+  font-size: 1.1em;
+  cursor: pointer;
+}
+.input-name input, .input-user input, .input-email input, .input-password input {
+  background-color: #9b9fa0;
+  width: 100%;
+  height: 35px;
+  border: none;
+  border-radius: 20px;
+  outline: none;
+  cursor: text;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1em;
+  padding: 0px 10px;
+}
+.container-form-center-right {
+    background-color: var(--container-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 500px;
+    height: 80%;
+    border-radius: 40px;
+    box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
+    /* margin-top: 10px; */
+}
+.top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.container-form-center-right section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 40%;
+}
+.title {
+  color: #01335c;
+  font-family: var(--font-family);
+  font-size: 1.2em;
+  font-weight: bold;
+  text-align: center;
+}
+.input-radio {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 300px;
+}
+.radio-collab, .radio-adm, .radio-active, .radio-deactive {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: #01335c;
+  font-family: var(--font-family);
+  font-size: 1.1em;
+}
+.radio-collab label, .radio-adm label, .radio-active label, .radio-deactive label {
+  cursor: pointer;
+}
+.radio-collab, .radio-active {
+  accent-color: #01335c;
+}
+.bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.bottom section {
+  width: 100%;
+}
+.input-select {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+}
+.input-select select {
+  display: flex;
+  justify-content: center;
+  background-color: transparent;
+  padding-left: 15px;
+  border: none;
+  outline: none;
+  width: 80%;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+.input-select option {
+  color: #01335c;
+  font-family: var(--font-family);
+  font-size: 1.1em;
+  font-weight: bold;
+  width: 100%;
+}
+.container-form-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 95%;
+  height: 200px;
+}
+.container-form-bottom-left {
+  background-color: var(--container-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 40%;
+  height: 170px;
+  margin-bottom: 10px;
+  border-radius: 40px;
+  box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
+}
+.container-form-bottom-left h2 {
+  color: #01335c;
+  font-family: var(--font-family);
+  font-size: 1.4em;
+  text-align: center;
+}
+.container-form-bottom-right {
+  background-color: var(--container-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 48%;
+  height: 170px;
+  margin-bottom: 10px;
+  border-radius: 40px;
+  box-shadow: 3px 6px 7px rgba(0, 0, 0, 0.5);
+}
+.container-form-bottom label {
+  color: #01335c;
+  font-family: var(--font-family);
+  font-size: 1.2em;
+  cursor: pointer;
+}
+.container-form-bottom textarea {
+  background-color: #9b9fa0;
+  width: 90%;
+  height: 100px;
+  outline: none;
+  border-radius: 30px;
+  resize: none;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1.1em;
+  cursor: text;
+  padding: 5px 20px;
+}
+.container-form-bottom-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  width: 48%;
+}
+.content {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+.upload {
+  position: relative;
+  left: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  width: 150px;
+  height: 120px;
+}
+.buttons-bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+.buttons-bottom button {
+  background: linear-gradient(to bottom, #0fc9B0, #048089);
+  width: 65px;
+  height: 35px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 0.8em;
+  font-weight: bold;
+}
+.upload i {
+  color: #048089;
+  font-size: 4em;
+}
+.photo {
+  background-color: #10858e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 140px;
+  height: 110px;
+}
+.photo i {
+  color: #fff;
+  font-size: 6em;
+}
+.alert-container {
+  position: absolute;
+  font-family: var(--font-family);
+  font-size: 0.8em;
+  font-weight: bold;
+  width: auto;
+  height: 30px;
+}
+.alert.alert-danger {
+  color: #ff0000;
+}
+.alert.alert-success {
+  color: green;
+}
+/* ESTILO UNIFICADO PARA TODOS OS CAMPOS */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+
+input[type="color"],
+select {
+  background-color: #9b9fa0 !important; /* Fundo cinza */
+  border: none !important;
+  border-radius: 30px !important; /* Bordas arredondadas */
+  color: #fff !important;
+  font-family: var(--font-family) !important;
+  font-size: 1.1em !important;
+  padding: 12px 20px !important; /* Espaçamento igual ao textarea */
+  width: 90% !important;
+  
+  height: 20px !important;
+  outline: none !important;
+  resize: none !important; /* Só afeta textarea */
+  cursor: text !important;
+  box-shadow: none !important;
+}
+
+/* Ajuste para inputs menores (opcional) */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"]{
+  height: 30px !important; /* Altura fixa (menor que o textarea) */
+}
+
+/* Input de Cor - Estilo Quadrado Pequeno */
+input[type="color"] {
+  width: 50px !important;  /* Largura reduzida */
+  height: 50px !important; /* Altura igual à largura (quadrado) */
+  padding: 0 !important;   /* Remove padding interno */
+  border-radius: 8px !important; /* Cantos levemente arredondados */
+  cursor: pointer !important;
+}
+
+/* Ajuste opcional para o rótulo */
+label[for="{{ form.cor_primaria.id_for_label }}"],
+label[for="{{ form.cor_secundaria.id_for_label }}"] {
+  display: block;
+  margin-bottom: 8px; /* Espaço entre label e input */
+}
+/* Garante que TODAS as labels usem a fonte Inter */
+label {
+  font-family: var(--font-family) !important; /* Fonte Inter */
+  color: #01335c; /* Cor consistente com seu tema */
+  font-size: 1.1em; /* Tamanho padrão */
+  cursor: pointer; /* Mantém o cursor como ponteiro */
+}
+
+/* Ajuste específico para labels dentro de container-form-bottom */
+.container-form-bottom label {
+ 
+  font-size: 1.2em; /* Mantém o tamanho original para observações */
+}
+/* Container para as cores lado a lado */
+.color-picker-group {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+/* Cada grupo de cor individual */
+.color-picker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 150px;
+}
+
+/* Estilo do input de cor */
+.color-picker-item input[type="color"] {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 10px !important;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+/* Texto do código hexadecimal */
+.color-hex {
+  font-family: var(--font-family);
+  color: #01335c;
+  font-size: 0.9em;
+  background: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+/* Container das datas */
+.date-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+/* Container das cores (lado a lado) */
+.color-picker-group {
+  display: flex;
+  justify-content: center; /* Centraliza horizontalmente */
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+/* Cada grupo de cor (primária/secundária) */
+.color-picker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 150px;
+}
+
+/* Container das datas (uma embaixo da outra, centralizado) */
+.date-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centraliza horizontalmente */
+  gap: 10px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* Inputs de data */
+input[type="date"] {
+  background-color: #9b9fa0 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 20px !important;
+  padding: 8px 15px !important;
+  height: 35px !important;
+  width: 200px !important; /* Largura fixa para uniformidade */
+  text-align: center;
+}
+
+/* Labels das datas */
+.date-group label {
+  margin-bottom: 5px;
+  font-family: var(--font-family);
+  color: #01335c;
+  font-weight: bold;
+}
+/* Container principal das cores e datas */
+.color-and-dates-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Linha das cores */
+.color-row {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+/* Cada item de cor */
+.color-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Input de cor */
+.color-item input[type="color"] {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  border: 2px solid #01335c;
+  margin-bottom: 5px;
+}
+
+/* Código hexadecimal */
+.hex-code {
+  font-family: monospace;
+  background: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* Linha das datas */
+.date-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Input de data */
+.date-row input[type="date"] {
+  background-color: #9b9fa0;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 15px;
+  width: 200px;
+  text-align: center;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  width: 100%;
+  height: 100%;
+} 
+.input{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 30px;
+}
+
+.input input{
+  background-color: #9b9fa0;
+  width: 90%;
+  height: 30px; 
+  border: none;
+  border-radius: 20px;
+  outline: none;
+  cursor: text;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1em;
+  padding: 0px 10px;
+}
+
+.inputnumber {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 30px;
+
+  
+}
+
+.inputnumber input{
+  background-color: #9b9fa0;
+  width: 90%;
+  height: 30px; 
+  border: none;
+  border-radius: 20px;
+  outline: none;
+  cursor: text;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 1em;
+  padding: 5px 10px;
+}

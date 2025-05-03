@@ -1,0 +1,396 @@
+{% extends "global/base.html" %}
+{% load static %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static "LSDash/css/style-cliente-edit.css" %}">
+<link rel="shortcut icon" href="{% static 'LSDash/img/favicon.ico' %}" type="image/x-icon">
+<!-- Garanta que o Bootstrap CSS está incluído aqui ou no template base -->
+
+{% endblock %}
+
+{% block page-content %}
+<header>
+  {% include "global/partials/navbar.html" %}
+</header>
+
+<main>
+<!-- Alertas de mensagens -->
+{% if messages %}
+  <div class="alert-container">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close float-end" data-bs-dismiss="alert" aria-label="Fechar"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="container">
+  <div class="container-top">
+    <h1>Editar Cliente</h1>
+      <!-- Exibir mensagens de sucesso ou erro -->
+    <div class="buttons">
+      <a href="{% url 'collabmanage' %}"> <button class="btn-reset" id="btnReset" type="submit">Redefinir</button></a>
+      <button class="btn-save" id="btnSave" type="submit" {% if not cliente_selecionado %}disabled{% endif %}>Salvar</button>
+    </div>
+  </div>
+  
+  <div class="container-main">
+    <div class="center">
+      <!-- Modal com lista de clientes -->
+      <div class="modal fade" id="modalClientes" tabindex="-1" aria-labelledby="modalClientesLabel" aria-hidden="true"> 
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalClientesLabel">Lista de Clientes</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+              <input type="text" id="filtroClientes" class="form-control mb-3" placeholder="Filtrar por nome...">
+              
+              <ul class="list-group" id="listaClientes">
+                {% for cliente in todos_clientes %}
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>ID: {{ cliente.id }} — {{ cliente.nome }}</span>
+                    <a href="?cliente_id={{ cliente.id }}" class="btn btn-sm btn-outline-primary">Selecionar</a>
+                  </li>
+                {% empty %}
+                  <li class="list-group-item">Nenhum cliente encontrado.</li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+          </div>
+        </div>
+      </div> 
+      
+      <!-- Formulário de Edição - SEMPRE VISÍVEL -->
+      <div class="card">
+        <div class="card-body form-overlay">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Se tiver cliente selecionado, incluir o ID -->
+            {% if form.instance.id %}
+              <input type="hidden" name="cliente_id" value="{{ form.instance.id }}">
+            {% endif %}
+            
+            <div class="row">
+              <div class="content-right">
+                <!-- Informações Básicas -->
+                
+                <div class="infor-1">
+                  <!-- Pesquisa por ID -->
+                  <div class="buscar-cliente">
+                    <div class="container-form-card-body">
+                      <div class="card-body">                    
+                        <h5 class="mb-0">Buscar Cliente:</h5>
+                        <form class="search-user-id" method="get" class="mb-3">
+                            <input type="text" name="cliente_id" id="cliente_id" class="form-control" placeholder="Digite o ID do cliente" value="{{ cliente_id|default:'' }}">
+                            <button type="submit" class="btn btn-primary">Buscar</button>
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalClientes">
+                              Ver Lista
+                            </button>
+                        </form>
+                        <!-- Mostrar nome da instituição se cliente estiver carregado -->
+                        {% if form.instance.id %}
+                          <!--<div class="alert-cli">
+                            <strong>Cliente selecionado:</strong> {{ form.instance.nome }} (ID: {{ form.instance.id }})
+                          </div>-->
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                <div class="content-form">
+                  <div class="name-inst">
+                   <div class="fist-info"><label for="{{ form.nome.id_for_label }}" class="form-label">Nome da Instituição:</label></div>
+                    {{ form.nome }}
+                    {% if form.nome.errors %}
+                      <div class="invalid-feedback d-block">{{ form.nome.errors }}</div>
+                    {% endif %}
+                    {% if form.nome.help_text %}
+                      <small class="form-text text-muted">{{ form.nome.help_text }}</small>
+                    {% endif %}
+                  </div>
+                  
+                  <div class="name-inst2">
+                    <div class="second-info"><label for="{{ form.email_master.id_for_label }}" class="form-label">Email do Administrador:</label></div>
+                    {{ form.email_master }}
+                    {% if form.email_master.errors %}
+                      <div class="invalid-feedback d-block">{{ form.email_master.errors }}</div>
+                    {% endif %}
+                    {% if form.email_master.help_text %}
+                      <small class="form-text text-muted">{{ form.email_master.help_text }}</small>
+                    {% endif %}
+                  </div>
+            
+                  
+                  <div class="name-inst3">
+                    <div class="third-info"><label for="{{ form.senha_master.id_for_label }}" class="form-label">Nova Senha (deixe em branco para manter):</label></div>
+                    {{ form.senha_master }}
+                    {% if form.senha_master.errors %}
+                      <div class="invalid-feedback d-block">{{ form.senha_master.errors }}</div>
+                    {% endif %}
+                    {% if form.senha_master.help_text %}
+                      <small class="form-text text-muted">{{ form.senha_master.help_text }}</small>
+                    {% endif %}
+                  </div>
+                </div>
+                </div>
+
+                <div class="name-inst4">
+                  <div class="fourth-info"><label for="{{ form.qtd_usuarios.id_for_label }}" class="form-label">Quantidade de Usuários:</label></div>
+                  {{ form.qtd_usuarios }}
+                  {% if form.qtd_usuarios.errors %}
+                    <div class="invalid-feedback d-block">{{ form.qtd_usuarios.errors }}</div>
+                  {% endif %}
+                  {% if form.qtd_usuarios.help_text %}
+                    <small class="form-text text-muted">{{ form.qtd_usuarios.help_text }}</small>
+                  {% endif %}
+                </div>
+
+                <div class="name-inst5">
+                  <div class="fifth-infor"><label for="{{ form.subdominio.id_for_label }}" class="form-label">Subdomínio:</label></div>
+                  {{ form.subdominio }}
+                  {% if form.subdominio.errors %}
+                    <div class="invalid-feedback d-block">{{ form.subdominio.errors }}</div>
+                  {% endif %}
+                  {% if form.subdominio.help_text %}
+                    <div class="menssage"><small class="form-text text-muted">{{ form.subdominio.help_text }}</small></div>
+                  {% endif %}
+                </div>
+                
+                
+                <div class="infor-2">
+                  <div class="mb-3">
+                    <div class="color-image"><label for="{{ form.observacoes.id_for_label }}" class="form-label">Observações:</label>
+                    {{ form.observacoes }}
+                    {% if form.observacoes.errors %}
+                      <div class="invalid-feedback d-block">{{ form.observacoes.errors }}</div>
+                    {% endif %}
+                    {% if form.observacoes.help_text %}
+                      <small class="form-text text-muted">{{ form.observacoes.help_text }}</small>
+                    {% endif %}
+                </div>
+              </div>
+             <div class="container-form-bottom">
+                <div class="container-form-bottom-left">
+                  <h2>Logo da Instituição</h2>
+                  <div class="content">
+                      <!-- Botão de Upload (igual ao da foto do usuário) -->
+                      <div class="upload">
+                          <i class="fas fa-upload" id="uploadLogoIcon"></i>
+                          <input type="file" name="logo" id="id_logo" accept="image/*" style="display: none;">
+                      </div>
+                      <!-- Preview do Logo (círculo como o da foto) -->
+                      <div class="photo" id="logoPreviewContainer">
+                          <i class="fas fa-circle-user" id="logoIcon"></i>
+                          <img id="logoPreview" src="{% if form.logo.value %}{{ form.logo.value.url }}{% endif %}" 
+                               alt="Preview do Logo" style="max-width: 100%; max-height: 100%; display: none; border-radius: 50%;">
+                      </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="data-cor">
+          <div class="infor-3">
+            <div class="col-md-6">
+              <!-- Informações de Acesso e Aparência -->
+              <div class="color-row">
+                <div class="color-item">
+                  <div class="color-pri">
+                    <div class="cor-1"><label for="{{ form.cor_primaria.id_for_label }}" class="form-label">Cor Primária:</label></div>
+                    {{ form.cor_primaria }}
+                    <span class="hex-code" id="primary-hex">#FFFFFF</span>
+                    {% if form.cor_primaria.errors %}
+                      <div class="invalid-feedback d-block">{{ form.cor_primaria.errors }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="color-item">
+                    <div class="cor-2"><label for="{{ form.cor_secundaria.id_for_label }}" class="form-label">Cor Secundária:</label></div>
+                    {{ form.cor_secundaria }}
+                    <span class="hex-code" id="secondary-hex">#FFFFFF</span>
+                    {% if form.cor_secundaria.errors %}
+                      <div class="invalid-feedback d-block">{{ form.cor_secundaria.errors }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            
+              <div class="date-row">
+                <div class="mb-3">
+                  <label for="{{ form.data_inicio_assinatura.id_for_label }}" class="form-label">Início da Assinatura:</label>
+                  {{ form.data_inicio_assinatura }}
+                  {% if form.data_inicio_assinatura.errors %}
+                    <div class="invalid-feedback d-block">{{ form.data_inicio_assinatura.errors }}</div>
+                  {% endif %}
+                </div>
+            
+                <div class="mb-3">
+                  <label for="{{ form.data_validade_assinatura.id_for_label }}" class="form-label">Validade da Assinatura:</label>
+                  {{ form.data_validade_assinatura }}
+                  {% if form.data_validade_assinatura.errors %}
+                    <div class="invalid-feedback d-block">{{ form.data_validade_assinatura.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="limpar_sec">
+                <a href="?cliente_id=" class="btn btn-outline-secondary">Limpar Seleção</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</main>
+
+<!-- IMPORTANTE: Scripts do Bootstrap (jQuery + Popper.js + Bootstrap JS) -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+<!-- Script para filtrar clientes no modal -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Verifica se o Bootstrap está disponível
+    if (typeof bootstrap === 'undefined') {
+      console.error('Bootstrap não está carregado! O modal não funcionará corretamente.');
+    }
+    
+    // Função para filtrar clientes na lista
+    const filtroInput = document.getElementById('filtroClientes');
+    const listaClientes = document.getElementById('listaClientes');
+    
+    if (filtroInput && listaClientes) {
+      filtroInput.addEventListener('input', function() {
+        const filtro = this.value.toLowerCase();
+        const itens = listaClientes.getElementsByTagName('li');
+        
+        for (let i = 0; i < itens.length; i++) {
+          const textoItem = itens[i].textContent.toLowerCase();
+          if (textoItem.indexOf(filtro) > -1) {
+            itens[i].style.display = '';
+          } else {
+            itens[i].style.display = 'none';
+          }
+        }
+      });
+    }
+    
+    // Auto-ocultar alertas após 5 segundos
+    const alertas = document.querySelectorAll('.alert:not(.alert-info)');
+    alertas.forEach(alerta => {
+      setTimeout(() => {
+        alerta.classList.add('fade-out');
+        setTimeout(() => {
+          alerta.remove();
+        }, 500);
+      }, 5000);
+    });
+    
+    // Configurar botão salvar para enviar o formulário
+    const btnSave = document.getElementById('btnSave');
+    if (btnSave) {
+      btnSave.addEventListener('click', function() {
+        document.querySelector('form').submit();
+      });
+    }
+  });
+  
+  // Abrir modal automaticamente se necessário
+  {% if abrir_modal %}
+    document.addEventListener('DOMContentLoaded', function() {
+      const modalElem = document.getElementById('modalClientes');
+      if (modalElem) {
+        const modalClientes = new bootstrap.Modal(modalElem);
+        modalClientes.show();
+      }
+    });
+  {% endif %}
+</script>
+
+<!--Script da logo-->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // Configuração do upload do logo (igual ao da foto do usuário)
+      const uploadLogoIcon = document.getElementById('uploadLogoIcon');
+      const logoInput = document.getElementById('id_logo');
+      const logoPreview = document.getElementById('logoPreview');
+      const logoIcon = document.getElementById('logoIcon');
+      
+      // Quando clicar no ícone de upload
+      if (uploadLogoIcon && logoInput) {
+        uploadLogoIcon.addEventListener('click', function() {
+            logoInput.click();
+        });
+      }
+      
+      // Quando um arquivo for selecionado
+      if (logoInput && logoPreview && logoIcon) {
+        logoInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    logoPreview.src = e.target.result;
+                    logoPreview.style.display = 'block';
+                    logoIcon.style.display = 'none';
+                };
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        // Se já existir um logo carregado
+        if (logoPreview.src && logoPreview.src !== window.location.href) {
+            logoPreview.style.display = 'block';
+            logoIcon.style.display = 'none';
+        }
+      }
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Função para atualizar os códigos de cor
+    function updateColorHex() {
+      const primaryColor = document.getElementById('{{ form.cor_primaria.id_for_label }}');
+      const secondaryColor = document.getElementById('{{ form.cor_secundaria.id_for_label }}');
+      const primaryHex = document.getElementById('primary-hex');
+      const secondaryHex = document.getElementById('secondary-hex');
+      
+      if (primaryColor && primaryHex) {
+        primaryHex.textContent = primaryColor.value;
+      }
+      
+      if (secondaryColor && secondaryHex) {
+        secondaryHex.textContent = secondaryColor.value;
+      }
+    }
+    
+    // Ouvintes de evento para as cores
+    const primaryColor = document.getElementById('{{ form.cor_primaria.id_for_label }}');
+    const secondaryColor = document.getElementById('{{ form.cor_secundaria.id_for_label }}');
+    
+    if (primaryColor) {
+      primaryColor.addEventListener('input', updateColorHex);
+    }
+    
+    if (secondaryColor) {
+      secondaryColor.addEventListener('input', updateColorHex);
+    }
+    
+    // Atualiza inicialmente
+    updateColorHex();
+  });
+</script>
+{% endblock %}

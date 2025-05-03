@@ -1,0 +1,146 @@
+* {
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+}
+body {
+  background: linear-gradient(135deg, #ececec, #e0e0e0, #b2b2b2);
+}
+main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+.container-form {
+  background-color: #e7e7e7;
+  width: 45%;
+  height: 370px;
+  border-radius: 40px;
+  position: relative;
+  box-shadow: 0px 3px 19px rgba(0, 0, 0, 0.5);
+}
+.container-logo {
+  background-color: #808080;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 130px;
+  height: 130px;
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  box-shadow: 0px 6px 5px rgba(0, 0, 0, 0.5);
+}
+.logo {
+  background-image: url(../img/sua-logo.png);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  width: 85px;
+  height: 52px;
+}
+.form-login {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  width: 100%;
+  height: 100%;
+  padding-top: 30px;
+}
+.email-container, .password-container {
+  position: relative;
+  width: 75%;
+  height: 40px;
+}
+.email-container input, .password-container input {
+  background-color: #B2B2B2;
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  border-radius: 20px;
+  padding: 0px 15px 0px 45px;
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  font-size: 1em;
+}
+.email-container input::placeholder, .password-container input::placeholder {
+  color: #fff;
+  font-weight: bold;
+}
+.email-container i, .password-container i {
+  background-color: #808080;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  color: #fff;
+}
+.forgot-password a {
+  position: relative;
+  color: #808080;
+  font-family: "Inter", sans-serif;
+  font-size: 1em;
+  font-weight: bold;
+  text-decoration: none;
+}
+.forgot-password a::after {
+  background-color: #808080;
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  content: "";
+  width: 0px;
+  height: 2px;
+  transition: all 0.5s ease;
+}
+.forgot-password a:hover::after {
+  width: 100%;
+}
+.btn-send {
+  background-color: #e7e7e7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 300px;
+  height: 55px;
+  border: none;
+  border-bottom-right-radius: 60px;
+  border-bottom-left-radius: 60px;
+  cursor: pointer;
+  color: #808080;
+  font-family: "Inter", sans-serif;
+  font-size: 1.5em;
+  font-weight: bold;
+  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.5);
+}
+.logo-linkschool {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 12%;
+}
+.logo-linkschool img {
+  width: 100%;
+}
+.errorlist {
+  color: red;
+  font-family: sans-serif;
+  font-size: 0.85em;
+  font-weight: bold;
+  list-style: none;
+  margin: 5px 8px;
+}

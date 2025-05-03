@@ -100,12 +100,11 @@ class ClienteManager(models.Manager):
         """
         cliente = self.create(nome=nome, **kwargs)
         
-        # Criar usuário master
+        # Criar usuário master sem nome/responsável
         usuario_master = UsuarioMaster.objects.create_user(
             cliente=cliente,
             email=email_master,
             password=password_master,
-            nome=kwargs.get('responsavel', 'Administrador'),
             is_master=True
         )
         
@@ -125,10 +124,11 @@ class Cliente(TenantMixin):
     observacoes = models.TextField(blank=True, null=True)
     logo = models.ImageField(upload_to='logos_clientes/', blank=True, null=True)
     qtd_usuarios = models.IntegerField(default=5)
-    responsavel = models.CharField(max_length=100)
-    email_contato = models.EmailField()
+    
+    
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
+    
     
     # Referência ao usuário master (relação um-para-um)
     usuario_master = models.OneToOneField(
@@ -178,7 +178,7 @@ class UsuarioMaster(AbstractBaseUser, PermissionsMixin):
     Este modelo fica no schema compartilhado (public).
     """
     id = models.AutoField(primary_key=True)
-    nome = models.CharField(max_length=100)
+    
     email = models.EmailField(unique=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)  # Acesso ao admin
@@ -209,9 +209,112 @@ class UsuarioMaster(AbstractBaseUser, PermissionsMixin):
     objects = UsuarioMasterManager()
     
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['nome', 'cliente']
+    REQUIRED_FIELDS = ['cliente']  # Removido 'nome' daqui também
     
     def __str__(self):
-        return f"{self.nome} ({self.cliente.nome})"
+        return f"{self.email} ({self.cliente.nome})"
+
+class GrupoEnsino(models.Model):
+    nome = models.CharField(max_length=50)  # Ex: "Fundamental 1", "Fundamental 2", "Ensino Médio"
+    
+    def __str__(self):
+        return self.nome
+
+class AnoEscolar(models.Model):
+    grupo_ensino = models.ForeignKey(GrupoEnsino, on_delete=models.CASCADE, related_name='anos')
+    nome = models.CharField(max_length=50)  # Ex: "1º Ano", "2º Ano", etc.
+    ordem = models.IntegerField(default=0)  # Para ordenação (1º ano = 1, 2º ano = 2, etc.)
+    
+    class Meta:
+        ordering = ['grupo_ensino', 'ordem']
+    
+    def __str__(self):
+        return f"{self.nome} - {self.grupo_ensino.nome}"
+
+class Materia(models.Model):
+    nome = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.nome
+
+class Questao(models.Model):
+    TIPO_CHOICES = [
+        ('aberta', 'Questão Aberta'),
+        ('multipla', 'Múltipla Escolha'),
+        ('vf', 'Verdadeiro ou Falso'),
+    ]
+    
+    titulo = models.CharField(max_length=255, verbose_name="Enunciado")  # Enunciado da questão
+    materia = models.ForeignKey(Materia, on_delete=models.CASCADE, related_name='questoes')
+    ano_escolar = models.ForeignKey(AnoEscolar, on_delete=models.CASCADE, related_name='questoes')
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    criado_por = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='questoes')
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    data_atualizacao = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.titulo[:50]}... ({self.get_tipo_display()})"
+
+class ImagemQuestao(models.Model):
+    questao = models.ForeignKey(Questao, on_delete=models.CASCADE, related_name='imagens')
+    imagem = models.ImageField(upload_to='imagens_questoes/')
+    legenda = models.CharField(max_length=255, blank=True, null=True)
+    
+    def __str__(self):
+        return f"Imagem para questão {self.questao.id}"
+
+class AlternativaMultiplaEscolha(models.Model):
+    questao = models.ForeignKey(Questao, on_delete=models.CASCADE, related_name='alternativas')
+    texto = models.CharField(max_length=255)
+    correta = models.BooleanField(default=False)
+    ordem = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['ordem']
+    
+    def __str__(self):
+        return f"{self.texto[:30]}... {'(Correta)' if self.correta else ''}"
+
+class FraseVerdadeiroFalso(models.Model):
+    questao = models.ForeignKey(Questao, on_delete=models.CASCADE, related_name='frases_vf')
+    texto = models.CharField(max_length=255)
+    verdadeira = models.BooleanField(default=True)
+    ordem = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['ordem']
+    
+    def __str__(self):
+        return f"{self.texto[:30]}... {'(V)' if self.verdadeira else '(F)'}"
 
 
+class ConfiguracaoSistema(models.Model):
+    imagem_home_1 = models.ImageField(upload_to='imagens_sistema/home/', null=True, blank=True)
+    imagem_home_2 = models.ImageField(upload_to='imagens_sistema/home/', null=True, blank=True)
+    observacoes = models.TextField(blank=True, null=True)
+    tempo_maximo_inatividade = models.IntegerField(default=30, help_text="Tempo máximo de inatividade em minutos")
+    
+    @classmethod
+    def obter_configuracao(cls):
+        """Retorna a configuração atual ou cria uma nova se não existir"""
+        configuracao, created = cls.objects.get_or_create(id=1)
+        return configuracao
+    
+    def __str__(self):
+        return "Configurações do Sistema"
+
+
+class SessaoUsuario(models.Model):
+    """Modelo para rastrear sessões ativas de usuários"""
+    usuario = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='sessoes')
+    chave_sessao = models.CharField(max_length=40)
+    data_inicio = models.DateTimeField(auto_now_add=True)
+    ultima_atividade = models.DateTimeField(auto_now=True)
+    endereco_ip = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ('usuario', 'chave_sessao')
+    
+    def __str__(self):
+        return f"Sessão de {self.usuario.username} - {self.chave_sessao[:8]}"

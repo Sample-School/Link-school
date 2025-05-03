@@ -29,8 +29,12 @@
         <form action="{% url 'logout' %}" method="post">
           {% csrf_token %}
           <button type="submit">
-            <i class="fa-regular fa-circle-user"></i>
-            <p>Login</p>
+            {% if user.user_img %}
+              <img src="{{ user.user_img.url }}" alt="Foto do usuário" class="user-avatar">
+            {% else %}
+              <i class="fa-regular fa-circle-user"></i>
+            {% endif %}
+            <p>Logout</p>
           </button>
         </form>
       {% endif %}

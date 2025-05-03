@@ -1,0 +1,70 @@
+{% extends "global/cliente-base.html" %} 
+{% load static %}
+
+{% block styles %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="{% static "LSCliente/css/style-login.css" %}"> 
+{% endblock styles %}
+
+{% block content %}
+  <div class="logo-linkschool">
+    <img src="{% static "LSCliente/img/logo-linkschool.png" %}">
+  </div>
+  <main>
+    <div class="container-form">
+      <!-- Logo do formulário: -->
+      <div class="container-logo">
+        <div class="logo"></div>
+      </div>
+      <form id="formLogin" class="form-login" method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="email-container">
+          <label for="{{ form.email_for_label }}">
+            <i class="fa-solid fa-user"></i>
+          </label>
+          {{ form.email }}
+          <!-- Renderiza o campo de email (ainda chamado username no form) -->
+          {{ form.email.errors }}
+          <!-- Exibe erros relacionados ao campo -->
+        </div>
+        <div class="password-container">
+          <label for="{{ form.password.id_for_label }}">
+            <i class="fa-solid fa-lock"></i>
+          </label>
+          {{ form.password }}
+          <!-- Renderiza o campo de senha -->
+          {{ form.password.errors }}
+          <!-- Exibe erros relacionados ao campo -->
+        </div>
+        <!-- Campos de (Esqueceu Senha)  -->
+        <div class="forgot-password">
+          <a href="{% url 'LSCliente:clientepassword_reset' %}"
+            >ESQUECI MINHA SENHA</a
+          >
+        </div>
+      </form>
+    </div>
+    <button id="btnSend" class="btn-send" type="submit">LOGIN</button>
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  </main>
+  
+  <script>
+    const formLogin = document.getElementById("formLogin");
+  
+  const btnSend = document.getElementById("btnSend");
+  btnSend.addEventListener("click", () => {
+  // Envia o formulário de login.
+  formLogin.submit();
+  });
+  
+  </script>
+
+
+{% endblock content %}

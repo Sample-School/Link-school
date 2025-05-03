@@ -25,10 +25,13 @@ LOGIN_URL = '/login/'
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')  # Valor padrão para evitar erros
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = ['sampletext.com.br','69.62.98.124', '195.200.4.174', 'localhost']
+ALLOWED_HOSTS = ['sampletext.com.br','69.62.98.124', '195.200.4.174', 'localhost', '127.0.0.1', 'testejaum.localhost', 'clienteteste.localhost', 'testecliente.sampletext.com.br']
+
+ALLOWED_HOSTS = []
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://sampletext.com.br',
+    'https://sampletext.com.br','http://testecliente.sampletext.com.br/'
+
 ]
 
 #User model
@@ -45,7 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'LSDash',
-    'LSCliente'
+    'LSCliente',
+    
 ]
 
 
@@ -58,7 +62,8 @@ EMAIL_HOST_PASSWORD = 'marw oycd lsqy bhxq'
 DEFAULT_FROM_EMAIL = 'jaumamaralpessoal@gmail.com'
 
 MIDDLEWARE = [
-    'LSmain.middleware.SelectiveTenantMiddleware',
+    'django_tenants.middleware.main.TenantMainMiddleware',
+    
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -66,7 +71,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
+    'LSmain.middleware.SessionTrackingMiddleware'
 ]
 
 ROOT_URLCONF = 'LSmain.urls'
@@ -142,7 +147,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -164,7 +169,7 @@ TENANT_APPS = [
     'django.contrib.auth',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'LSClient'
+    'LSCliente'
 ]
 
 SHARED_APPS = [
@@ -179,10 +184,16 @@ SHARED_APPS = [
     
 ]
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 TENANT_MODEL = "LSDash.Cliente"  # Seu modelo de tenant
 TENANT_DOMAIN_MODEL = "LSDash.Dominio"  # Seu modelo de domínio
+PUBLIC_SCHEMA_NAME = 'public'
+PUBLIC_SCHEMA_URLCONF = 'LSmain.urls'
+TENANT_URLCONF = 'LSmain.tenant_urls'
 
 try:
     from LSmain import *
 except ImportError:
     ...
+

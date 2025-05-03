@@ -219,11 +219,11 @@ main {
 }
 
 .modal-backdrop {
-  z-index: 1040; /* valor menor */
+  z-index: 1040;
 }
 
 .modal-content {
-  z-index: 1050; /* valor maior */
+  z-index: 1050;
 }
 
 .pop-up-user-list-container{

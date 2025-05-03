@@ -1,0 +1,578 @@
+{% extends "global/base.html" %}
+{% load static %}
+{% block style %}
+
+<link rel="stylesheet" href="{% static "LSDash/css/style-questionRegister.css" %}">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock style %}
+{% block page-content %}
+
+<header>
+    {% include "global/partials/navbar.html" %}
+</header>
+<div class="content-container">
+    
+    <div class="header-container">
+        <div class="header-container">
+            <div class="header-first-section-container">
+                <div class="page-title container">
+                    <h1>Gestao De Questões</h1>
+                </div>
+            
+                <div class=" id-search card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">COD DA QUESTÃO</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET">
+                            <div class="input-group">
+                                <input type="number" name="questao_id" id="input-questao-id" class="form-control" placeholder="ID da questão" value="{{ request.GET.questao_id }}">
+                                
+                                <button type="submit" class="btn btn-primary">Buscar</button>
+                                
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="buttons-and-modal-container">
+                <div class="header-buttons-container">
+                    <a href="{% url 'questao_manage' %}"> <button class="btn-reset" id="btnReset" type="button">Redefinir</button></a>
+                    <button class="btn-save" id="btnSave" type="button">Salvar</button>
+                </div>
+                <div class="header-modal-button">
+                    <button type="button" class="button-pop-up btn btn-info text-white float-end" data-bs-toggle="modal" data-bs-target="#questoesRecentesModal">
+                        <img src="{% static 'LSDash/img/listaimgs.png' %}" alt="imagem de fundo pro index" class="img-fluid">
+                        Listar Questões
+                    </button>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    
+    <form method="POST" id="QuestionRegisterForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="questao_id" value="{{ questao.id }}" />
+        
+        <div class="main-content-container">
+            <div class="main-content-header-container">
+                
+                <div class="mb-3">
+                    <label for="{{ questao_form.materia.id_for_label }}" class="form-label">{{ questao_form.materia.label }}</label>
+                    {{ questao_form.materia }}
+                    {% if questao_form.materia.errors %}
+                        <div class="text-danger">
+                            {% for error in questao_form.materia.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            
+                <div class="mb-3">
+                    <label for="{{ questao_form.ano_escolar.id_for_label }}" class="form-label">{{ questao_form.ano_escolar.label }}</label>
+                    {{ questao_form.ano_escolar }}
+                    {% if questao_form.ano_escolar.errors %}
+                        <div class="text-danger">
+                            {% for error in questao_form.ano_escolar.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            
+                <div class="mb-3">
+                    <label for="{{ questao_form.tipo.id_for_label }}" class="form-label">{{ questao_form.tipo.label }}</label>
+                    {{ questao_form.tipo }}
+                    {% if questao_form.tipo.errors %}
+                        <div class="text-danger">
+                            {% for error in questao_form.tipo.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="main-content-body-container">
+                <div class="question-title-container">
+                    {{ questao_form.titulo }}
+                </div>
+
+                <div id="multipla-escolha-section" style="display: {% if questao and questao.tipo == 'multipla' %}block{% else %}none{% endif %};">
+                    <hr>
+                    
+                    {{ alternativa_formset.management_form }}
+                    <div id="alternativa-formset">
+                        {% if alternativa_formset %}
+                            <div class="row">
+                                {% for form in alternativa_formset %}
+                                    <div class="col-md-6">
+                                        <div class="alternativa-form mb-3 p-3 border rounded">
+                                            {{ form.id }}
+                                            {{ form.ordem }}
+                                            <div class="row">
+                                                <div class="col-md-9">
+                                                    <div class="mb-2">
+                                                        {{ form.texto }}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-check mt-4">
+                                                        {{ form.correta }}
+                                                        <label class="form-check-label" for="{{ form.correta.id_for_label }}">Correta</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            {% if form.instance.pk %}
+                                                <div class="form-check">
+                                                    {{ form.DELETE }}
+                                                    <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Excluir esta alternativa</label>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% if forloop.counter|divisibleby:2 %}
+                                        </div><div class="row">
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <!-- Template para novas alternativas -->
+                            <div class="row">
+                                {% for i in "12345" %}
+                                    <div class="col-md-6">
+                                        <div class="alternativa-form mb-3 p-3 border rounded">
+                                            <input type="hidden" name="alternativamultiplaescolha_set-{{ forloop.counter0 }}-id" id="id_alternativamultiplaescolha_set-{{ forloop.counter0 }}-id">
+                                            <input type="hidden" name="alternativamultiplaescolha_set-{{ forloop.counter0 }}-ordem" id="id_alternativamultiplaescolha_set-{{ forloop.counter0 }}-ordem" value="{{ forloop.counter0 }}">
+                                            <div class="row">
+                                                <div class="col-md-9">
+                                                    <div class="mb-2">
+                                                        <label class="form-label">Texto da Alternativa</label>
+                                                        <input type="text" name="alternativamultiplaescolha_set-{{ forloop.counter0 }}-texto" id="id_alternativamultiplaescolha_set-{{ forloop.counter0 }}-texto" class="form-control">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-check mt-4">
+                                                        <input type="checkbox" name="alternativamultiplaescolha_set-{{ forloop.counter0 }}-correta" id="id_alternativamultiplaescolha_set-{{ forloop.counter0 }}-correta" class="form-check-input custom-radio">
+                                                        <label class="form-check-label" for="id_alternativamultiplaescolha_set-{{ forloop.counter0 }}-correta">Correta</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% if forloop.counter|divisibleby:2 and not forloop.last %}
+                                        </div><div class="row">
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Seção Dinâmica: Disertativa-->
+                <div id="dissertativa-section" style="display: {% if questao and questao.tipo == 'aberta' %}block{% else %}none{% endif %};">
+                    <hr>
+                    <h5 class="">Resposta para Questão Aberta</h5>
+                    <div class="dissertativa-container">
+                        <!-- Seção de imagem para questão aberta -->
+                        <div class="dissertativa-image-container">
+                            <img src="{% if questao and questao.dissertativa_image %}{{ questao.dissertativa_image.url }}{% else %}{% static 'LSDash/img/dissertativa-placeholder.png' %}{% endif %}" alt="Imagem para questão dissertativa" class="img-fluid dissertativa-image" id="dissertativa-preview-image">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção Dinâmica: Verdadeiro ou Falso -->
+                <div id="vf-section" style="display: {% if questao and questao.tipo == 'vf' %}block{% else %}none{% endif %};">
+                    <hr>
+                    
+                    {{ frase_vf_formset.management_form }}
+                    <div id="frase-vf-formset">
+                        {% if frase_vf_formset %}
+                            <div class="row">
+                                {% for form in frase_vf_formset %}
+                                    <div class="col-md-6">
+                                        <div class="frase-vf-form mb-3 p-3 border rounded">
+                                            {{ form.id }}
+                                            {{ form.ordem }}
+                                            <div class="row">
+                                                <div class="col-md-9">
+                                                    <div class="mb-2">
+                                                        {{ form.texto }}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-check mt-4">
+                                                        {{ form.verdadeira }}
+                                                        <label class="form-check-label" for="{{ form.verdadeira.id_for_label }}">Verdadeira</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            {% if form.instance.pk %}
+                                                <div class="form-check">
+                                                    {{ form.DELETE }}
+                                                    <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Excluir esta frase</label>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% if forloop.counter|divisibleby:2 and not forloop.last %}
+                                        </div><div class="row">
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <!-- Template para novas frases VF -->
+                            <div class="row">
+                                {% for i in "1234" %}
+                                    <div class="col-md-6">
+                                        <div class="frase-vf-form mb-3 p-3 border rounded">
+                                            <input type="hidden" name="fraseverdadeirofalso_set-{{ forloop.counter0 }}-id" id="id_fraseverdadeirofalso_set-{{ forloop.counter0 }}-id">
+                                            <input type="hidden" name="fraseverdadeirofalso_set-{{ forloop.counter0 }}-ordem" id="id_fraseverdadeirofalso_set-{{ forloop.counter0 }}-ordem" value="{{ forloop.counter0 }}">
+                                            <div class="row">
+                                                <div class="col-md-9">
+                                                    <div class="mb-2">
+                                                        <input type="text" name="fraseverdadeirofalso_set-{{ forloop.counter0 }}-texto" id="id_fraseverdadeirofalso_set-{{ forloop.counter0 }}-texto" class="form-control" placeholder="Texto da Frase">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-check mt-4">
+                                                        <input type="checkbox" name="fraseverdadeirofalso_set-{{ forloop.counter0 }}-verdadeira" id="id_fraseverdadeirofalso_set-{{ forloop.counter0 }}-verdadeira" class="form-check-input custom-radio">
+                                                        <label class="form-check-label" for="id_fraseverdadeirofalso_set-{{ forloop.counter0 }}-verdadeira">Verdadeira</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% if forloop.counter|divisibleby:2 and not forloop.last %}
+                                        </div><div class="row">
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="img-form-container">
+                    <h5 class="img-container-title">Imagens da Questão</h5>
+                    
+                    {{ imagem_formset.management_form }}
+                    <div id="imagem-formset">
+                        {% for form in imagem_formset %}
+                            <div class="imagem-form mb-3 p-3 border rounded">
+                                {% if form.instance.pk %}
+                                    <div class="mb-2">
+                                        <img src="{{ form.instance.imagem.url }}" alt="{{ form.instance.legenda }}" style="max-height: 100px;" class="img-thumbnail">
+                                    </div>
+                                {% endif %}
+                                
+                                {{ form.id }}
+                                <div class="image-form-container row">
+                                    <div class=" label-img col-mb-6">
+                                        <label class="form-label">{{ form.imagem.label }}</label>
+                                    </div>
+                                    <div class="img-input col-md-6">
+                                        <div class="mb-2">
+                                            {{ form.imagem }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            {{ form.legenda }}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {% if form.instance.pk %}
+                                    <div class="form-check mt-2">
+                                        {{ form.DELETE }}
+                                        <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Excluir esta imagem</label>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <button type="button" id="add-imagem" class="btn btn-secondary mb-3">+ Adicionar Imagem</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="questoesRecentesModal" tabindex="-1" aria-labelledby="questoesRecentesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="questoesRecentesModalLabel">Questões Recentes</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Enunciado</th>
+                                <th>Matéria</th>
+                                <th>Ano Escolar</th>
+                                <th>Tipo</th>
+                                <th>Criado por</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for q in questoes %}
+                                <tr>
+                                    <td>{{ q.id }}</td>
+                                    <td>{{ q.titulo|truncatechars:50 }}</td>
+                                    <td>{{ q.materia.nome }}</td>
+                                    <td>{{ q.ano_escolar.nome }}</td>
+                                    <td>{{ q.get_tipo_display }}</td>
+                                    <td>{{ q.criado_por.username }}</td>
+                                    <td>{{ q.data_criacao|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary selecionar-questao" data-questao-id="{{ q.id }}" data-bs-dismiss="modal">Selecionar</button>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">Nenhuma questão cadastrada.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript para adicionar dinamicamente mais campos de imagem, controlar a exibição dos tipos de questão e lidar com a seleção de questão -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Setup para o botão salvar
+    document.getElementById('btnSave').addEventListener('click', function() {
+        document.getElementById('QuestionRegisterForm').submit();
+    });
+    
+    
+    // Referências dos elementos
+    const addImagemBtn = document.getElementById('add-imagem');
+    const imagemFormset = document.getElementById('imagem-formset');
+    const tipoSelect = document.querySelector('select[name="{{ questao_form.tipo.name }}"]');
+    const multiplaSection = document.getElementById('multipla-escolha-section');
+    const vfSection = document.getElementById('vf-section');
+    const dissertativaSection = document.getElementById('dissertativa-section');
+    const inputQuestaoId = document.getElementById('input-questao-id');
+    
+    // Adicionar classe custom-radio a todos os checkboxes para estilização
+    document.querySelectorAll('input[type="checkbox"][name^="alternativamultiplaescolha_set-"], input[type="checkbox"][name^="fraseverdadeirofalso_set-"]').forEach(function(checkbox) {
+        checkbox.classList.add('custom-radio', 'form-check-input');
+    });
+    
+    // Função para adicionar imagem
+    if (addImagemBtn) {
+        addImagemBtn.addEventListener('click', function() {
+            const forms = imagemFormset.getElementsByClassName('imagem-form');
+            const formCount = forms.length;
+            
+            // Clone o último formulário
+            const newForm = forms[formCount - 1].cloneNode(true);
+            
+            // Limpar valores e atualizar IDs
+            const inputs = newForm.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                const name = input.getAttribute('name');
+                if (name) {
+                    // Atualizar o índice no nome do campo
+                    const newName = name.replace(/\d+/, formCount);
+                    input.setAttribute('name', newName);
+                    
+                    // Atualizar o ID
+                    const id = input.getAttribute('id');
+                    if (id) {
+                        const newId = id.replace(/\d+/, formCount);
+                        input.setAttribute('id', newId);
+                    }
+                }
+                
+                // Limpar valores
+                if (input.type === 'file' || input.type === 'text') {
+                    input.value = '';
+                }
+                if (input.type === 'checkbox') {
+                    input.checked = false;
+                }
+            });
+            
+            // Limpar imagem existente
+            const imgElement = newForm.querySelector('img');
+            if (imgElement) {
+                imgElement.parentNode.removeChild(imgElement);
+            }
+            
+            // Adicionar o novo formulário
+            imagemFormset.appendChild(newForm);
+            
+            // Atualizar o contador de total de formulários no management_form
+            const totalForms = document.getElementById('id_imagemquestao_set-TOTAL_FORMS');
+            totalForms.value = parseInt(totalForms.value) + 1;
+        });
+    }
+    if (tipoSelect && !tipoSelect.value) {
+        tipoSelect.value = 'aberta';
+        // Disparar o evento change para atualizar a exibição das seções
+        tipoSelect.dispatchEvent(new Event('change'));
+    }
+
+    // Controlar a exibição dos tipos de questão
+    if (tipoSelect) {
+        tipoSelect.addEventListener('change', function() {
+            const tipoValue = this.value;
+            
+            // Ocultar todas as seções
+            multiplaSection.style.display = 'none';
+            vfSection.style.display = 'none';
+            dissertativaSection.style.display = 'none';
+            
+            
+            // Mostrar a seção apropriada
+            if (tipoValue === 'multipla') {
+                multiplaSection.style.display = 'block';
+                
+                // Garantir que o management form tenha os valores corretos
+                if (!document.getElementById('id_alternativamultiplaescolha_set-TOTAL_FORMS')) {
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <input type="hidden" name="alternativamultiplaescolha_set-TOTAL_FORMS" value="5" id="id_alternativamultiplaescolha_set-TOTAL_FORMS">
+                        <input type="hidden" name="alternativamultiplaescolha_set-INITIAL_FORMS" value="0" id="id_alternativamultiplaescolha_set-INITIAL_FORMS">
+                        <input type="hidden" name="alternativamultiplaescolha_set-MIN_NUM_FORMS" value="0" id="id_alternativamultiplaescolha_set-MIN_NUM_FORMS">
+                        <input type="hidden" name="alternativamultiplaescolha_set-MAX_NUM_FORMS" value="5" id="id_alternativamultiplaescolha_set-MAX_NUM_FORMS">
+                    `;
+                    document.getElementById('alternativa-formset').insertBefore(div, document.getElementById('alternativa-formset').firstChild);
+                }
+                
+                // Adicionar classe custom-radio aos novos checkboxes
+                setTimeout(function() {
+                    document.querySelectorAll('input[type="checkbox"][name^="alternativamultiplaescolha_set-"]').forEach(function(checkbox) {
+                        checkbox.classList.add('custom-radio');
+                    });
+                }, 100);
+                
+            } else if (tipoValue === 'vf') {
+                vfSection.style.display = 'block';
+                
+                // Garantir que o management form tenha os valores corretos
+                if (!document.getElementById('id_fraseverdadeirofalso_set-TOTAL_FORMS')) {
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <input type="hidden" name="fraseverdadeirofalso_set-TOTAL_FORMS" value="4" id="id_fraseverdadeirofalso_set-TOTAL_FORMS">
+                        <input type="hidden" name="fraseverdadeirofalso_set-INITIAL_FORMS" value="0" id="id_fraseverdadeirofalso_set-INITIAL_FORMS">
+                        <input type="hidden" name="fraseverdadeirofalso_set-MIN_NUM_FORMS" value="0" id="id_fraseverdadeirofalso_set-MIN_NUM_FORMS">
+                        <input type="hidden" name="fraseverdadeirofalso_set-MAX_NUM_FORMS" value="4" id="id_fraseverdadeirofalso_set-MAX_NUM_FORMS">
+                    `;
+                    document.getElementById('frase-vf-formset').insertBefore(div, document.getElementById('frase-vf-formset').firstChild);
+                }
+                
+                // Adicionar classe custom-radio aos novos checkboxes
+                setTimeout(function() {
+                    document.querySelectorAll('input[type="checkbox"][name^="fraseverdadeirofalso_set-"]').forEach(function(checkbox) {
+                        checkbox.classList.add('custom-radio');
+                    });
+                }, 100);
+            } else if (tipoValue === 'aberta') {
+                dissertativaSection.style.display = 'block';
+            }
+        });
+        
+        // Configurar inicialmente com base na seleção atual
+        if (tipoSelect.value) {
+            tipoSelect.dispatchEvent(new Event('change'));
+        }else {
+            // Se não houver valor selecionado, definir como "aberta" e mostrar a seção de dissertativa
+            tipoSelect.value = 'aberta';
+            dissertativaSection.style.display = 'block';
+        }
+    }
+    
+    // Adicionar validação para garantir apenas uma alternativa correta em múltipla escolha
+    const alternativaCheckboxes = document.querySelectorAll('input[name^="alternativamultiplaescolha_set-"][name$="-correta"]');
+alternativaCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            // Desmarcar as outras caixas de seleção
+            alternativaCheckboxes.forEach(cb => {
+                if (cb !== this) {
+                    cb.checked = false;
+                }
+            });
+        }
+    });
+});
+    
+    // Função para garantir que o estilo custom-radio seja aplicado a novos elementos
+    function observeMutations() {
+        const targetNode = document.body;
+        const config = { childList: true, subtree: true };
+        
+        const callback = function(mutationsList, observer) {
+            for(const mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    document.querySelectorAll('input[type="checkbox"][name^="alternativamultiplaescolha_set-"], input[type="checkbox"][name^="fraseverdadeirofalso_set-"]').forEach(function(checkbox) {
+                        if (!checkbox.classList.contains('custom-radio')) {
+                            checkbox.classList.add('custom-radio');
+                        }
+                    });
+                }
+            }
+        };
+        
+        const observer = new MutationObserver(callback);
+        observer.observe(targetNode, config);
+    }
+    
+    // Iniciar o observador de mutações
+    observeMutations();
+    
+    // Atualizar o campo de ID de questão quando uma questão é selecionada no modal
+    const botoesSelecionarQuestao = document.querySelectorAll('.selecionar-questao');
+    botoesSelecionarQuestao.forEach(botao => {
+        botao.addEventListener('click', function() {
+            const questaoId = this.getAttribute('data-questao-id');
+            inputQuestaoId.value = questaoId;
+            // Submeter o formulário de busca para carregar a questão selecionada
+            inputQuestaoId.closest('form').submit();
+        });
+    });
+    
+    // Configurar o botão de salvar para validar as entradas antes de enviar
+    const btnSave = document.getElementById('btnSave');
+    if (btnSave) {
+        btnSave.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Validar se pelo menos uma alternativa está marcada como correta para múltipla escolha
+            if (tipoSelect.value === 'multipla') {
+                // Obter uma coleção atualizada de todos os checkboxes atualmente no formulário
+                const currentAlternativaCheckboxes = document.querySelectorAll('input[name^="alternativamultiplaescolha_set-"][name$="-correta"]');
+                const isAnyCorrect = Array.from(currentAlternativaCheckboxes).some(cb => cb.checked);
+                
+            }
+            
+            // Enviar o formulário se passar na validação
+            document.getElementById('QuestionRegisterForm').submit();
+        });
+    }
+});
+</script>
+{% endblock page-content %}

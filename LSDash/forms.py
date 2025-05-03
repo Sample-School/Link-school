@@ -3,8 +3,7 @@ from django.core.exceptions import ValidationError
 from django import forms
 
 #imports locais
-from .models import UserModel, Pagina, Cliente
-
+from .models import UserModel, Pagina, Cliente, GrupoEnsino, AnoEscolar, Materia, Questao, ImagemQuestao, AlternativaMultiplaEscolha, FraseVerdadeiroFalso, ConfiguracaoSistema
 from django.contrib.auth.forms import PasswordResetForm
 
 class UserLoginForm(AuthenticationForm):
@@ -39,8 +38,14 @@ class UserLoginForm(AuthenticationForm):
 class NewResetPasswordForm(SetPasswordForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.fields['new_password1'].help_text = mark_safe("<h1>tenho tdah</h1>")
-
+        self.fields['new_password1'].widget.attrs.update({
+            'placeholder': 'Nova senha',
+            'class': 'password-input'
+        })
+        self.fields['new_password2'].widget.attrs.update({
+            'placeholder': 'Confirme a nova senha',
+            'class': 'password-input'
+        })
 
 class CollabManageForm(forms.ModelForm):
     tipo_usuario = forms.ChoiceField(
@@ -86,10 +91,16 @@ class CollabManageForm(forms.ModelForm):
         label="Páginas",
         help_text="Selecione uma ou mais páginas"
     )
+    user_img = forms.ImageField(
+        required=False,
+        label="Imagem do Usuário",
+        widget=forms.FileInput(attrs={'class': 'form-control-file'}),
+        help_text="Upload de uma imagem para o perfil do usuário"
+    )
 
     class Meta:
         model = UserModel
-        fields = ['username', 'fullname', 'email', 'tipo_usuario', 'status', 'observacoes', 'paginas']
+        fields = ['username', 'fullname', 'email', 'tipo_usuario', 'status', 'observacoes', 'paginas', 'user_img']
         error_messages = {
             'username': {
                 'required': 'O nome de usuário é obrigatório.',
@@ -159,9 +170,15 @@ class ClienteForm(forms.ModelForm):
     subdominio = forms.CharField(max_length=50, help_text="Será usado como: subdominio.seudominio.com.br")
     email_master = forms.EmailField(help_text="Email do usuário master")
     senha_master = forms.CharField(widget=forms.PasswordInput, help_text="Senha do usuário master")
-    responsavel = forms.CharField(max_length=100, help_text="Nome do responsável/administrador")
-    email_contato = forms.EmailField(help_text="Email de contato da instituição")
+    data_inicio_assinatura = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
+    data_validade_assinatura = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
     
+    
+
     class Meta:
         model = Cliente
         fields = ['nome', 'cor_primaria', 'cor_secundaria', 'data_inicio_assinatura', 
@@ -172,3 +189,95 @@ class ClienteForm(forms.ModelForm):
             'cor_primaria': forms.TextInput(attrs={'type': 'color'}),
             'cor_secundaria': forms.TextInput(attrs={'type': 'color'}),
         }
+
+class QuestaoForm(forms.ModelForm):
+    class Meta:
+        model = Questao
+        fields = ['titulo', 'materia', 'ano_escolar', 'tipo']
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enunciado da Questão'}),
+            'materia': forms.Select(attrs={'class': 'form-control'}),
+            'ano_escolar': forms.Select(attrs={'class': 'form-control'}),
+            'tipo': forms.Select(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'titulo': 'Enunciado da questão',
+            'materia': 'Matéria',
+            'ano_escolar': 'Série',
+            'tipo': 'Tipo de questão',
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Agrupar anos escolares por grupo de ensino para o select
+        anos_por_grupo = {}
+        for ano in AnoEscolar.objects.select_related('grupo_ensino').all():
+            grupo_nome = ano.grupo_ensino.nome
+            if grupo_nome not in anos_por_grupo:
+                anos_por_grupo[grupo_nome] = []
+            anos_por_grupo[grupo_nome].append((ano.id, ano.nome))
+        
+        # Criar as opções do campo com grupos
+        choices = []
+        for grupo_nome, anos in anos_por_grupo.items():
+            group_options = [(id, nome) for id, nome in anos]
+            choices.append((grupo_nome, group_options))
+        
+        # Atualizar o campo ano_escolar com as opções agrupadas
+        self.fields['ano_escolar'].choices = choices
+
+class ImagemQuestaoForm(forms.ModelForm):
+    class Meta:
+        model = ImagemQuestao
+        fields = ['imagem', 'legenda']
+        widgets = {
+            'legenda': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Legenda'}),
+            'imagem': forms.FileInput(attrs={'class': 'form-control-file'}),
+        }
+
+# FormSet para múltiplas imagens
+ImagemQuestaoFormSet = forms.inlineformset_factory(
+    Questao, 
+    ImagemQuestao,
+    form=ImagemQuestaoForm,
+    extra=1,  # Começa com 1 formulário vazio
+    can_delete=True  # Permite excluir imagens
+)
+
+
+class AlternativaMultiplaEscolhaForm(forms.ModelForm):
+    class Meta:
+        model = AlternativaMultiplaEscolha
+        fields = ['texto', 'correta', 'ordem']
+        widgets = {
+            'texto': forms.TextInput(attrs={'class': 'form-control'}),
+            'correta': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'ordem': forms.HiddenInput(),
+        }
+
+class FraseVerdadeiroFalsoForm(forms.ModelForm):
+    class Meta:
+        model = FraseVerdadeiroFalso
+        fields = ['texto', 'verdadeira', 'ordem']
+        widgets = {
+            'texto': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Texto da Frase'}),
+            'verdadeira': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'ordem': forms.HiddenInput(),
+        }
+
+class ConfiguracaoSistemaForm(forms.ModelForm):
+    class Meta:
+        model = ConfiguracaoSistema
+        fields = ['imagem_home_1', 'imagem_home_2', 'observacoes', 'tempo_maximo_inatividade']
+        widgets = {
+            'observacoes': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+            'tempo_maximo_inatividade': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 1440}),
+        }
+class CustomPasswordResetForm(PasswordResetForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({
+            'placeholder': 'Seu endereço de e-mail',
+            'class': 'email-input'
+        })
