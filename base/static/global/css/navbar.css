@@ -93,3 +93,10 @@
   color: #fff;
   font-size: 4em;
 }
+
+.user-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
