@@ -309,7 +309,7 @@ class CadastroClienteView(LoginRequiredMixin, View):
                 
                 # Criar o domínio
                 subdominio = dados['subdominio']
-                dominio_base = 'localhost'
+                dominio_base = 'sampletext.com.br'
                 dominio_completo = f"{subdominio}.{dominio_base}"
                 
                 dominio = Dominio()
@@ -546,7 +546,11 @@ class QuestaoManageView(LoginRequiredMixin, View):
             
             if is_specific_formset_valid:
                 messages.success(request, "Questão atualizada com sucesso!")
-                return redirect(f"questao_manage?questao_id={questao_id}")
+                # AQUI ESTÁ A CORREÇÃO: Use reverse() com parâmetros de consulta corretamente
+                from django.urls import reverse
+                from django.http import HttpResponseRedirect
+                base_url = reverse('questao_manage')
+                return HttpResponseRedirect(f"{base_url}?questao_id={questao_id}")
         
         # Se chegou aqui, houve erro em algum formulário
         messages.error(request, "Erro ao atualizar questão. Verifique os dados informados.")
@@ -564,7 +568,7 @@ class QuestaoManageView(LoginRequiredMixin, View):
             context['frase_vf_formset'] = frase_vf_formset or FraseVFFormSet(instance=questao)
         
         return render(request, self.template_name, context)
-
+    
 class EditarClienteView(LoginRequiredMixin, View):
     template_name = 'ClienteEdit.html'
     
