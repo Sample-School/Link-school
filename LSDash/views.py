@@ -309,7 +309,7 @@ class CadastroClienteView(LoginRequiredMixin, View):
                 
                 # Criar o domínio
                 subdominio = dados['subdominio']
-                dominio_base = 'sampletext.com.br'
+                dominio_base = 'localhost'
                 dominio_completo = f"{subdominio}.{dominio_base}"
                 
                 dominio = Dominio()

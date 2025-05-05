@@ -1,0 +1,70 @@
+{% block title %}{{ tenant_name }} - Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="jumbotron mt-4">
+        <h1>Bem-vindo ao {{ tenant_name }}</h1>
+        <p class="lead">Esta é a página inicial do tenant {{ tenant_name }} (schema: {{ tenant_schema }})</p>
+        <hr class="my-4">
+        <p>Esta página é exclusiva para este tenant e não está disponível no tenant público.</p>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Usuários Cadastrados</h2>
+        </div>
+        <div class="card-body">
+            {% if usuarios %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Data de Cadastro</th>
+                            <th>Status</th>
+                            <th>Perfil</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                            <tr>
+                                <td>{{ usuario.id }}</td>
+                                <td>{{ usuario.nome }}</td>
+                                <td>{{ usuario.email }}</td>
+                                <td>{{ usuario.date_joined|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    {% if usuario.is_active %}
+                                        <span class="badge bg-success">Ativo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inativo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if usuario.is_master %}
+                                        <span class="badge bg-danger">Administrador</span>
+                                    {% elif usuario.is_staff %}
+                                        <span class="badge bg-warning">Staff</span>
+                                    {% else %}
+                                        <span class="badge bg-info">Usuário</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="alert alert-warning">
+                    Nenhum usuário cadastrado no momento.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if request.user.is_master %}
+    <div class="mt-3">
+        <a href="#" class="btn btn-primary">Adicionar Novo Usuário</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

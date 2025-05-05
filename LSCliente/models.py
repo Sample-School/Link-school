@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 
 # Create your models here.
@@ -30,6 +31,7 @@ class UsuarioCliente(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
     nome = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
+    password = models.CharField(max_length=128)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -43,3 +45,45 @@ class UsuarioCliente(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return f"{self.nome} ({self.email})"
+    class Meta:
+        verbose_name = 'Usuário Cliente'
+        verbose_name_plural = 'Usuários Cliente'
+    
+    def __str__(self):
+        return self.nome
+    
+    def set_password(self, raw_password):
+        """
+        Define a senha do usuário, convertendo-a para um hash utilizando
+        o sistema de hash de senhas do Django.
+        """
+        self.password = make_password(raw_password)
+        self.save(update_fields=['password'])
+    
+    def check_password(self, raw_password):
+        """
+        Verifica se a senha fornecida corresponde à senha armazenada.
+        """
+        return check_password(raw_password, self.password)
+    
+    @property
+    def is_authenticated(self):
+        """
+        Sempre retorna True para usuários reais. Este é um requisito para
+        usar o sistema de autenticação do Django.
+        """
+        return True
+    
+    @property
+    def is_anonymous(self):
+        """
+        Sempre retorna False para usuários reais. Este é um requisito para
+        usar o sistema de autenticação do Django.
+        """
+        return False
+    
+    def get_username(self):
+        """
+        Retorna o campo usado como identificador do usuário.
+        """
+        return self.email

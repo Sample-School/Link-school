@@ -9,6 +9,9 @@ import logging
 from django.http import HttpResponseNotFound
 from django_tenants.utils import get_tenant_model, get_public_schema_name
 from django.db import connections
+from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.urls import reverse, resolve
+from django.conf import settings
 
 
 logger = logging.getLogger(__name__)
@@ -64,3 +67,48 @@ class SessionTrackingMiddleware:
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+    
+
+
+class TenantAccessControlMiddleware:
+    """
+    Middleware para controlar rigorosamente o acesso às views com base no tenant atual.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        tenant = request.tenant
+        current_path = request.path_info
+        
+        # Evitar bloquear acesso a arquivos estáticos e admin
+        if current_path.startswith('/static/') or current_path.startswith('/admin/'):
+            return self.get_response(request)
+            
+        try:
+            # Obter o nome da view atual
+            resolver_match = resolve(current_path)
+            view_name = resolver_match.view_name
+            app_name = resolver_match.app_name
+            
+            # Definir views exclusivas de cada tipo de tenant
+            master_views = ['home', 'collabmanage', 'login', 'password_reset']  # Views do tenant master
+            client_views = ['clientehome', 'clientelogin']  # Views do tenant cliente
+            
+            # Verificar se está acessando uma view incompatível com o tenant atual
+            if tenant.schema_name == 'public' and view_name in client_views:
+                # Redirecionar para a home do tenant master
+                return HttpResponseRedirect(reverse('home'))
+                
+            elif tenant.schema_name != 'public' and view_name in master_views:
+                # Redirecionar para a home do tenant cliente
+                view_module = resolver_match.func.__module__
+                if view_module.startswith('LSDash.'):
+                    return HttpResponseForbidden("Acesso não permitido")
+                
+        except:
+            # Se não conseguiu resolver a URL, deixa passar para os outros middlewares lidarem
+            pass
+            
+        # Continuar com a requisição normalmente
+        return self.get_response(request)

@@ -27,25 +27,14 @@ SECRET_KEY = 'django-insecure-ylxmjhqh%ug3b)jizt*m47&(d7_d1xs@obias%yx!-5io0tm-#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testejaum.localhost', 'clienteteste.localhost']
+ALLOWED_HOSTS = ['finalteste.localhost','localhost', '127.0.0.1', 'testejaum.localhost', 'clienteteste.localhost']
 
 #User model
 AUTH_USER_MODEL = 'LSDash.UserModel'
 
 # Application definition
 
-INSTALLED_APPS = [
-    'django_tenants',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'LSDash',
-    'LSCliente',
-    
-]
+
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -56,9 +45,16 @@ EMAIL_HOST_USER = 'jaumamaralpessoal@gmail.com'
 EMAIL_HOST_PASSWORD = 'marw oycd lsqy bhxq'
 DEFAULT_FROM_EMAIL = 'jaumamaralpessoal@gmail.com'
 
+PASSWORD_RESET_TIMEOUT = 86400 * 2 
+
+AUTHENTICATION_BACKENDS = [
+    'LSmain.auth_backend.TenantAwareAuthBackend',  # Seu backend personalizado
+    'django.contrib.auth.backends.ModelBackend',  # Mantenha o backend padrão como fallback
+]
+
 MIDDLEWARE = [
     'django_tenants.middleware.main.TenantMainMiddleware',
-    
+    'LSmain.middleware.TenantAccessControlMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -142,7 +138,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -179,10 +174,12 @@ SHARED_APPS = [
     
 ]
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 TENANT_MODEL = "LSDash.Cliente"  # Seu modelo de tenant
 TENANT_DOMAIN_MODEL = "LSDash.Dominio"  # Seu modelo de domínio
 PUBLIC_SCHEMA_NAME = 'public'
 PUBLIC_SCHEMA_URLCONF = 'LSmain.urls'
 TENANT_URLCONF = 'LSmain.tenant_urls'
+
+INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]

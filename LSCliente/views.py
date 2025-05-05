@@ -23,41 +23,143 @@ from django_tenants.utils import tenant_context
 from django.utils.text import slugify
 from django import forms
 from django.utils import timezone
+from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
 
+from .forms import CustomPasswordResetForm
+from .models import UsuarioCliente
 
 class ClienteUserLoginView(LoginView):
-    template_name = "clienteLogin.html"  # Template a ser usado
-    success_url = reverse_lazy('clientehome')  # Para onde redirecionar após login com sucesso
-    form_class = UserLoginForm  # Formulário de login personalizado
+    template_name = "clienteLogin.html"
+    success_url = reverse_lazy('LSCliente:clientehome')
+    form_class = UserLoginForm
 
+    def get_form_kwargs(self):
+        # Adiciona o request aos kwargs do formulário
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+    
     def post(self, request, *args, **kwargs):
-        form = self.form_class(request=request, data=request.POST)
+        # Usa o método get_form_kwargs para garantir que o request seja passado
+        form_kwargs = self.get_form_kwargs()
+        form = self.form_class(**form_kwargs)
+        
         if form.is_valid():
-            email = form.cleaned_data.get('email')
-            password = form.cleaned_data.get('password')
-
-            user = authenticate(request, username=email, password=password)
-            if user is not None and user.is_active:
-                login(request, user)
-                return redirect(self.get_success_url())
-            else:
-                form.add_error(None, "Email ou senha incorretos ou conta inativa.")
+            user = form.get_user()
+            login(request, user)
+            return redirect(self.get_success_url())
         return self.form_invalid(form)
 
     def get_success_url(self):
         return self.success_url
 
     def get_context_data(self, **kwargs):
-        # Adiciona variável de contexto ao template
         context = super().get_context_data(**kwargs)
         context["title"] = "ClienteLogin"
+        context["tenant_name"] = self.request.tenant.nome if hasattr(self.request, 'tenant') else "Public"
         return context
 
-
-class ClienteHomeView(LoginRequiredMixin, TemplateView):
-    template_name = 'index.html'
+class ClienteHomeView(TemplateView):
+    template_name = 'cliente_index.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Home"
+        # Adicionar a lista de usuários ao contexto
+        from LSCliente.models import UsuarioCliente
+        context["usuarios"] = UsuarioCliente.objects.all().order_by('nome')
+        context["tenant_name"] = self.request.tenant.nome
+        context["tenant_schema"] = self.request.tenant.schema_name
+        return context
+
+class TenantPasswordResetView(PasswordResetView):
+    """
+    View para reset de senha que é consciente do tenant atual.
+    """
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # Passa o request para o formulário
+        kwargs['request'] = self.request
+        return kwargs
+
+class TenantAwarePasswordResetConfirmView(View):
+    """
+    Uma versão completamente personalizada do PasswordResetConfirmView 
+    que é consciente do sistema multi-tenant.
+    """
+    template_name = 'cliente_password_reset/password_reset_senha_nova_form.html'
+    success_url = reverse_lazy('LSCliente:clientepassword_reset_complete')
+    
+    def get(self, request, *args, **kwargs):
+        """
+        Exibe o formulário de redefinição de senha e valida o token
+        """
+        # Debug
+        print(f"[DEBUG] TenantAwarePasswordResetConfirmView GET chamado no tenant: {request.tenant.schema_name}")
+        print(f"[DEBUG] uidb64: {kwargs.get('uidb64')}")
+        print(f"[DEBUG] token: {kwargs.get('token')}")
+        
+        context = self._get_context_with_user(request, **kwargs)
+        
+        if context['validlink']:
+            form = NewResetPasswordForm(user=context['user'])
+            context['form'] = form
+        
+        return render(request, self.template_name, context)
+    
+    def post(self, request, *args, **kwargs):
+        """
+        Processa o formulário de redefinição de senha
+        """
+        # Debug
+        print(f"[DEBUG] TenantAwarePasswordResetConfirmView POST chamado no tenant: {request.tenant.schema_name}")
+        
+        context = self._get_context_with_user(request, **kwargs)
+        
+        if not context['validlink']:
+            return render(request, self.template_name, context)
+        
+        form = NewResetPasswordForm(user=context['user'], data=request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Sua senha foi alterada com sucesso!")
+            return redirect(self.success_url)
+        
+        context['form'] = form
+        return render(request, self.template_name, context)
+    
+    def _get_context_with_user(self, request, **kwargs):
+        """
+        Método auxiliar para obter o contexto com informações do usuário e validação do token
+        """
+        context = {
+            'validlink': False,
+            'user': None,
+            'tenant': request.tenant,
+            'tenant_name': request.tenant.schema_name,
+        }
+        
+        try:
+            # Decodificar o uidb64
+            uid = force_str(urlsafe_base64_decode(kwargs.get('uidb64', '')))
+            print(f"[DEBUG] UID decodificado: {uid}")
+            
+            try:
+                # Obtenha o usuário do tenant atual usando UsuarioCliente
+                user = UsuarioCliente.objects.get(pk=uid)
+                print(f"[DEBUG] Usuário encontrado: {user.email}")
+                
+                # Verificar o token
+                token = kwargs.get('token', '')
+                if default_token_generator.check_token(user, token):
+                    context['validlink'] = True
+                    context['user'] = user
+                    print(f"[DEBUG] Token válido para usuário {user.email}")
+                else:
+                    print(f"[DEBUG] Token inválido para usuário {user.email}")
+            except UsuarioCliente.DoesNotExist:
+                print(f"[DEBUG] Usuário com ID {uid} não encontrado no tenant {request.tenant.schema_name}")
+        except (TypeError, ValueError, OverflowError) as e:
+            print(f"[DEBUG] Erro ao decodificar UID: {str(e)}")
+        
         return context
