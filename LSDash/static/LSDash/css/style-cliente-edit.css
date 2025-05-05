@@ -390,6 +390,13 @@ flex-direction: column;
   width: 10%; /* ou o valor que quiser */
   height: auto; /* mantém proporção */
 }
+#logoPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* ou "contain", se quiser ver a imagem inteira */
+  display: block; /* ou "inline-block", mas nunca "none" a menos que controle via JS */
+  border-radius: 100%;
+}
 
 /* .buscar-cliente{
     display: flex;

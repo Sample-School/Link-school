@@ -18,9 +18,11 @@
       </div>
       <form id="formLogin" class="form-login" method="post">
         {% csrf_token %}
-        {{ form.non_field_errors }}
+        <div class="non-field-errors">
+          {{ form.non_field_errors }}
+        </div>
         <div class="email-container">
-          <label for="{{ form.email_for_label }}">
+          <label for="{{ form.email.id_for_label }}">
             <i class="fa-solid fa-user"></i>
           </label>
           {{ form.email }}
