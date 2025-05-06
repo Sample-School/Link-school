@@ -2,71 +2,52 @@
 {% load static %}
 
 {% block styles %}
+  <link rel="stylesheet" href="{% static "LSCliente/css/style-cliente-login.css" %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="{% static "LSCliente/css/style-login.css" %}"> 
 {% endblock styles %}
 
 {% block content %}
-  <div class="logo-linkschool">
-    <img src="{% static "LSCliente/img/logo-linkschool.png" %}">
-  </div>
   <main>
-    <div class="container-form">
-      <!-- Logo do formulário: -->
-      <div class="container-logo">
-        <div class="logo"></div>
+    <img class="linkschool-logo" src="{% static "LSCliente/img/linkschool-logo.png" %}" alt="Powered by LinkSchool">
+    <div class="container">
+      <div class="container__logo">
+        <img src="{% static "LSCliente/img/your-logo.png" %}" alt="Logo da Instituição">
       </div>
-      <form id="formLogin" class="form-login" method="post">
+      <form class="container__form" method="post">
         {% csrf_token %}
         <div class="non-field-errors">
           {{ form.non_field_errors }}
         </div>
-        <div class="email-container">
+        <div class="container__input-email">
           <label for="{{ form.email.id_for_label }}">
             <i class="fa-solid fa-user"></i>
           </label>
+
           {{ form.email }}
-          <!-- Renderiza o campo de email (ainda chamado username no form) -->
           {{ form.email.errors }}
-          <!-- Exibe erros relacionados ao campo -->
         </div>
-        <div class="password-container">
+        <div class="container__input-password">
           <label for="{{ form.password.id_for_label }}">
             <i class="fa-solid fa-lock"></i>
           </label>
+
           {{ form.password }}
-          <!-- Renderiza o campo de senha -->
           {{ form.password.errors }}
-          <!-- Exibe erros relacionados ao campo -->
         </div>
-        <!-- Campos de (Esqueceu Senha)  -->
-        <div class="forgot-password">
-          <a href="{% url 'LSCliente:clientepassword_reset' %}"
-            >ESQUECI MINHA SENHA</a
-          >
+        <div class="container__forgot-password">
+          <a href="{% url 'LSCliente:clientepassword_reset' %}">ESQUECI MINHA SENHA</a>
         </div>
+      </div>
       </form>
-    </div>
-    <button id="btnSend" class="btn-send" type="submit">LOGIN</button>
-  {% if messages %}
-    <ul class="messages">
-      {% for message in messages %}
+    <button class="btn-send" type="submit">LOGIN</button>
+
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
           <li class="{{ message.tags }}">{{ message }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
+        {% endfor %}
+      </ul>
+    {% endif %}
   </main>
-  
-  <script>
-    const formLogin = document.getElementById("formLogin");
-  
-  const btnSend = document.getElementById("btnSend");
-  btnSend.addEventListener("click", () => {
-  // Envia o formulário de login.
-  formLogin.submit();
-  });
-  
-  </script>
-
-
+  <script src="{% static "LSCliente/js/cliente-login.js" %}"></script>
 {% endblock content %}
