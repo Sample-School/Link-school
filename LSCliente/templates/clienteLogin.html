@@ -15,7 +15,7 @@
       </div>
       <form class="container__form" method="post">
         {% csrf_token %}
-        <div class="non-field-errors">
+        <div class="container__non-field-errors">
           {{ form.non_field_errors }}
         </div>
         <div class="container__input-email">
@@ -24,7 +24,10 @@
           </label>
 
           {{ form.email }}
-          {{ form.email.errors }}
+
+          <div class="container__errorlist">
+            {{ form.email.errors }}
+          </div>
         </div>
         <div class="container__input-password">
           <label for="{{ form.password.id_for_label }}">
@@ -32,7 +35,10 @@
           </label>
 
           {{ form.password }}
-          {{ form.password.errors }}
+          
+          <div class="container__errorlist">
+            {{ form.password.errors }}
+          </div>
         </div>
         <div class="container__forgot-password">
           <a href="{% url 'LSCliente:clientepassword_reset' %}">ESQUECI MINHA SENHA</a>
