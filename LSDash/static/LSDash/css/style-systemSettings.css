@@ -512,6 +512,8 @@ video {
 }
 #webcrumbs .bg-slate-100 {
   --tw-bg-opacity: 1;
+  margin-left: 10%;
+  margin-right: 10%;
   background-color: rgb(241 245 249 / var(--tw-bg-opacity));
 }
 #webcrumbs .bg-slate-200 {
@@ -702,4 +704,14 @@ video {
   #webcrumbs .lg\:p-6 {
     padding: 24px;
   }
+}
+
+/* ===== [NOVO] Estilos para o Preview ===== */
+.object-cover {
+  object-fit: cover;  /* Garante que a imagem cubra o espaço sem distorcer */
+}
+
+/* Melhora a borda do container de preview */
+#preview1, #preview2 {
+  border: 1px dashed #cbd5e1;  /* Bordinha tracejada sutil */
 }

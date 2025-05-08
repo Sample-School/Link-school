@@ -1,15 +1,42 @@
 {% load static %}
 
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
 
 {% if request.user.is_authenticated %}
-    <ul class="nav">
-        <li><a href="{% url 'LSCliente:clientehome' %}">Home</a></li>
-        <li><a href="{% url 'LSCliente:CLProvaCreate' %}">Criar Prova</a></li>
-        <li><a href="{% url 'LSCliente:CLParametros' %}">Parâmetros</a></li>
+  <nav class="navbar">
+    <div class="navbar__logo">
+      <img src="{% static "global/img/your-logo.png" %}" alt="Logo da Instituição">
+    </div>
+    <ul class="navbar__list">
+      <li class="navbar__link">
+          <a href="{% url 'LSCliente:clientehome' %}">Home</a>
+      </li>
 
-        {% if request.user.is_master %}
-            <li><a href="{% url 'LSCliente:CLUserMange' %}">Gerenciar Usuários</a></li>
-        {% endif %}
-        <li><a href="{% url 'LSCliente:clientelogout' %}">Logout</a></li>
+      <div class="navbar__horizontal-line"></div>
+
+      <li class="navbar__link">
+          <a href="{% url 'LSCliente:CLProvaCreate' %}">Criar Prova</a>
+      </li>
+
+      <div class="navbar__horizontal-line"></div>
+
+      <li class="navbar__link">
+          <a href="{% url 'LSCliente:CLParametros' %}">Parâmetros</a>
+      </li class="navbar__link">
+      {% if request.user.is_master %}
+        <div class="navbar__horizontal-line"></div>
+
+        <li class="navbar__link">
+          <a href="{% url 'LSCliente:CLUserMange' %}">Gerenciar Usuários</a>
+        </li>
+      {% endif %}
+      <li class="navbar__link">
+          <a class="icon" href="{% url 'LSCliente:clientelogout' %}">
+            <i class="fa-regular fa-circle-user"></i>
+          </a>
+      </li>
     </ul>
+  </nav>
 {% endif %}
