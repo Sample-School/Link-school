@@ -1,8 +1,16 @@
-{% block title %}{{ tenant_name }} - Home{% endblock %}
+{% extends "global/cliente-base.html" %}
+{% load static %}
+
+{% block title %}
+  <title>{{ tenant_name }} - Home</title>
+{% endblock %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static "LSCliente/css/style-index.css" %}">
+{% endblock styles %}
 
 {% block content %}
-
-{% include "global/partials/cliente_navbar.html" %}
-
-
+  <header>
+    {% include "global/partials/cliente_navbar.html" %}
+  </header>
 {% endblock %}
