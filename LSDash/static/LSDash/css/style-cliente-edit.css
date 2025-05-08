@@ -17,11 +17,6 @@ height: 100%;
 display: flex;
 flex-direction: column;
 }
-.nnm{
-  position: relative;
-  display: flex;
-  top: 60%;
-}
 .container-top {
   display: flex;
   justify-content: space-around;
