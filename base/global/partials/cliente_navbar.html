@@ -14,19 +14,19 @@
           <a href="{% url 'LSCliente:clientehome' %}">Home</a>
       </li>
 
-      <div class="navbar__horizontal-line"></div>
+      <div class="navbar__vertical-line"></div>
 
       <li class="navbar__link">
           <a href="{% url 'LSCliente:CLProvaCreate' %}">Criar Prova</a>
       </li>
 
-      <div class="navbar__horizontal-line"></div>
+      <div class="navbar__vertical-line"></div>
 
       <li class="navbar__link">
           <a href="{% url 'LSCliente:CLParametros' %}">Parâmetros</a>
       </li class="navbar__link">
       {% if request.user.is_master %}
-        <div class="navbar__horizontal-line"></div>
+        <div class="navbar_vertical-line"></div>
 
         <li class="navbar__link">
           <a href="{% url 'LSCliente:CLUserMange' %}">Gerenciar Usuários</a>

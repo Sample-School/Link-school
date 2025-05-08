@@ -64,7 +64,7 @@ header {
   font-size: 2em;
   margin-left: 30px;
 }
-.navbar__horizontal-line {
+.navbar__vertical-line {
   background-color: #7f7f7f;
   width: 2px;
   height: 20px;

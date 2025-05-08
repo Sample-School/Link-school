@@ -48,12 +48,13 @@
     <button class="btn-send" type="submit">LOGIN</button>
 
     {% if messages %}
-      <ul class="messages">
+      <ul class="messages" style="position: absolute; list-style: none; top: 20px; color: green; font-weight: bold;">
         {% for message in messages %}
           <li class="{{ message.tags }}">{{ message }}</li>
         {% endfor %}
       </ul>
     {% endif %}
   </main>
-  <script src="{% static "LSCliente/js/cliente-login.js" %}"></script>
+  <script src="{% static "LSCliente/js/send.js" %}"></script>
+  <script src="{% static "LSCliente/js/time.js" %}"></script>
 {% endblock content %}
