@@ -1,0 +1,15 @@
+{% load static %}
+
+
+{% if request.user.is_authenticated %}
+    <ul class="nav">
+        <li><a href="{% url 'LSCliente:clientehome' %}">Home</a></li>
+        <li><a href="{% url 'LSCliente:CLProvaCreate' %}">Criar Prova</a></li>
+        <li><a href="{% url 'LSCliente:CLParametros' %}">Parâmetros</a></li>
+
+        {% if request.user.is_master %}
+            <li><a href="{% url 'LSCliente:CLUserMange' %}">Gerenciar Usuários</a></li>
+        {% endif %}
+        <li><a href="{% url 'LSCliente:clientelogout' %}">Logout</a></li>
+    </ul>
+{% endif %}

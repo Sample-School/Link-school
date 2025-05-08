@@ -53,16 +53,18 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 MIDDLEWARE = [
-    'django_tenants.middleware.main.TenantMainMiddleware',
-    'LSmain.middleware.TenantAccessControlMiddleware',
+    'django_tenants.middleware.main.TenantMainMiddleware',  # Primeiro o middleware de tenant
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',  # Middleware de sessão deve vir antes do auth
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # Auth middleware em posição correta
+    'LSmain.middleware.TenantAwareSettingsMiddleware',  # Configurações de tenant após auth
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'LSmain.middleware.SessionTrackingMiddleware'
+    'LSmain.middleware.SessionDebugMiddleware',  # Middleware de debug
+    'LSmain.middleware.TenantAccessControlMiddleware',  # Controle de acesso após todas as configs
+    'LSmain.middleware.SessionTrackingMiddleware'  # Middleware de rastreamento no final
 ]
 
 ROOT_URLCONF = 'LSmain.urls'
@@ -80,7 +82,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-
+                'LSmain.context_processors.tenant_settings',  # Novo context processor
             ],
         },
     },

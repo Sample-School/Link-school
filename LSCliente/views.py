@@ -39,27 +39,46 @@ class ClienteUserLoginView(LoginView):
         kwargs['request'] = self.request
         return kwargs
     
+    def form_valid(self, form):
+        """Método que é chamado quando o formulário é válido"""
+        user = form.get_user()
+        # Efetuar login manualmente para garantir que a sessão seja corretamente inicializada
+        login(self.request, user)
+        
+        # Registrar o login no console para debug
+        print(f"[LOGIN DEBUG] Usuário {user.email} autenticado com sucesso")
+        print(f"[LOGIN DEBUG] Sessão: {self.request.session.session_key}")
+        
+        # Adicionar marcador de sessão para verificar no middleware
+        self.request.session['authenticated_tenant'] = self.request.tenant.schema_name
+        self.request.session.save()  # Forçar salvamento da sessão
+        
+        return HttpResponseRedirect(self.get_success_url())
+    
     def post(self, request, *args, **kwargs):
         # Usa o método get_form_kwargs para garantir que o request seja passado
         form_kwargs = self.get_form_kwargs()
         form = self.form_class(**form_kwargs)
         
         if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect(self.get_success_url())
+            return self.form_valid(form)
         return self.form_invalid(form)
 
     def get_success_url(self):
-        return self.success_url
+        next_url = self.request.GET.get('next')
+        print(f"[DEBUG] ClienteUserLoginView: next_url={next_url}")
+        
+        if next_url:
+            # Se for /home/, substituir pelo caminho correto
+            if next_url == '/home/':
+                return next_url  # Manter o caminho como está para evitar problemas de resolução
+            return next_url
+        
+        default_url = reverse('LSCliente:clientehome')
+        print(f"[DEBUG] Usando URL padrão: {default_url}")
+        return default_url
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "ClienteLogin"
-        context["tenant_name"] = self.request.tenant.nome if hasattr(self.request, 'tenant') else "Public"
-        return context
-
-class ClienteHomeView(TemplateView):
+class ClienteHomeView(LoginRequiredMixin, TemplateView):
     template_name = 'cliente_index.html'
 
     def get_context_data(self, **kwargs):
@@ -163,3 +182,18 @@ class TenantAwarePasswordResetConfirmView(View):
             print(f"[DEBUG] Erro ao decodificar UID: {str(e)}")
         
         return context
+
+
+class ClienteUserMangeView(LoginRequiredMixin, TemplateView):
+    template_name = 'cliente_userManage.html'
+
+class ClienteProvaCreateView(LoginRequiredMixin, TemplateView):
+    template_name = 'cliente_provaCreate.html'
+
+class ClienteParametroView(LoginRequiredMixin, TemplateView):
+    template_name = 'cliente_parametros.html'
+
+
+def custom_logout_view(request):
+    logout(request)
+    return redirect('clientehome')

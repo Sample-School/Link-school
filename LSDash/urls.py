@@ -1,3 +1,4 @@
+#Dash urls
 from django.views.generic import TemplateView
 from django.urls import path
 from django.contrib.auth import views as auth_views
@@ -13,7 +14,7 @@ urlpatterns = [
     path('login/', views.UserLoginView.as_view(), name='login'),
     path('GestaoColaborador/', views.CollabManage.as_view(), name='collabmanage'),
     path('RegistroColaborador/', views.CollabRegisterView.as_view(), name='collabregister'),
-    path('logout/', views.custom_logout_view, name='logout'),
+    path('logout/', views.cliente_custom_logout_view, name='logout'),
     path('ClienteRegister/', views.CadastroClienteView.as_view(), name='ClienteRegister'),
     path('questoes/', views.QuestaoManageView.as_view(), name='questao_manage'),
     path('ClienteEdit/', views.EditarClienteView.as_view(), name='ClienteEdit'),

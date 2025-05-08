@@ -272,7 +272,7 @@ class CollabRegisterView(LoginRequiredMixin, View):
             messages.error(request, f"Erro inesperado: {str(e)}")
             return redirect('collabregister')
 
-def custom_logout_view(request):
+def cliente_custom_logout_view(request):
     logout(request)
     return redirect('login')
 

@@ -1,4 +1,4 @@
-# No arquivo urls.py
+# LSCliente urls
 from django.views.generic import TemplateView
 from django.urls import path
 from django.contrib.auth import views as auth_views
@@ -12,8 +12,13 @@ from LSCliente.views import TenantAwarePasswordResetConfirmView  # Adicione esta
 app_name = 'LSCliente'
 
 urlpatterns = [
-    path('cliente/', views.ClienteHomeView.as_view(), name='clientehome'),
+    path('home/', views.ClienteHomeView.as_view(), name='clientehome'),
     path('clientelogin/', views.ClienteUserLoginView.as_view(), name='clientelogin'),
+    path('CLUserMange/', views.ClienteUserMangeView.as_view(), name='CLUserMange'),
+    path('CLProvaCreate/', views.ClienteProvaCreateView.as_view(), name='CLProvaCreate'),
+    path('CLParametros/', views.ClienteParametroView.as_view(), name='CLParametros'),
+    path('logout/', views.custom_logout_view, name='clientelogout'),
+
 
     # urls para recuperação de conta - ATUALIZADO
     path('clientepassword_reset/', views.TenantPasswordResetView.as_view(
