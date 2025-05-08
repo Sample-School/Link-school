@@ -140,7 +140,8 @@ flex-direction: column;
 
 .container-form-card-body h5 {
   position: relative;
-  left: -3%;
+  margin-top: -19%;
+  left: 10%;
   color: #01335c;
   font-family: var(--font-family);
   display: flex;
@@ -171,8 +172,6 @@ flex-direction: column;
   padding: 0px 10px;
 }
 .buscar-cliente button {
-  position: relative;
-  margin-top: -1%;
   background: linear-gradient(to bottom, #0fc9B0, #048089);
   display: flex;
   justify-content: center;
@@ -230,7 +229,7 @@ flex-direction: column;
 .card-body{
   position: relative;
   display: flex;
-  left: -1%;
+  left: 1%;
   top: 15px;
 }
 .name-inst2{
