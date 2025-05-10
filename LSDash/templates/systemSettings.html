@@ -173,26 +173,23 @@
             <div class="bg-slate-50 p-4 font-semibold text-center text-slate-800">
                 Imagens da Home
             </div>
+
+            
             <div class="p-4">
                 {% for i in "12" %}
                 <div class="mb-6">
                     <div class="mb-2 text-slate-800 font-medium">{{ forloop.counter }}ª Imagem</div>
                     
-                    
                     <div class="flex items-start gap-4">
                         <!-- Inputs e Botões -->
                         <div class="flex flex-col gap-2 w-48">
                             <!-- Input de arquivo escondido -->
-                            
-
-                            
-                            <!--Botão escondido-->
                             <input 
-                            type="file" 
-                            id="upload{{ forloop.counter }}" 
-                            accept="image/*"
-                            style="position: absolute; left: -9999px;"
-                            onchange="previewImage(event, {{ forloop.counter }})"
+                                type="file" 
+                                id="upload{{ forloop.counter }}" 
+                                accept="image/*"
+                                style="position: absolute; left: -9999px;"
+                                onchange="previewImage(event, {{ forloop.counter }})"
                             />
 
                             <button onclick="document.getElementById('upload{{ forloop.counter }}').click()" 
@@ -206,14 +203,13 @@
 
                         <!-- Preview da Imagem (agora dinâmico) -->
                         <div class="flex-1 bg-slate-100 rounded-lg h-24 flex items-center justify-center overflow-hidden" id="preview{{ forloop.counter }}">
-                            <span class="material-symbols-outlined text-5xl text-slate-400">upload</span>
-                        </div> 
-                        
-                        
+                            <span class="material-symbols-outlined text-5xl text-slate-400">upload</span> <!-- Ícone SVG -->
+                        </div>
                     </div>
-
                 </div>
-                {% endfor %}
+
+                {% endfor %} 
+                
                 <!-- Observação Específica -->
                 <div class="text-sm text-slate-600 italic mt-2">
                     OBS: A imagem deve ter 500 x 500 pixels.
@@ -232,6 +228,32 @@
         </div>
     </div>
 </div>
+
+
+<!-- No final do seu template, ANTES do fechamento do body -->
+<script>
+// Função global garantida
+window.previewImage = function(event, counter) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const preview = document.getElementById('preview' + counter);
+    if (!preview) return;
+
+    preview.innerHTML = '<span class="text-sm">Carregando...</span>';
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.innerHTML = `
+            <img src="${e.target.result}" 
+                 alt="Preview" 
+                 style="max-width:100%; max-height:100%; object-fit:contain;">
+        `;
+    };
+    reader.readAsDataURL(file);
+};
+</script>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -270,37 +292,5 @@
             }
         });
     });
-</script>
-
-<script>
-    // ===== [NOVO] Preview de Imagem + Validação de Tamanho =====
-    document.querySelectorAll('input[type="file"]').forEach(input => {
-        input.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const previewId = 'preview' + this.id.replace('upload', '');
-            const preview = document.getElementById(previewId);
-
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        if (this.width === 500 && this.height === 500) {
-                            // Se a imagem for 500x500px, mostra o preview
-                            preview.innerHTML = `<img src="${event.target.result}" class="w-full h-full object-cover" />`;
-                        } else {
-                            // Se não for, exibe alerta e reseta o preview
-                            alert('A imagem deve ter exatamente 500x500 pixels!');
-                            preview.innerHTML = '<span class="material-symbols-outlined text-5xl text-slate-400">upload</span>';
-                            e.target.value = ''; // Limpa o input
-                        }
-                    };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    });
-
 </script>
 {% endblock %}
