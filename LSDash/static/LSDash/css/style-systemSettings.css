@@ -512,7 +512,7 @@ video {
 }
 #webcrumbs .bg-slate-100 {
   --tw-bg-opacity: 1;
-  margin-left: 10%;
+  
   margin-right: 10%;
   background-color: rgb(241 245 249 / var(--tw-bg-opacity));
 }
@@ -567,7 +567,9 @@ video {
   padding: 12px;
 }
 #webcrumbs .p-4 {
-  padding: 16px;
+  padding-right: 2%;
+  padding-left: 2%;
+  padding-bottom: 2%;
 }
 #webcrumbs .p-5 {
   padding: 20px;
@@ -694,12 +696,14 @@ video {
 @media (min-width: 1024px) {
   #webcrumbs .lg\:col-span-2 {
     grid-column: span 2 / span 2;
+    margin-left: 5%;
   }
   #webcrumbs .lg\:w-40 {
     width: 160px;
   }
   #webcrumbs .lg\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-left: 5%;
   }
   #webcrumbs .lg\:p-6 {
     padding: 24px;
