@@ -78,12 +78,12 @@ h6 {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 300px;
+  width: 350px;
   border-bottom-left-radius: 45px;
   border-bottom-right-radius: 45px;
   color: #01335c;
   font-family: var(--font-family);
-  font-size: 1.8em;
+  font-size: 1.5em;
   font-style: italic;
   margin-bottom: 1%;
 }
@@ -499,7 +499,7 @@ video {
   justify-content: space-between;
 }
 #webcrumbs .gap-2 {
-  gap: 8px;
+  gap: 30px;
 }
 #webcrumbs .gap-3 {
   gap: 12px;
@@ -536,7 +536,7 @@ video {
 }
 #webcrumbs .border-slate-100 {
   --tw-border-opacity: 1;
-  border-color: rgb(241 245 249 / var(--tw-border-opacity));
+  border-color: #e0e0e0;
 }
 #webcrumbs .border-slate-300 {
   --tw-border-opacity: 1;

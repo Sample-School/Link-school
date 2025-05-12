@@ -19,7 +19,7 @@
     }
 
     .table th {
-        background-color: #f8f9fc;
+        background-color: #e0e0e0;
         font-weight: bold;
     }
 
@@ -43,7 +43,7 @@
     
     
     <div class="container-top">
-      <h1>Cadastrar Cliente</h1>
+      <h1>configurações do sistema</h1>
       <div class="buttons">
         <button class="bg-slate-200 hover:bg-slate-300 text-slate-700 transition-all px-6 py-2 rounded-full" id="btn-redefinir" type="reset">Redefinir</button>
 
@@ -72,7 +72,7 @@
                                         <th>Início</th>
                                         <th>Última Atividade</th>
                                         <th>IP</th>
-                                        <th>Ações</th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -89,12 +89,7 @@
                                         <td>{{ sessao.ultima_atividade|date:"d/m/Y H:i" }}</td>
                                         <td>{{ sessao.endereco_ip }}</td>
                                         <td>
-                                            <form method="post" action="{% url 'encerrar_sessao' sessao.id %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-sign-out-alt"></i> Deslogar
-                                                </button>
-                                            </form>
+
                                         </td>
                                     </tr>
                                     {% empty %}
@@ -122,7 +117,7 @@
 
                 <!-- Box de Permanência em Inatividade -->
                 <div class="bg-slate-50 rounded-lg p-3">
-                    <div class="text-center text-slate-800 font-medium mb-2">
+                    <div class="font-semibold text-slate-800 mb-2"">
                         Permanência em Inatividade
                     </div>
                     <div class="flex items-center gap-2">
@@ -291,5 +286,6 @@ window.previewImage = function(event, counter) {
             }
         });
     });
+    
 </script>
 {% endblock %}
