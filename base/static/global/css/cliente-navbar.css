@@ -29,6 +29,7 @@ a {
 .navbar__item a {
   color: #7f7f7f;
   font-size: 1.2em;
+  font-weight: bold;
   position: relative;
 }
 .navbar__item a:not(#icon)::after {
@@ -49,4 +50,9 @@ a {
   background-color: #7f7f7f;
   width: 2px;
   height: 20px;
+}
+.navbar__circle {
+  position: absolute;
+  top: 0px;
+  left: 0px;
 }

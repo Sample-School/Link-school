@@ -1,6 +1,9 @@
 {% load static %}
 
 {% if request.user.is_authenticated %}
+  <svg class="navbar__circle" width="580" height="540" viewBox="0 0 831 769" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path opacity="0.3" d="M831 266.17C831 543.45 593.34 768.24 300.18 768.24C188.78 768.24 85.39 735.78 0 680.3V0H750.35C801.46 77.17 831 168.41 831 266.17Z" fill="#C3C3C3"/>
+  </svg>
   <nav class="navbar">
     <div class="navbar__container">
       <a href="{% url 'LSCliente:clientehome' %}">
