@@ -10,7 +10,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   width: 100%;
-  height: 87vh;
+  height: 90vh;
 }
 .header__container {
   display: grid;
@@ -63,4 +63,124 @@
 }
 .header__img img {
   width: 500px;
+}
+.horizontal-line {
+  background-color: #b2b2b2;
+  width: 95%;
+  height: 3px;
+  margin: 20px auto;
+}
+.content-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 0px 10px;
+  position: relative;
+}
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  padding: 10px;
+}
+.top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.content-title {
+  color: #7f7f7f;
+  font-size: 2em;
+  text-align: center;
+}
+.content-text {
+  color: #c4c4c4;
+  font-size: 1.3em;
+  text-align: center;
+}
+.content-img {
+  position: relative;
+}
+.content-img img {
+  width: 300px;
+}
+.user-list, .list-evidence {
+  width: 300px;
+  background-color: #e8e8e8;
+  height: 400px;
+  border-top-left-radius: 45px;
+  border-top-right-radius: 45px;
+  border-bottom-left-radius: 45px;
+  box-shadow: 3px 5px 13px 3px rgba(0, 0, 0, 0.5);
+  /* position: relative; */
+}
+.user-list h3, .list-evidence h3 {
+  width: 100%;
+  height: 20%;
+  color: #7e7e7e;
+  font-size: 1.5em;
+  padding: 20px 0px 0px 20px;
+}
+.user-list span, .list-evidence span {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  width: 100%;
+  height: 80%;
+  color: #c2c2c2;
+  font-size: 10em;
+  text-align: right;
+}
+.list-evidence {
+  margin-top: 22px;
+}
+.footer {
+  background-color: #7e7e7e;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 400px;
+  position: absolute;
+  bottom: -230px;
+  z-index: -1;
+}
+.assets-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 100px;
+  width: 100%;
+  height: 80%;
+  margin-top: 60px;
+}
+#linkschool-logo {
+  width: 15%;
+}
+#asset-footer {
+  width: 70%;
+}
+.footer-content {
+  width: 100%;
+  height: 20%;
+}
+.footer-content p {
+  text-align: center;
+  color: #fff;
+}
+.footer-content span {
+  font-weight: bold;
+}
+.circle-one, .circle-two {
+  position: absolute;
+}
+.circle-one {
+  left: 0px;
+}
+.circle-two {
+  position: absolute;
+  right: 35%;
+  bottom: 0px;
 }

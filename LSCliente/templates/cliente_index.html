@@ -13,6 +13,7 @@
 
 {% block content %}
   {% include "global/partials/cliente_navbar.html" %}
+
   <header class="header">
     <div class="header__container">
       <div class="header-title">
@@ -23,6 +24,70 @@
         <a class="btn-create-proof" href="#">Criar Prova</a>
       </div>
     </div>
-    <div class="header__img"><img src="{% static "LSCliente/img/asset-img-one.png" %}"></div>
+    <div class="header__img">
+      <svg class="circle-one" width="130" height="130" viewBox="0 0 223 223" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M111.5 223C173.08 223 223 173.08 223 111.5C223 49.9202 173.08 0 111.5 0C49.9202 0 0 49.9202 0 111.5C0 173.08 49.9202 223 111.5 223Z" fill="#C4C4C4"/>
+      </svg>
+      <svg class="circle-two" width="100" height="100" viewBox="0 0 223 223" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M111.5 223C173.08 223 223 173.08 223 111.5C223 49.9202 173.08 0 111.5 0C49.9202 0 0 49.9202 0 111.5C0 173.08 49.9202 223 111.5 223Z" fill="#C4C4C4"/>
+      </svg>
+      <img src="{% static "LSCliente/img/asset-img-one.png" %}">
+    </div>
   </header>
+
+  <hr class="horizontal-line">
+
+  <section class="content-container">
+    <div class="content">
+      <div class="top">
+        <h2 class="content-title">Fácil</h2>
+        <p class="content-text">
+          Transforme a sua forma de ensinar com uma plataformaintuitiva e personalizada.
+          Simplifique o planejamento de tarefas e garanta um aprendizado mais dinâmico e eficiente.
+        </p>
+      </div>
+      <div class="content-img">
+        <img src="{% static "LSCliente/img/asset-img-two.png" %}">
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="top">
+        <h2 class="content-title">Inteligente</h2>
+        <p class="content-text">
+          Com recursos inovadores, nossa IA gera e adapta perguntas para cada necessidade.
+          Torne suas atividades mais envolventes e acessíveis com um sistema feito para educadores.
+        </p>
+      </div>
+      <div class="user-list">
+        <h3>Lista de Usuários</h3>
+        <span>01</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="top">
+        <h2 class="content-title">Organizado</h2>
+        <p class="content-text">
+          Controle usuários, personalize questões e mantenha seu conteúdo sempre organizado.
+          Mais tempo para ensinar, menos tempo com burocracia.
+        </p>
+      </div>
+      <div class="list-evidence">
+        <h3>Lista de Provas</h3>
+        <span>02</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="assets-footer">
+        <img id="linkschool-logo" src="{% static "LSCliente/img/asset-linkschool-logo.png" %}" alt="Logo da LinkSchool">
+        <img id="asset-footer" src="{% static "LSCliente/img/asset-footer.png" %}">
+      </div>
+      <div class="footer-content">
+        <hr class="horizontal-line">
+        <p>DESENVOLVIDO POR <span>LAGUMCORP - LINKSCHOOL</span></p>
+      </div> 
+    </div>
+  </section>
 {% endblock %}
