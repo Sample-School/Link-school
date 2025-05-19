@@ -1,0 +1,115 @@
+{% extends "global/cliente-base.html" %}
+{% load static %}
+
+{% block title %}
+  <title>{{ tenant_name }} - Home</title>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static "LSCliente/css/style-cliente_usermanage.css" %}">
+{% endblock styles %}
+
+{% block content %}
+  <header>
+    {% include "global/partials/cliente_navbar.html" %}
+  </header>
+
+  <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Usuário</title>
+
+    
+    
+    
+</head>
+<body>
+
+<h2>Gerenciar Usuário</h2>
+
+<!-- Busca por ID + Botão modal -->
+<div class="row">
+    <div class="col">
+        <label for="buscar-id" class="form-label">Buscar por ID</label>
+        <input type="text" id="buscar-id" placeholder="Digite o ID do usuário">
+    </div>
+    <div class="col">
+        <label>&nbsp;</label>
+        <button id="btn-buscar-id" class="btn-primary">Buscar</button>
+    </div>
+    <div class="col">
+        <label>&nbsp;</label>
+        <button id="abrir-modal" class="btn-secondary">Selecionar usuário existente</button>
+    </div>
+</div>
+
+<!-- Mensagens de sucesso do Django -->
+{% if messages %}
+<div class="alert-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Erros não relacionados a campos específicos -->
+{% if form.non_field_errors %}
+<div class="alert-container">
+    {% for error in form.non_field_errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Formulário -->
+<form method="post" enctype="multipart/form-data" id="usuario-form">
+    
+    
+    {% csrf_token %}
+    <input type="hidden" name="usuario_id" id="usuario_id">
+    <label for="{{ form.nome.id_for_label }}" class="form-label">Nome</label>
+    {{ form.nome }}
+
+    <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+    {{ form.email }}
+
+    <label for="{{ form.password.id_for_label }}" class="form-label">Senha</label>
+    {{ form.password }}
+
+    <label for="{{ form.password_confirm.id_for_label }}" class="form-label">Confirme a Senha</label>
+    {{ form.password_confirm }}
+
+    <label for="{{ form.foto.id_for_label }}" class="form-label">Foto</label>
+    {{ form.foto }}
+
+    <button type="submit" class="btn-primary">Salvar</button>
+</form>
+
+<!-- Modal -->
+<div id="userListModal">
+    <h3>Selecionar Usuário</h3>
+    <input type="text" id="filtro-modal" placeholder="Filtrar por nome ou email...">
+    <div id="lista-usuarios-modal">
+        {% for usuario in usuarios %}
+        <div class="usuario-item" data-id="{{ usuario.id }}" data-nome="{{ usuario.nome }}" data-email="{{ usuario.email }}">
+            <span>{{ usuario.nome }} ({{ usuario.email }})</span>
+            <button class="btn-primary selecionar-usuario">Selecionar</button>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="modal-actions">
+        <button class="btn-danger" id="fechar-modal">Fechar</button>
+    </div>
+</div>
+
+<script src="{% static "LSCliente/js/script-cliente_userManage" %}"></script>
+</body>
+</html>
+
+{% endblock %}

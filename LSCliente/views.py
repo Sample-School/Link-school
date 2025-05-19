@@ -1,10 +1,10 @@
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy,  reverse
 from django.contrib import messages
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView, View, CreateView,  ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -25,7 +25,7 @@ from django import forms
 from django.utils import timezone
 from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
 
-from .forms import CustomPasswordResetForm
+from .forms import CustomPasswordResetForm, UsuarioClienteForm
 from .models import UsuarioCliente
 
 class ClienteUserLoginView(LoginView):
@@ -184,9 +184,60 @@ class TenantAwarePasswordResetConfirmView(View):
         return context
 
 
-class ClienteUserMangeView(LoginRequiredMixin, TemplateView):
+class ClienteUserMangeView(LoginRequiredMixin, ListView):
+    model = UsuarioCliente
     template_name = 'cliente_userManage.html'
-
+    context_object_name = 'usuarios'
+    
+    def get_queryset(self):
+        return UsuarioCliente.objects.all().order_by('-date_joined')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Adiciona o formulário ao contexto - seja vazio ou com dados
+        if hasattr(self, 'form'):
+            context['form'] = self.form
+        else:
+            context['form'] = UsuarioClienteForm()
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        usuario_id = request.POST.get('usuario_id')
+        
+        if usuario_id:
+            # Modo de edição
+            try:
+                usuario = get_object_or_404(UsuarioCliente, id=usuario_id)
+                form = UsuarioClienteForm(request.POST, request.FILES, instance=usuario)
+            except:
+                messages.error(request, 'Usuário não encontrado.')
+                return redirect(reverse_lazy('LSCliente:CLUserMange'))
+        else:
+            # Modo de criação
+            form = UsuarioClienteForm(request.POST, request.FILES)
+        
+        if form.is_valid():
+            try:
+                form.save()
+                messages.success(request, 'Usuário salvo com sucesso!')
+                return redirect(reverse_lazy('LSCliente:CLUserMange'))
+            except Exception as e:
+                messages.error(request, f'Erro ao salvar usuário: {str(e)}')
+        else:
+            # Se o formulário tem erros, vamos garantir que sejam exibidos
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':  # Erros não relacionados a campos específicos
+                        messages.error(request, error)
+                    else:
+                        # Os erros de campo já são tratados no template
+                        pass
+        
+        # Se inválido, retorna o formulário com erros
+        self.form = form
+        self.object_list = self.get_queryset()
+        return self.render_to_response(self.get_context_data())
+    
 class ClienteProvaCreateView(LoginRequiredMixin, TemplateView):
     template_name = 'cliente_provaCreate.html'
 

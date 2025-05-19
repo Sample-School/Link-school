@@ -5,7 +5,8 @@ from django import forms
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
-
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.hashers import make_password
 
 #imports locais
 from .models import UsuarioCliente
@@ -151,3 +152,62 @@ class CustomPasswordResetForm(PasswordResetForm):
             active_users = UserModel.objects.filter(email__iexact=email, is_active=True)
             print(f"[DEBUG] Buscando UserModel no schema público, encontrados: {active_users.count()}")
             return active_users
+
+class UsuarioClienteForm(forms.ModelForm):
+    password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label='Senha'
+    )
+    password_confirm = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label='Confirmar Senha'
+    )
+    
+    class Meta:
+        model = UsuarioCliente
+        fields = ['nome', 'email', 'password', 'is_active', 'foto']
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'is_active': forms.RadioSelect(choices=[(True, 'Ativo'), (False, 'Inativo')]),
+            'foto': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'nome': 'Nome',
+            'email': 'Email',
+            'is_active': 'Status',
+            'foto': 'Foto',
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        password_confirm = cleaned_data.get('password_confirm')
+
+        # Se for novo usuário (sem PK), senha é obrigatória
+        if not self.instance.pk and not password:
+            self.add_error('password', 'A senha é obrigatória para novos usuários.')
+
+        # Se a senha for preenchida, precisa confirmar
+        if password and password != password_confirm:
+            self.add_error('password_confirm', 'As senhas não coincidem.')
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        password = self.cleaned_data.get('password')
+
+        # Só define nova senha se foi informada
+        if password:
+            user.password = make_password(password)
+
+        # Garantir consistência nas permissões
+        user.is_staff = False
+        user.is_superuser = False
+
+        if commit:
+            user.save()
+        return user

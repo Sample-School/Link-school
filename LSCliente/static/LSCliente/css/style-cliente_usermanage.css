@@ -1,0 +1,34 @@
+#userListModal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    top: 10%;
+    left: 20%;
+    width: 60%;
+    background: white;
+    padding: 20px;
+    border: 2px solid #444;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+#userListModal.active {
+    display: block;
+}
+
+#filtro-modal {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 12px;
+}
+
+.modal-actions {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+

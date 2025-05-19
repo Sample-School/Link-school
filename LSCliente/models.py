@@ -37,7 +37,9 @@ class UsuarioCliente(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_master = models.BooleanField(default=False)  # Se é administrador dentro do tenant
     date_joined = models.DateTimeField(default=timezone.now)
-    
+    foto = models.ImageField(upload_to='usuarios/', blank=True, null=True)
+
+
     objects = UsuarioClienteManager()
     
     USERNAME_FIELD = 'email'
@@ -45,12 +47,10 @@ class UsuarioCliente(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return f"{self.nome} ({self.email})"
+    
     class Meta:
         verbose_name = 'Usuário Cliente'
         verbose_name_plural = 'Usuários Cliente'
-    
-    def __str__(self):
-        return self.nome
     
     def set_password(self, raw_password):
         """
@@ -58,7 +58,10 @@ class UsuarioCliente(AbstractBaseUser, PermissionsMixin):
         o sistema de hash de senhas do Django.
         """
         self.password = make_password(raw_password)
-        self.save(update_fields=['password'])
+        # Só use update_fields se o objeto já tiver um ID
+        if self.pk:
+            self.save(update_fields=['password'])
+        # Caso contrário, não salve aqui - o save será chamado posteriormente
     
     def check_password(self, raw_password):
         """
