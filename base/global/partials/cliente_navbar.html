@@ -2,37 +2,34 @@
 
 {% if request.user.is_authenticated %}
   <nav class="navbar">
-    <div class="navbar__logo">
-      <img src="{% static "global/img/asset-your-logo.png" %}" alt="Logo da Instituição">
-    </div>
-    <ul class="navbar__list">
-      <li class="navbar__link">
+    <div class="navbar__container">
+      <a href="{% url 'LSCliente:clientehome' %}">
+        <img src="{% static "global/img/asset-your-logo.png" %}" alt="Sua Logo">
+      </a>
+      <ul class="navbar__list">
+        <li class="navbar__item">
           <a href="{% url 'LSCliente:clientehome' %}">Home</a>
-      </li>
-
-      <div class="navbar__vertical-line"></div>
-
-      <li class="navbar__link">
-          <a href="{% url 'LSCliente:CLProvaCreate' %}">Criar Prova</a>
-      </li>
-
-      <div class="navbar__vertical-line"></div>
-
-      <li class="navbar__link">
-          <a href="{% url 'LSCliente:CLParametros' %}">Parâmetros</a>
-      </li class="navbar__link">
-      {% if request.user.is_master %}
-        <div class="navbar_vertical-line"></div>
-
-        <li class="navbar__link">
-          <a href="{% url 'LSCliente:CLUserMange' %}">Gerenciar Usuários</a>
         </li>
-      {% endif %}
-      <li class="navbar__link">
-          <a class="icon" href="{% url 'LSCliente:clientelogout' %}">
+        <div class="navbar__vertical-line"></div>
+        <li class="navbar__item">
+          <a href="{% url 'LSCliente:CLProvaCreate' %}">Criar Prova</a>
+        </li>
+        <div class="navbar__vertical-line"></div>
+        <li class="navbar__item">
+          <a href="{% url 'LSCliente:CLParametros' %}">Parâmetros</a>
+        </li>
+        {% if request.user.is_master %}
+          <div class="navbar__vertical-line"></div>
+          <li class="navbar__item">
+            <a href="{% url 'LSCliente:CLUserMange' %}">Gerenciar Usuários</a>
+          </li>
+        {% endif %}
+        <li class="navbar__item">
+          <a id="icon" href="{% url 'LSCliente:clientelogout' %}">
             <i class="fa-regular fa-circle-user"></i>
           </a>
-      </li>
-    </ul>
+        </li>
+      </ul>
+    </div>
   </nav>
 {% endif %}
