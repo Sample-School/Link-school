@@ -1,38 +1,38 @@
 {% load static %}
 
 {% if request.user.is_authenticated %}
+  <svg class="navbar__circle" width="580" height="540" viewBox="0 0 831 769" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path opacity="0.3" d="M831 266.17C831 543.45 593.34 768.24 300.18 768.24C188.78 768.24 85.39 735.78 0 680.3V0H750.35C801.46 77.17 831 168.41 831 266.17Z" fill="#C3C3C3"/>
+  </svg>
   <nav class="navbar">
-    <div class="navbar__logo">
-      <img src="{% static "global/img/asset-your-logo.png" %}" alt="Logo da Instituição">
-    </div>
-    <ul class="navbar__list">
-      <li class="navbar__link">
+    <div class="navbar__container">
+      <a href="{% url 'LSCliente:clientehome' %}">
+        <img src="{% static "global/img/asset-your-logo.png" %}" alt="Sua Logo">
+      </a>
+      <ul class="navbar__list">
+        <li class="navbar__item">
           <a href="{% url 'LSCliente:clientehome' %}">Home</a>
-      </li>
-
-      <div class="navbar__vertical-line"></div>
-
-      <li class="navbar__link">
-          <a href="{% url 'LSCliente:CLProvaCreate' %}">Criar Prova</a>
-      </li>
-
-      <div class="navbar__vertical-line"></div>
-
-      <li class="navbar__link">
-          <a href="{% url 'LSCliente:CLParametros' %}">Parâmetros</a>
-      </li class="navbar__link">
-      {% if request.user.is_master %}
-        <div class="navbar_vertical-line"></div>
-
-        <li class="navbar__link">
-          <a href="{% url 'LSCliente:CLUserMange' %}">Gerenciar Usuários</a>
         </li>
-      {% endif %}
-      <li class="navbar__link">
-          <a class="icon" href="{% url 'LSCliente:clientelogout' %}">
+        <div class="navbar__vertical-line"></div>
+        <li class="navbar__item">
+          <a href="{% url 'LSCliente:CLProvaCreate' %}">Criar Prova</a>
+        </li>
+        <div class="navbar__vertical-line"></div>
+        <li class="navbar__item">
+          <a href="{% url 'LSCliente:CLParametros' %}">Parâmetros</a>
+        </li>
+        {% if request.user.is_master %}
+          <div class="navbar__vertical-line"></div>
+          <li class="navbar__item">
+            <a href="{% url 'LSCliente:CLUserMange' %}">Gerenciar Usuários</a>
+          </li>
+        {% endif %}
+        <li class="navbar__item">
+          <a id="icon" href="{% url 'LSCliente:clientelogout' %}">
             <i class="fa-regular fa-circle-user"></i>
           </a>
-      </li>
-    </ul>
+        </li>
+      </ul>
+    </div>
   </nav>
 {% endif %}
