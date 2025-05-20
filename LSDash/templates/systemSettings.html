@@ -5,31 +5,33 @@
 <link rel="stylesheet" href="{% static 'LSDash/css/style-systemSettings.css' %}">
 <link rel="icon" type="image/x-icon" href="{% static 'LSDash/img/favicon.ico' %}">
 <style>
-    /* Ajuste para a tabela com conteúdo centralizado */
     .table th, .table td {
         text-align: center;
         vertical-align: middle;
-        padding: 12px 15px; /* Aumentando o espaçamento nas células da tabela */
+        padding: 12px 15px;
     }
-
-    /* Outros ajustes */
     .table {
         width: 100%;
         border-collapse: collapse;
     }
-
     .table th {
         background-color: #e0e0e0;
         font-weight: bold;
+        position: sticky;
+        top: 0;
+        z-index: 2;
     }
-
-    /* Ajuste para a estrutura das divs */
     .usuarios-logados-container {
         margin-top: 20px;
     }
-
     .card-body {
         padding: 20px;
+    }
+    /* Adiciona rolagem vertical na tabela de usuários ativos */
+    .table-responsive {
+        max-height: 320px;
+        overflow-y: auto;
+        overflow-x: auto;
     }
 </style>
 {% endblock style %}
@@ -40,14 +42,11 @@
 </header>
 
 <div id="webcrumbs" class="container-fluid">
-    
-    
     <div class="container-top">
       <h1>configurações do sistema</h1>
       <div class="buttons">
-        <button class="bg-slate-200 hover:bg-slate-300 text-slate-700 transition-all px-6 py-2 rounded-full" id="btn-redefinir" type="reset">Redefinir</button>
-
-        <button class="bg-teal-500 hover:bg-teal-600 text-white transition-all px-6 py-2 rounded-full" id="btn-salvar" type="submit">Salvar</button>
+        <button class="bg-slate-200 hover:bg-slate-300 text-slate-700 transition-all px-6 py-2 rounded-full" id="btn-redefinir" type="button">Redefinir</button>
+        <button class="bg-teal-500 hover:bg-teal-600 text-white transition-all px-6 py-2 rounded-full" id="btn-salvar" type="button">Salvar</button>
       </div>
     </div>
 
@@ -61,7 +60,12 @@
                 <!-- Box de Usuários Ativos -->
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Usuários Ativos</h6>
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            Usuários Ativos
+                            <span class="text-slate-600 text-sm font-normal">
+                                ({{ sessoes_ativas|length }}/{{ total_usuarios }})
+                            </span>
+                        </h6>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -72,7 +76,7 @@
                                         <th>Início</th>
                                         <th>Última Atividade</th>
                                         <th>IP</th>
-
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -88,9 +92,7 @@
                                         <td>{{ sessao.data_inicio|date:"d/m/Y H:i" }}</td>
                                         <td>{{ sessao.ultima_atividade|date:"d/m/Y H:i" }}</td>
                                         <td>{{ sessao.endereco_ip }}</td>
-                                        <td>
-
-                                        </td>
+                                        <td></td>
                                     </tr>
                                     {% empty %}
                                     <tr>
@@ -108,8 +110,8 @@
                     <div class="font-semibold text-slate-800 mb-2">Deslogar Usuário</div>
                     <div class="flex items-center gap-2">
                         <div class="text-sm text-slate-600">Cód:</div>
-                        <input type="text" class="flex-1 border border-slate-300 rounded-md h-8 px-2 text-sm" />
-                        <button class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm">
+                        <input type="text" class="flex-1 border border-slate-300 rounded-md h-8 px-2 text-sm" id="codigo-deslogar" />
+                        <button class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm" data-type="codigo">
                             Aplicar
                         </button>
                     </div>
@@ -117,13 +119,19 @@
 
                 <!-- Box de Permanência em Inatividade -->
                 <div class="bg-slate-50 rounded-lg p-3">
-                    <div class="font-semibold text-slate-800 mb-2"">
+                    <div class="font-semibold text-slate-800 mb-2">
                         Permanência em Inatividade
                     </div>
                     <div class="flex items-center gap-2">
                         <div class="text-sm text-slate-600">Tempo:</div>
-                        <input type="text" id="input-tempo-inatividade" class="flex-1 border border-slate-300 rounded-md h-8 px-2 text-sm" value="00:45" />
-                        <button class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm">
+                        <input type="number" id="input-horas-inatividade" min="0" max="23" value="0"
+                            class="border border-slate-300 rounded-md h-8 px-2 text-sm w-16" style="width:60px;" /> 
+                        <span class="text-sm text-slate-600">h</span>
+                        <input type="number" id="input-minutos-inatividade" min="0" max="59" value="45"
+                            class="border border-slate-300 rounded-md h-8 px-2 text-sm w-16" style="width:60px;" />
+                        <span class="text-sm text-slate-600">min</span>
+                        <button class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm"
+                            data-type="tempo">
                             Aplicar
                         </button>
                     </div>
@@ -131,53 +139,17 @@
             </div>
         </div>
 
-        <!-- Imagens da Home -->
-        <!--
-        <div class="bg-white rounded-2xl shadow-md overflow-hidden border-2 border-slate-100">
-            <div class="bg-slate-50 p-4 font-semibold text-center text-slate-800">
-                Imagens da Home
-            </div>
-            <div class="p-4">
-                {% for i in "12" %}
-                <div class="mb-4">
-                    <div class="mb-2 text-slate-800 font-medium">{{ forloop.counter }}ª Imagem</div>
-                    <div class="flex items-center gap-3">
-                        <div class="flex-1 bg-slate-100 rounded-lg h-24 flex items-center justify-center">
-                            <span class="material-symbols-outlined text-5xl text-slate-400" aria-label="Upload de imagem">upload</span>
-                        </div>
-                        <div>
-                            <input type="file" id="upload{{ forloop.counter }}" class="hidden" />
-                            <button onclick="document.getElementById('upload{{ forloop.counter }}').click()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 transition-all px-4 py-1 rounded-full text-sm w-24 mb-2">
-                                Carregar
-                            </button>
-                            <button class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm w-24">
-                                Aplicar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-                <div class="text-sm text-slate-600 italic" title="A imagem deve ter YYYY x YYYY">OBS: A imagem deve ter tamanho adequado</div>
-            </div>
-        </div>
-        -->
-
         <!-- Imagens da Home (MODIFICADO) -->
         <div class="bg-white rounded-2xl shadow-md overflow-hidden border-2 border-slate-100">
             <div class="bg-slate-50 p-4 font-semibold text-center text-slate-800">
                 Imagens da Home
             </div>
-
-            
             <div class="p-4">
                 {% for i in "12" %}
                 <div class="mb-6">
                     <div class="mb-2 text-slate-800 font-medium">{{ forloop.counter }}ª Imagem</div>
-                    
                     <div class="flex items-start gap-4">
-                        <!-- Inputs e Botões -->
                         <div class="flex flex-col gap-2 w-48">
-                            <!-- Input de arquivo escondido -->
                             <input 
                                 type="file" 
                                 id="upload{{ forloop.counter }}" 
@@ -185,26 +157,20 @@
                                 style="position: absolute; left: -9999px;"
                                 onchange="previewImage(event, {{ forloop.counter }})"
                             />
-
                             <button onclick="document.getElementById('upload{{ forloop.counter }}').click()" 
                                     class="bg-slate-200 hover:bg-slate-300 text-slate-700 transition-all px-4 py-1 rounded-full text-sm w-full">
                                 Escolher arquivo
                             </button>
-                            <button class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm w-full">
+                            <button class="btn-aplicar bg-teal-500 hover:bg-teal-600 text-white transition-all px-4 py-1 rounded-full text-sm w-full" data-type="imagem" data-input="upload{{ forloop.counter }}">
                                 Aplicar
                             </button>
                         </div>
-
-                        <!-- Preview da Imagem (agora dinâmico) -->
                         <div class="flex-1 bg-slate-100 rounded-lg h-24 flex items-center justify-center overflow-hidden" id="preview{{ forloop.counter }}">
-                            <span class="material-symbols-outlined text-5xl text-slate-400">upload</span> <!-- Ícone SVG -->
+                            <span class="material-symbols-outlined text-5xl text-slate-400">upload</span>
                         </div>
                     </div>
                 </div>
-
                 {% endfor %} 
-                
-                <!-- Observação Específica -->
                 <div class="text-sm text-slate-600 italic mt-2">
                     OBS: A imagem deve ter 500 x 500 pixels.
                 </div>
@@ -217,25 +183,19 @@
                 Observações do Administrador
             </div>
             <div class="p-4">
-                <textarea class="w-full h-24 bg-slate-100 rounded-lg p-4 resize-none" placeholder="Digite suas observações aqui..."></textarea>
+                <textarea class="w-full h-24 bg-slate-100 rounded-lg p-4 resize-none" placeholder="Digite suas observações aqui..." id="obs-admin"></textarea>
             </div>
         </div>
     </div>
 </div>
 
-
-<!-- No final do seu template, ANTES do fechamento do body -->
 <script>
-// Função global garantida
 window.previewImage = function(event, counter) {
     const file = event.target.files[0];
     if (!file) return;
-
     const preview = document.getElementById('preview' + counter);
     if (!preview) return;
-
     preview.innerHTML = '<span class="text-sm">Carregando...</span>';
-    
     const reader = new FileReader();
     reader.onload = function(e) {
         preview.innerHTML = `
@@ -252,40 +212,88 @@ window.previewImage = function(event, counter) {
 
 {% block extra_js %}
 <script>
-    $(document).ready(function () {
-        // Barra de progresso dinâmica
-        const usuariosAtivos = 4;
-        const totalUsuarios = 10;
-        const percentual = (usuariosAtivos / totalUsuarios) * 100;
-        $('.barra-progresso').css('width', `${percentual}%`);
+// Função para mostrar popup customizado
+function showPopup(message, type="success") {
+    $('#custom-popup').remove();
+    let bgColor = type === "success" ? "#16a34a" : "#dc2626";
+    const popup = $(`
+        <div id="custom-popup" style="
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: ${bgColor};
+            color: #fff;
+            padding: 18px 32px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            z-index: 9999;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 220px;
+        ">
+            <span style="font-size:1.5em;">${type === "success" ? "✔️" : "❌"}</span>
+            <span>${message}</span>
+        </div>
+    `);
+    $('body').append(popup);
+    setTimeout(() => {
+        $('#custom-popup').fadeOut(400, function() { $(this).remove(); });
+    }, 2200);
+}
 
-        // Redefinir campos
-        $('#btn-redefinir').on('click', function () {
-            $('input[type="text"]').val('');
-            $('textarea').val('');
-            alert('Os campos foram redefinidos!');
+$(document).ready(function () {
+    // Redefinir campos
+    $('#btn-redefinir').on('click', function () {
+        $('input[type="text"], input[type="number"]').val('');
+        $('textarea').val('');
+        $('input[type="file"]').val('');
+        $('[id^="preview"]').each(function() {
+            $(this).html('<span class="material-symbols-outlined text-5xl text-slate-400">upload</span>');
         });
-
-        // Simular salvamento
-        $('#btn-salvar').on('click', function () {
-            alert('As configurações foram salvas com sucesso!');
-        });
-
-        // Validação e aplicação de dados
-        $('.btn-aplicar').on('click', function () {
-            const input = $(this).siblings('input[type="text"]').val();
-            const isTimeInput = $(this).siblings('input').attr('id') === 'input-tempo-inatividade';
-            const regexTime = /^\d{2}:\d{2}$/;
-
-            if (!input) {
-                alert('Por favor, insira um valor antes de aplicar.');
-            } else if (isTimeInput && !regexTime.test(input)) {
-                alert('Formato inválido. Use o padrão HH:MM.');
-            } else {
-                alert(`Valor aplicado: ${input}`);
-            }
-        });
+        $('#input-horas-inatividade').val(0);
+        $('#input-minutos-inatividade').val(45);
+        showPopup('Os campos foram redefinidos!', "success");
     });
-    
+
+    // Simular salvamento
+    $('#btn-salvar').on('click', function () {
+        showPopup('As configurações foram salvas com sucesso!', "success");
+    });
+
+    // Aplicar botões
+    $('.btn-aplicar').on('click', function () {
+        const tipo = $(this).data('type');
+        if (tipo === 'codigo') {
+            const codigo = $('#codigo-deslogar').val();
+            if (codigo) {
+                showPopup(`Código "${codigo}" aplicado para deslogar usuário!`, "success");
+            } else {
+                showPopup('Por favor, informe o código do usuário.', "error");
+            }
+        } else if (tipo === 'tempo') {
+            const horas = parseInt($('#input-horas-inatividade').val(), 10) || 0;
+            const minutos = parseInt($('#input-minutos-inatividade').val(), 10) || 0;
+            if (horas === 0 && minutos === 0) {
+                showPopup('Por favor, informe um tempo maior que zero.', "error");
+            } else if (horas < 0 || minutos < 0 || minutos > 59 || horas > 23) {
+                showPopup('Valores inválidos para horas ou minutos.', "error");
+            } else {
+                const tempoFormatado = `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}`;
+                showPopup(`Tempo de inatividade "${tempoFormatado}" aplicado!`, "success");
+            }
+        } else if (tipo === 'imagem') {
+            const inputId = $(this).data('input');
+            const fileInput = document.getElementById(inputId);
+            if (fileInput && fileInput.files.length > 0) {
+                showPopup('Imagem aplicada com sucesso!', "success");
+            } else {
+                showPopup('Por favor, selecione uma imagem antes de aplicar.', "error");
+            }
+        }
+    });
+});
 </script>
 {% endblock %}
