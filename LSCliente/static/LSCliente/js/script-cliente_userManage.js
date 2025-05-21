@@ -1,55 +1,57 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const modal = document.getElementById('userListModal');
-    const abrirModalBtn = document.getElementById('abrir-modal');
-    const fecharModalBtn = document.getElementById('fechar-modal');
-    const buscarBtn = document.getElementById('btn-buscar-id');
-    const inputId = document.getElementById('buscar-id');
-    const usuarios = document.querySelectorAll('.usuario-item');
-    const filtroInput = document.getElementById('filtro-modal');
-
-    function preencherFormulario(usuario) {
-        document.getElementById('usuario_id').value = usuario.id;
-        document.querySelector('[name="nome"]').value = usuario.nome;
-        document.querySelector('[name="email"]').value = usuario.email;
-        document.querySelector('[name="password"]').value = '';
-        const passConfirm = document.querySelector('[name="password_confirm"]');
-        if (passConfirm) passConfirm.value = '';
+document.addEventListener('DOMContentLoaded', function() {
+    // Preview da imagem quando selecionada
+    const inputFoto = document.querySelector('input[type="file"]');
+    if (inputFoto) {
+        inputFoto.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                
+                // Verificar se já existe uma preview
+                let previewContainer = document.querySelector('.foto-preview');
+                if (!previewContainer) {
+                    previewContainer = document.createElement('div');
+                    previewContainer.className = 'foto-preview';
+                    this.parentNode.appendChild(previewContainer);
+                }
+                
+                // Limpar conteúdo anterior
+                previewContainer.innerHTML = '';
+                
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = 'Foto do usuário';
+                    img.className = 'user-photo-preview';
+                    previewContainer.appendChild(img);
+                }
+                
+                reader.readAsDataURL(file);
+            }
+        });
     }
-
-    abrirModalBtn.addEventListener('click', () => modal.classList.add('active'));
-    fecharModalBtn.addEventListener('click', () => modal.classList.remove('active'));
-
-    buscarBtn.addEventListener('click', function () {
-        const id = inputId.value.trim();
-        if (!id) return alert("Digite um ID válido");
-
-        const user = [...usuarios].find(el => el.dataset.id === id);
-        if (!user) return alert("Usuário não encontrado");
-
-        preencherFormulario({
-            id: user.dataset.id,
-            nome: user.dataset.nome,
-            email: user.dataset.email
+    
+    // Avisar se o usuário tentar sair sem salvar alterações
+    const form = document.getElementById('usuario-form');
+    if (form) {
+        let formChanged = false;
+        
+        form.addEventListener('change', function() {
+            formChanged = true;
         });
-    });
-
-    usuarios.forEach(el => {
-        el.querySelector('.selecionar-usuario').addEventListener('click', () => {
-            preencherFormulario({
-                id: el.dataset.id,
-                nome: el.dataset.nome,
-                email: el.dataset.email
-            });
-            modal.classList.remove('active');
+        
+        // Quando o usuário sair da página
+        window.addEventListener('beforeunload', function(e) {
+            if (formChanged) {
+                e.preventDefault();
+                e.returnValue = 'Você tem alterações não salvas. Deseja realmente sair?';
+                return e.returnValue;
+            }
         });
-    });
-
-    filtroInput.addEventListener('input', function () {
-        const termo = this.value.toLowerCase().trim();
-        usuarios.forEach(el => {
-            const nome = el.dataset.nome.toLowerCase();
-            const email = el.dataset.email.toLowerCase();
-            el.style.display = nome.includes(termo) || email.includes(termo) ? 'flex' : 'none';
+        
+        // Quando o formulário for enviado, não precisamos mais do alerta
+        form.addEventListener('submit', function() {
+            formChanged = false;
         });
-    });
+    }
 });

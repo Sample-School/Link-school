@@ -1,115 +1,97 @@
 {% extends "global/cliente-base.html" %}
 {% load static %}
 
-{% block title %}
-  <title>{{ tenant_name }} - Home</title>
-{% endblock %}
+{% block title %}{% endblock %}
 
-{% block styles %}
-<link rel="stylesheet" href="{% static "LSCliente/css/style-cliente_usermanage.css" %}">
-{% endblock styles %}
+{% block styles %}{% endblock styles %}
 
 {% block content %}
-  <header>
-    {% include "global/partials/cliente_navbar.html" %}
-  </header>
-
-  <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciar Usuário</title>
-
-    
-    
-    
-</head>
-<body>
-
-<h2>Gerenciar Usuário</h2>
-
-<!-- Busca por ID + Botão modal -->
-<div class="row">
-    <div class="col">
-        <label for="buscar-id" class="form-label">Buscar por ID</label>
-        <input type="text" id="buscar-id" placeholder="Digite o ID do usuário">
+  {% include "global/partials/cliente_navbar.html" %}
+  
+  <h1>{% if form.instance.id %}Editar{% else %}Novo{% endif %} Usuário</h1>
+  <a href="#">Voltar para Lista</a>
+  
+  {% if messages %}
+    <div>
+      {% for message in messages %}
+        <div>{{ message }}</div>
+      {% endfor %}
     </div>
-    <div class="col">
-        <label>&nbsp;</label>
-        <button id="btn-buscar-id" class="btn-primary">Buscar</button>
+  {% endif %}
+  
+  {% if form.non_field_errors %}
+    <div>
+      {% for error in form.non_field_errors %}
+        <div>{{ error }}</div>
+      {% endfor %}
     </div>
-    <div class="col">
-        <label>&nbsp;</label>
-        <button id="abrir-modal" class="btn-secondary">Selecionar usuário existente</button>
-    </div>
-</div>
-
-<!-- Mensagens de sucesso do Django -->
-{% if messages %}
-<div class="alert-container">
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags }}" role="alert">
-        {{ message }}
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
-
-<!-- Erros não relacionados a campos específicos -->
-{% if form.non_field_errors %}
-<div class="alert-container">
-    {% for error in form.non_field_errors %}
-    <div class="alert alert-danger" role="alert">
-        {{ error }}
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
-
-<!-- Formulário -->
-<form method="post" enctype="multipart/form-data" id="usuario-form">
-    
-    
+  {% endif %}
+  
+  <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    <input type="hidden" name="usuario_id" id="usuario_id">
-    <label for="{{ form.nome.id_for_label }}" class="form-label">Nome</label>
-    {{ form.nome }}
-
-    <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
-    {{ form.email }}
-
-    <label for="{{ form.password.id_for_label }}" class="form-label">Senha</label>
-    {{ form.password }}
-
-    <label for="{{ form.password_confirm.id_for_label }}" class="form-label">Confirme a Senha</label>
-    {{ form.password_confirm }}
-
-    <label for="{{ form.foto.id_for_label }}" class="form-label">Foto</label>
-    {{ form.foto }}
-
-    <button type="submit" class="btn-primary">Salvar</button>
-</form>
-
-<!-- Modal -->
-<div id="userListModal">
-    <h3>Selecionar Usuário</h3>
-    <input type="text" id="filtro-modal" placeholder="Filtrar por nome ou email...">
-    <div id="lista-usuarios-modal">
-        {% for usuario in usuarios %}
-        <div class="usuario-item" data-id="{{ usuario.id }}" data-nome="{{ usuario.nome }}" data-email="{{ usuario.email }}">
-            <span>{{ usuario.nome }} ({{ usuario.email }})</span>
-            <button class="btn-primary selecionar-usuario">Selecionar</button>
-        </div>
-        {% endfor %}
+    {% if form.instance.id %}
+    <input type="hidden" name="id" value="{{ form.instance.id }}">
+    {% endif %}
+    
+    <div>
+      <label for="{{ form.nome.id_for_label }}">Nome</label>
+      {{ form.nome }}
+      {% if form.nome.errors %}
+      <div>{{ form.nome.errors }}</div>
+      {% endif %}
     </div>
-    <div class="modal-actions">
-        <button class="btn-danger" id="fechar-modal">Fechar</button>
+    
+    <div>
+      <label for="{{ form.email.id_for_label }}">Email</label>
+      {{ form.email }}
+      {% if form.email.errors %}
+      <div>{{ form.email.errors }}</div>
+      {% endif %}
     </div>
-</div>
-
-<script src="{% static "LSCliente/js/script-cliente_userManage" %}"></script>
-</body>
-</html>
-
+    
+    <div>
+      <label for="{{ form.password.id_for_label }}">Senha</label>
+      {{ form.password }}
+      {% if form.password.errors %}
+      <div>{{ form.password.errors }}</div>
+      {% endif %}
+    </div>
+    
+    <div>
+      <label for="{{ form.password_confirm.id_for_label }}">Confirme a Senha</label>
+      {{ form.password_confirm }}
+      {% if form.password_confirm.errors %}
+      <div>{{ form.password_confirm.errors }}</div>
+      {% endif %}
+    </div>
+    
+    <div>
+      <label for="{{ form.is_active.id_for_label }}">Status</label>
+      <div>
+        {{ form.is_active }}
+      </div>
+      {% if form.is_active.errors %}
+      <div>{{ form.is_active.errors }}</div>
+      {% endif %}
+    </div>
+    
+    <div>
+      <label for="{{ form.foto.id_for_label }}">Foto</label>
+      {{ form.foto }}
+      {% if form.foto.errors %}
+      <div>{{ form.foto.errors }}</div>
+      {% endif %}
+      
+      {% if form.instance.foto %}
+      <div>
+        <img src="{{ form.instance.foto.url }}" alt="Foto atual">
+      </div>
+      {% endif %}
+    </div>
+    
+    <div>
+      <button type="submit">Salvar</button>
+      <a href="#">Cancelar</a>
+    </div>
+  </form>
 {% endblock %}

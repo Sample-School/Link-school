@@ -24,6 +24,7 @@ from django.utils.text import slugify
 from django import forms
 from django.utils import timezone
 from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
+from django.db.models import Q
 
 from .forms import CustomPasswordResetForm, UsuarioClienteForm
 from .models import UsuarioCliente
@@ -184,22 +185,20 @@ class TenantAwarePasswordResetConfirmView(View):
         return context
 
 
-class ClienteUserMangeView(LoginRequiredMixin, ListView):
-    model = UsuarioCliente
+class ClienteUserMangeView(LoginRequiredMixin, View):
     template_name = 'cliente_userManage.html'
-    context_object_name = 'usuarios'
+    success_url = reverse_lazy('LSCliente:CLUserList')
     
-    def get_queryset(self):
-        return UsuarioCliente.objects.all().order_by('-date_joined')
+    def get_object(self):
+        user_id = self.request.GET.get('id')
+        if user_id:
+            return get_object_or_404(UsuarioCliente, id=user_id)
+        return None
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Adiciona o formulário ao contexto - seja vazio ou com dados
-        if hasattr(self, 'form'):
-            context['form'] = self.form
-        else:
-            context['form'] = UsuarioClienteForm()
-        return context
+    def get(self, request, *args, **kwargs):
+        usuario = self.get_object()
+        form = UsuarioClienteForm(instance=usuario) if usuario else UsuarioClienteForm()
+        return render(request, self.template_name, {'form': form})
     
     def post(self, request, *args, **kwargs):
         usuario_id = request.POST.get('usuario_id')
@@ -209,9 +208,9 @@ class ClienteUserMangeView(LoginRequiredMixin, ListView):
             try:
                 usuario = get_object_or_404(UsuarioCliente, id=usuario_id)
                 form = UsuarioClienteForm(request.POST, request.FILES, instance=usuario)
-            except:
-                messages.error(request, 'Usuário não encontrado.')
-                return redirect(reverse_lazy('LSCliente:CLUserMange'))
+            except Exception as e:
+                messages.error(request, f'Usuário não encontrado. Erro: {str(e)}')
+                return redirect(self.success_url)
         else:
             # Modo de criação
             form = UsuarioClienteForm(request.POST, request.FILES)
@@ -220,24 +219,49 @@ class ClienteUserMangeView(LoginRequiredMixin, ListView):
             try:
                 form.save()
                 messages.success(request, 'Usuário salvo com sucesso!')
-                return redirect(reverse_lazy('LSCliente:CLUserMange'))
+                return redirect(self.success_url)
             except Exception as e:
                 messages.error(request, f'Erro ao salvar usuário: {str(e)}')
-        else:
-            # Se o formulário tem erros, vamos garantir que sejam exibidos
-            for field, errors in form.errors.items():
-                for error in errors:
-                    if field == '__all__':  # Erros não relacionados a campos específicos
-                        messages.error(request, error)
-                    else:
-                        # Os erros de campo já são tratados no template
-                        pass
         
-        # Se inválido, retorna o formulário com erros
-        self.form = form
-        self.object_list = self.get_queryset()
-        return self.render_to_response(self.get_context_data())
+        # Se o formulário tem erros ou ocorreu uma exceção
+        return render(request, self.template_name, {'form': form})
+
+class ClienteUserListView(LoginRequiredMixin, ListView):
+    model = UsuarioCliente
+    template_name = 'cliente_userList.html'
+    context_object_name = 'usuarios'
+    paginate_by = 10  # Paginação de 10 usuários por página
     
+    def get_queryset(self):
+        queryset = UsuarioCliente.objects.all().order_by('-date_joined')
+        
+        # Filtro de pesquisa
+        search_query = self.request.GET.get('search')
+        if search_query:
+            queryset = queryset.filter(
+                Q(nome__icontains=search_query) | 
+                Q(email__icontains=search_query)
+            )
+            
+        return queryset
+
+class ClienteUserToggleStatusView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        try:
+            usuario = get_object_or_404(UsuarioCliente, id=pk)
+            usuario.is_active = not usuario.is_active
+            usuario.save()
+            
+            if usuario.is_active:
+                messages.success(request, f'Usuário {usuario.nome} ativado com sucesso!')
+            else:
+                messages.success(request, f'Usuário {usuario.nome} inativado com sucesso!')
+                
+        except Exception as e:
+            messages.error(request, f'Erro ao alterar status do usuário: {str(e)}')
+            
+        return redirect('LSCliente:CLUserList')
+
 class ClienteProvaCreateView(LoginRequiredMixin, TemplateView):
     template_name = 'cliente_provaCreate.html'
 

@@ -18,6 +18,8 @@ urlpatterns = [
     path('CLProvaCreate/', views.ClienteProvaCreateView.as_view(), name='CLProvaCreate'),
     path('CLParametros/', views.ClienteParametroView.as_view(), name='CLParametros'),
     path('logout/', views.custom_logout_view, name='clientelogout'),
+    path('CLUserList/', views.ClienteUserListView.as_view(), name='CLUserList'),
+    path('CLUserToggleStatus/<int:pk>/', views.ClienteUserToggleStatusView.as_view(), name='CLUserToggleStatus'),
 
 
     # urls para recuperação de conta - ATUALIZADO
