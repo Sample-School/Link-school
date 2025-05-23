@@ -20,3 +20,28 @@
   box-sizing: border-box;
   font-family: "Inter", sans-serif;
 }
+
+
+.container-flex {
+  display: flex;           /* Ativa flexbox */
+  justify-content: space-between; /* Espaço entre as colunas */
+  align-items: flex-start; /* Alinha no topo */
+  gap: 20px;               /* Espaço entre colunas */
+}
+
+.left-col, .right-col {
+  flex: 1;                 /* Cresce igualmente */
+  border: 1px solid #ddd;
+  padding: 15px;
+}
+
+/* Opcional: Larguras fixas */
+.left-col {
+  flex: 0 0 60%;           /* Não cresce, não encolhe, largura 60% */
+  
+}
+.right-col {
+    flex: 0 0 35%;           /* 35% do container */
+    margin-right: 5%;
+
+}

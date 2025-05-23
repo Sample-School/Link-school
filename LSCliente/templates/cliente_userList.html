@@ -15,78 +15,93 @@
 {% block content %}
   {% include "global/partials/cliente_navbar.html" %}
   
-  <h1 class="listadeusuarioletreiro">
-    Lista <br> 
-    de <br>
-    <div class="listadeusuarioletreiromaisescuro">Usuários</div>
+
+<div class="container-flex">
+
+  <div class="left-col">
+    <h1 class="listadeusuarioletreiro">
+      Lista <br> 
+      de <br>
+      <div class="listadeusuarioletreiromaisescuro">Usuários</div>
+      
+    </h1>
+    <a href="#">Novo Usuário</a>
     
-  </h1>
-  <a href="#">Novo Usuário</a>
-  
-  {% if messages %}
-    <div>
-      {% for message in messages %}
-        <div>{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-  
-  
-  <div>
-    <input type="text" placeholder="Buscar">
-  </div>
-  
-  <div>
-    {% if usuarios %}
-      {% for usuario in usuarios %}
-        <div>
-          <div>
-            {% if usuario.foto %}
-              <img src="{{ usuario.foto.url }}" alt="Foto de {{ usuario.nome }}">
-            {% else %}
-              <img src="{% static 'img/default-user.png' %}" alt="Foto padrão">
-            {% endif %}
-          </div>
-          
-          <div>
-            <h3>{{ usuario.nome }}</h3>
-            <p><strong>ID:</strong> {{ usuario.id }}</p>
-            <p><strong>Status:</strong> {% if usuario.is_active %}Ativo{% else %}Inativo{% endif %}</p>
-            <p><strong>Email:</strong> {{ usuario.email }}</p>
-          </div>
-          
-          <div>
-            <a href="#">Editar</a>
-            <form method="post" action="#">
-              {% csrf_token %}
-              <input type="hidden" name="usuario_id" value="{{ usuario.id }}">
-              <button type="submit">
-                {% if usuario.is_active %}Inativar{% else %}Ativar{% endif %}
-              </button>
-            </form>
-          </div>
-        </div>
-      {% endfor %}
-    {% else %}
+    {% if messages %}
       <div>
-        <p>Nenhum usuário encontrado.</p>
+        {% for message in messages %}
+          <div>{{ message }}</div>
+        {% endfor %}
       </div>
     {% endif %}
   </div>
-  
-  {% if is_paginated %}
+
+  <div class="right-col">
     <div>
-      {% if page_obj.has_previous %}
-        <a href="#">« primeira</a>
-        <a href="#">anterior</a>
-      {% endif %}
-      
-      <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-      
-      {% if page_obj.has_next %}
-        <a href="#">próxima</a>
-        <a href="#">última »</a>
+    <input type="text" placeholder="Buscar">
+    </div>
+  
+    <div>
+      {% if usuarios %}
+        {% for usuario in usuarios %}
+          <div>
+            <div>
+              {% if usuario.foto %}
+                <img src="{{ usuario.foto.url }}" alt="Foto de {{ usuario.nome }}">
+              {% else %}
+                <img src="{% static 'img/default-user.png' %}" alt="Foto padrão">
+              {% endif %}
+            </div>
+            
+            <div>
+              <h3>{{ usuario.nome }}</h3>
+              <p><strong>ID:</strong> {{ usuario.id }}</p>
+              <p><strong>Status:</strong> {% if usuario.is_active %}Ativo{% else %}Inativo{% endif %}</p>
+              <p><strong>Email:</strong> {{ usuario.email }}</p>
+            </div>
+            
+            <div>
+              <a href="#">Editar</a>
+              <form method="post" action="#">
+                {% csrf_token %}
+                <input type="hidden" name="usuario_id" value="{{ usuario.id }}">
+                <button type="submit">
+                  {% if usuario.is_active %}Inativar{% else %}Ativar{% endif %}
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div>
+          <p>Nenhum usuário encontrado.</p>
+        </div>
       {% endif %}
     </div>
-  {% endif %}
+  
+    {% if is_paginated %}
+      <div>
+        {% if page_obj.has_previous %}
+          <a href="#">« primeira</a>
+          <a href="#">anterior</a>
+        {% endif %}
+        
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        
+        {% if page_obj.has_next %}
+          <a href="#">próxima</a>
+          <a href="#">última »</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  </div>
+
+
+</div>
+  
+  
+  
+  
+
 {% endblock %}	
