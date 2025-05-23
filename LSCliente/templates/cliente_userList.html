@@ -1,14 +1,26 @@
 {% extends "global/cliente-base.html" %}
 {% load static %}
 
-{% block title %}{% endblock %}
+{% block title %}  
+{% endblock %}
 
-{% block styles %}{% endblock styles %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static 'LSCliente/css/style-cliente_list_user.css' %}">
+  <link rel="stylesheet" href="{% static "global/css/cliente-navbar.css" %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+{% endblock styles %}
+
 
 {% block content %}
   {% include "global/partials/cliente_navbar.html" %}
   
-  <h1>Lista de Usuários</h1>
+  <h1 class="listadeusuarioletreiro">
+    Lista <br> 
+    de <br>
+    <div class="listadeusuarioletreiromaisescuro">Usuários</div>
+    
+  </h1>
   <a href="#">Novo Usuário</a>
   
   {% if messages %}
@@ -18,6 +30,7 @@
       {% endfor %}
     </div>
   {% endif %}
+  
   
   <div>
     <input type="text" placeholder="Buscar">
@@ -76,4 +89,4 @@
       {% endif %}
     </div>
   {% endif %}
-{% endblock %}
+{% endblock %}	
