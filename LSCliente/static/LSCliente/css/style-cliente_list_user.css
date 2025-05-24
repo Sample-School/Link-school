@@ -31,17 +31,47 @@
 
 .left-col, .right-col {
   flex: 1;                 /* Cresce igualmente */
-  border: 1px solid #ddd;
-  padding: 15px;
+
+  
 }
 
 /* Opcional: Larguras fixas */
 .left-col {
-  flex: 0 0 60%;           /* Não cresce, não encolhe, largura 60% */
-  
-}
-.right-col {
-    flex: 0 0 35%;           /* 35% do container */
-    margin-right: 5%;
+  flex: 0 0 35%;           /* Não cresce, não encolhe, largura 60% */
+  padding: 15px;
 
 }
+.right-col {
+    flex: 0 0 50%;           /* 35% do container */
+    margin-left: auto;
+    margin-top: 2%;
+   
+}
+
+.blocoparalista {
+    background-color: rgba(195, 195, 195, 1);
+    margin-top: 5%;
+
+    border-top-left-radius: 50px;
+    border-bottom-left-radius: 50px; 
+
+
+    padding-top: 5%;
+    padding-bottom: 5%;
+    padding-left: 5%;
+    padding-right: 5%;
+    
+}
+
+.barrapesquisa {
+    margin-bottom: 5%
+}
+
+.userslist {
+    margin-top: 2%;
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 20px;
+    padding-left: 2%;
+     border: 1px solid #ddd;
+}
+
