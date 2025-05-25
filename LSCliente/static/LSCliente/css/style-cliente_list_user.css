@@ -50,7 +50,7 @@
 
 .blocoparalista {
     background-color: rgba(195, 195, 195, 1);
-    margin-top: 5%;
+
 
     border-top-left-radius: 50px;
     border-bottom-left-radius: 50px; 
@@ -63,8 +63,69 @@
     
 }
 
-.barrapesquisa {
+.areadabarradepesquisa {
+
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  border-bottom-left-radius: 20px;
+
+
+  margin-bottom: 1%;
+  margin-right: 1%;
+  margin-left: 4%;
+
+  padding-top: 4.5%;
+  display: flex;
+  align-items: center;        
+  justify-content: center;    
+  height: 40px; 
+  min-height: 20px;           
+  background-color: rgba(126, 126, 126, 1); 
+  
+  
+}
+
+.lupa {
+  scale: 0.7;
+  margin-bottom: 4%;
+  margin-left: 2%;
+}
+
+
+.areadabarradepesquisa .barrapesquisa {
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 5%;
+
+}
+
+.barrapesquisa input {
+    width: 90%;
+    height: 30%;
+    max-width: 800px;
+    padding: 12px 20px;
+    margin-bottom: 4%;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    background-color: rgba(255, 255, 255, 1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.areadabarradepesquisa .barrapesquisa .input {
+
+  width: 100%;
+}
+
+/*.barrapesquisa {
     margin-bottom: 5%
+}*/
+
+.barrapesquisa {
+  width: 100%; /* Ocupa 100% do container pai */
+  display: flex;
+  justify-content: center;
 }
 
 .userslist {
