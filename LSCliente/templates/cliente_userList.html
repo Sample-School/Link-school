@@ -64,7 +64,30 @@
     <div class="userslist">
       {% if usuarios %}
         {% for usuario in usuarios %}
-          <div>
+          
+        <div class="cardusuario">
+            
+            
+            <div>
+              <h3>{{ usuario.nome }}</h3>
+              
+              
+              
+              
+
+                <div class="informacoesusuario">
+                  <p><strong>ID:</strong> {{ usuario.id }}</p>
+
+                  <div>
+                    <p><strong>Status:</strong> {% if usuario.is_active %}Ativo{% else %}Inativo{% endif %}</p>
+                  </div>
+                
+                </div>
+                <p><strong>Email:</strong> {{ usuario.email }}</p>
+
+
+            </div>
+
             <div>
               {% if usuario.foto %}
                 <img src="{{ usuario.foto.url }}" alt="Foto de {{ usuario.nome }}">
@@ -72,14 +95,6 @@
                 <img src="{% static 'img/default-user.png' %}" alt="Foto padrão">
               {% endif %}
             </div>
-            
-            <div>
-              <h3>{{ usuario.nome }}</h3>
-              <p><strong>ID:</strong> {{ usuario.id }}</p>
-              <p><strong>Status:</strong> {% if usuario.is_active %}Ativo{% else %}Inativo{% endif %}</p>
-              <p><strong>Email:</strong> {{ usuario.email }}</p>
-            </div>
-            
             <div>
               <a href="#">Editar</a>
               <form method="post" action="#">

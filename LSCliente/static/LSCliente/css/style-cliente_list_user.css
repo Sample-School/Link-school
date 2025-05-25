@@ -101,6 +101,21 @@
 
 }
 
+.informacoesusuario {
+  display: flex;           /* Ativa o flexbox */
+  gap: 10px;              /* Espaço entre os elementos */
+  align-items: center; 
+}
+
+.cardusuario {
+  display: flex;           /* Ativa o flexbox */
+  gap: 50px;              /* Espaço entre os elementos */
+  align-items: center;
+
+  margin-top: 2%;
+  margin-bottom: 2%;
+}
+
 .barrapesquisa input {
     width: 90%;
     height: 30%;
