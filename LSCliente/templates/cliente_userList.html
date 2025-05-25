@@ -66,37 +66,64 @@
         {% for usuario in usuarios %}
           
         <div class="cardusuario">
+           
+          
+          <div class="usuariocontainerflex">
+          </div>
             
-            
-            <div>
+          <div class="dadosusuario">
+
               <h3>{{ usuario.nome }}</h3>
               
-              
-              
-              
-
                 <div class="informacoesusuario">
-                  <p><strong>ID:</strong> {{ usuario.id }}</p>
+                  
+                  <p><strong>ID:</strong> 
+                    
+                    <div class="userid">
+                      {{ usuario.id }}
+                    </div>
 
-                  <div>
-                    <p><strong>Status:</strong> {% if usuario.is_active %}Ativo{% else %}Inativo{% endif %}</p>
+                  </p>
+
+                  <div >
+                    <p><strong>STATUS:</strong> 
+
+                      <div class="useractivate">
+                        {% if usuario.is_active %}ATIVO{% else %}INATIVO{% endif %}
+                      </div>
+
+                    </p>
+
                   </div>
+                 
+
+                    
                 
                 </div>
-                <p><strong>Email:</strong> {{ usuario.email }}</p>
+                <p><strong>EMAIL</strong> <br> 
+                  
+                  <div class="useremail">
+                    {{ usuario.email }}
+                  </div>
+                  
+                
+                </p>
 
+          </div>
 
-            </div>
-
-            <div>
+          <div class="fotousuario">
               {% if usuario.foto %}
                 <img src="{{ usuario.foto.url }}" alt="Foto de {{ usuario.nome }}">
               {% else %}
                 <img src="{% static 'img/default-user.png' %}" alt="Foto padrão">
               {% endif %}
-            </div>
-            <div>
-              <a href="#">Editar</a>
+          </div>
+
+            <div class="opcoesusuario">
+              <span class="botaoeditar">
+                <a href="#">EDITAR</a>
+              </span>
+              
               <form method="post" action="#">
                 {% csrf_token %}
                 <input type="hidden" name="usuario_id" value="{{ usuario.id }}">
@@ -104,8 +131,15 @@
                   {% if usuario.is_active %}Inativar{% else %}Ativar{% endif %}
                 </button>
               </form>
+
+
             </div>
+
+
           </div>
+
+
+
         {% endfor %}
       {% else %}
         <div>
