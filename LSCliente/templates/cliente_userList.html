@@ -88,9 +88,9 @@
                   <div >
                     <p><strong>STATUS:</strong> 
 
-                      <div class="useractivate">
+                      <span class="useractivate">
                         {% if usuario.is_active %}ATIVO{% else %}INATIVO{% endif %}
-                      </div>
+                      </span>
 
                     </p>
 
@@ -120,15 +120,17 @@
           </div>
 
             <div class="opcoesusuario">
+              
               <span class="botaoeditar">
-                <a href="#">EDITAR</a>
+                <a href="#" >EDITAR</a>
               </span>
               
+
               <form method="post" action="#">
                 {% csrf_token %}
                 <input type="hidden" name="usuario_id" value="{{ usuario.id }}">
                 <button type="submit">
-                  {% if usuario.is_active %}Inativar{% else %}Ativar{% endif %}
+                  {% if usuario.is_active %}INATIVAR{% else %}ATIVAR{% endif %}
                 </button>
               </form>
 

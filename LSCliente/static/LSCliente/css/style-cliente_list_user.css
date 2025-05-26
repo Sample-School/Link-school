@@ -175,7 +175,9 @@
 .opcoesusuario {
   flex: 0 0 20%;
   margin-bottom: 5%;
+  
 }
+
 
 .userid {
   background-color: white;
@@ -187,17 +189,19 @@
 }
 
 .useractivate {
+  
   background-color: white;
   padding-left: 5%;
   padding-right: 5%;
-
   border-radius: 20px;
+
 }
 
 .useremail {
   background-color: white;
   padding-left: 5%;
   padding-right: 5%;
+  margin-right: 12%;
 
   border-radius: 20px;
 }
@@ -211,5 +215,27 @@
   padding-bottom: 5%;
   margin-bottom: 20%;
   border-radius: 20px;
+  
+}
 
+.botaoeditar a {
+  color: white;
+}
+
+
+
+
+.cardusuario button {
+  margin-top: 25%;
+
+  border: none;
+  border-radius: 20px;
+
+  padding-top: 6%;
+  padding-bottom: 6%;
+  padding-left: 5%;
+  padding-right: 5%;
+
+  background-color: rgba(151, 151, 151, 1);
+  color: white;
 }
