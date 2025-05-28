@@ -86,11 +86,18 @@
                   </p>
 
                   <div >
-                    <p><strong>STATUS:</strong> 
+                    <p class="status-container"><strong>STATUS:</strong> 
 
-                      <span class="useractivate">
-                        {% if usuario.is_active %}ATIVO{% else %}INATIVO{% endif %}
-                      </span>
+                      <div class="useractivate">
+                        
+                          {% if usuario.is_active %}  
+                            ATIVO
+                          {% else %}
+                            INATIVO
+                          {% endif %}
+                       
+                      </div>  
+                      
 
                     </p>
 
