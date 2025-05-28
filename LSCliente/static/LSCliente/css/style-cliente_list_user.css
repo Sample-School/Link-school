@@ -192,6 +192,46 @@
   margin-top: 15%;
 }
 
+.painel-filtro-usuario {
+  position: relative;
+  z-index: 999999;
+  background-color: rgba(126, 126, 126, 1);
+  border-radius: 20px;
+  padding: 15px;
+  margin-top: 25%;
+  width: 100%;
+}
+
+.filtro-usuarios {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.painel-filtro-usuario h3 {
+  color: white;
+}
+
+.painel-filtro-usuario button {
+  flex: 1;
+  min-width: 0;
+
+  margin-top: 5%;
+  margin-bottom: 3%;
+
+  white-space: nowrap;
+  padding: 8px 5px;
+  border: none;
+  border-radius: 20px;
+  background-color: rgba(195, 195, 195, 1);
+  color: black;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+
 .informacoesusuario p {
   display: inline-flex;
     align-items: center;

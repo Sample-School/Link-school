@@ -4,17 +4,15 @@
 {% block title %}  
 {% endblock %}
 
-
 {% block styles %}
   <link rel="stylesheet" href="{% static 'LSCliente/css/style-cliente_list_user.css' %}">
   <link rel="stylesheet" href="{% static "global/css/cliente-navbar.css" %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
 {% endblock styles %}
-
 
 {% block content %}
   {% include "global/partials/cliente_navbar.html" %}
-  
 
 <div class="container-flex">
 
@@ -23,10 +21,33 @@
       Lista <br> 
       de <br>
       <div class="listadeusuarioletreiromaisescuro">Usuários</div>
-      
     </h1>
-    <a href="#">Novo Usuário</a>
+
+    <div class="painel-filtro-usuario">
+
+      <h3> APENAS USUÁRIOS</h3>
+
+      <!-- Filtros de usuários -->
+      <div class="filtro-usuarios">
+       
+        
+        <!--<button class="btn-filtro-usuario ativo" data-filtro="todos">TODOS</button> -->
+       
+        <button class="btn-filtro-usuario" data-filtro="ativos">ATIVOS</button>
+        
+        <button class="btn-filtro-usuario" data-filtro="inativos">INATIVOS</button>
+
+      </div>
+
+    </div>
+
+
     
+
+
+    
+
+
     {% if messages %}
       <div>
         {% for message in messages %}
@@ -37,102 +58,65 @@
   </div>
 
   <div class="right-col">
-    
     <div class="areadabarradepesquisa">
-
-      <div class="lupa" >
+      <div class="lupa">
+        <!-- SVG da lupa -->
         <svg width="41" height="41" viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M14.8599 29.2401C7.03986 29.2401 0.659902 22.8701 0.649902 15.0401C0.649902 7.18007 7.00986 0.81008 14.8599 0.82008C22.6699 0.82008 29.0499 7.19008 29.0599 14.9901C29.0599 22.8401 22.6899 29.2301 14.8499 29.2401H14.8599ZM14.8299 25.5201C20.6099 25.5301 25.3299 20.8301 25.3499 15.0401C25.3699 9.28007 20.6599 4.56007 14.8899 4.54007C9.08989 4.52007 4.36986 9.20007 4.35986 15.0001C4.34986 20.8001 9.03988 25.5201 14.8199 25.5301L14.8299 25.5201Z" fill="white"/>
-<path d="M23.5798 27.95C25.2498 26.8 26.6398 25.43 27.7898 23.72C28.1398 24.08 28.4598 24.42 28.7898 24.75C32.2098 28.17 35.6298 31.59 39.0498 35.01C40.2898 36.25 40.3398 38.08 39.1398 39.29C37.9498 40.49 36.1098 40.47 34.8598 39.22C31.8298 36.2 28.8098 33.17 25.7798 30.14C25.0598 29.42 24.3298 28.7 23.5798 27.95Z" fill="white"/>
-<path d="M23.6699 14.7901C23.6699 15.5201 23.3299 16.0301 22.7399 16.1301C22.0199 16.2501 21.4599 15.7401 21.4199 14.9501C21.3399 12.9601 20.5699 11.2801 19.0399 10.0001C18.6299 9.65006 18.1499 9.38006 17.6799 9.11006C17.0699 8.76006 16.8199 8.16005 17.0999 7.59005C17.3799 7.00005 18.0499 6.78006 18.6799 7.11006C21.8099 8.72006 23.4099 11.3301 23.6699 14.8001V14.7901Z" fill="white"/>
-<path d="M14.8999 6.23008C15.5299 6.25008 15.9899 6.77009 15.9599 7.41009C15.9299 8.00009 15.4198 8.47008 14.8198 8.45008C14.2198 8.44008 13.7098 7.91008 13.7298 7.31008C13.7498 6.68008 14.2599 6.20009 14.8899 6.22009L14.8999 6.23008Z" fill="white"/>
-</svg>
-
+          <path d="M14.8599 29.2401C7.03986 29.2401 0.659902 22.8701 0.649902 15.0401C0.649902 7.18007 7.00986 0.81008 14.8599 0.82008C22.6699 0.82008 29.0499 7.19008 29.0599 14.9901C29.0599 22.8401 22.6899 29.2301 14.8499 29.2401H14.8599ZM14.8299 25.5201C20.6099 25.5301 25.3299 20.8301 25.3499 15.0401C25.3699 9.28007 20.6599 4.56007 14.8899 4.54007C9.08989 4.52007 4.36986 9.20007 4.35986 15.0001C4.34986 20.8001 9.03988 25.5201 14.8199 25.5301L14.8299 25.5201Z" fill="white"/>
+          <path d="M23.5798 27.95C25.2498 26.8 26.6398 25.43 27.7898 23.72C28.1398 24.08 28.4598 24.42 28.7898 24.75C32.2098 28.17 35.6298 31.59 39.0498 35.01C40.2898 36.25 40.3398 38.08 39.1398 39.29C37.9498 40.49 36.1098 40.47 34.8598 39.22C31.8298 36.2 28.8098 33.17 25.7798 30.14C25.0598 29.42 24.3298 28.7 23.5798 27.95Z" fill="white"/>
+          <path d="M23.6699 14.7901C23.6699 15.5201 23.3299 16.0301 22.7399 16.1301C22.0199 16.2501 21.4599 15.7401 21.4199 14.9501C21.3399 12.9601 20.5699 11.2801 19.0399 10.0001C18.6299 9.65006 18.1499 9.38006 17.6799 9.11006C17.0699 8.76006 16.8199 8.16005 17.0999 7.59005C17.3799 7.00005 18.0499 6.78006 18.6799 7.11006C21.8099 8.72006 23.4099 11.3301 23.6699 14.8001V14.7901Z" fill="white"/>
+          <path d="M14.8999 6.23008C15.5299 6.25008 15.9899 6.77009 15.9599 7.41009C15.9299 8.00009 15.4198 8.47008 14.8198 8.45008C14.2198 8.44008 13.7098 7.91008 13.7298 7.31008C13.7498 6.68008 14.2599 6.20009 14.8899 6.22009L14.8999 6.23008Z" fill="white"/>
+        </svg>
       </div>
-
       <div class="barrapesquisa">
-        <input type="text" placeholder="Buscar">
+        <input type="text" id="inputBuscaUsuario" placeholder="Buscar">
       </div>
-
     </div>
 
     
-  
+
     <div class="blocoparalista">
-
-
-    <div class="userslist">
-      {% if usuarios %}
-        {% for usuario in usuarios %}
-          
-        <div class="cardusuario">
-           
-          
-          <div class="usuariocontainerflex">
-          </div>
-            
-          <div class="dadosusuario">
-
+      <div class="userslist" id="usersList">
+        {% if usuarios %}
+          {% for usuario in usuarios %}
+          <div class="cardusuario"
+               data-nome="{{ usuario.nome|lower }}"
+               data-email="{{ usuario.email|lower }}"
+               data-status="{% if usuario.is_active %}ativo{% else %}inativo{% endif %}">
+            <div class="usuariocontainerflex"></div>
+            <div class="dadosusuario">
               <h3>{{ usuario.nome }}</h3>
-              
-                <div class="informacoesusuario">
-                  
-                  <p><strong>ID:</strong> 
-                    
-                    <div class="userid">
-                      {{ usuario.id }}
-                    </div>
-
-                  </p>
-
-                  <div >
-                    <p class="status-container"><strong>STATUS:</strong> 
-
-                      <div class="useractivate">
-                        
-                          {% if usuario.is_active %}  
-                            ATIVO
-                          {% else %}
-                            INATIVO
-                          {% endif %}
-                       
-                      </div>  
-                      
-
-                    </p>
-
-                  </div>
-                 
-
-                    
-                
-                </div>
-                <p><strong>EMAIL</strong> <br> 
-                  
-                  <div class="useremail">
-                    {{ usuario.email }}
-                  </div>
-                  
-                
+              <div class="informacoesusuario">
+                <p><strong>ID:</strong> 
+                  <div class="userid">{{ usuario.id }}</div>
                 </p>
-
-          </div>
-
-          <div class="fotousuario">
+                <div>
+                  <p><strong>STATUS:</strong> 
+                    <span class="useractivate">
+                      {% if usuario.is_active %}  
+                        ATIVO
+                      {% else %}
+                        INATIVO
+                      {% endif %}
+                    </span>  
+                  </p>
+                </div>
+              </div>
+              <p><strong>EMAIL</strong> <br> 
+                <div class="useremail">{{ usuario.email }}</div>
+              </p>
+            </div>
+            <div class="fotousuario">
               {% if usuario.foto %}
                 <img src="{{ usuario.foto.url }}" alt="Foto de {{ usuario.nome }}">
               {% else %}
                 <img src="{% static 'img/default-user.png' %}" alt="Foto padrão">
               {% endif %}
-          </div>
-
+            </div>
             <div class="opcoesusuario">
-              
               <span class="botaoeditar">
-                <a href="#" >EDITAR</a>
+                <a href="#">EDITAR</a>
               </span>
-              
-
               <form method="post" action="#">
                 {% csrf_token %}
                 <input type="hidden" name="usuario_id" value="{{ usuario.id }}">
@@ -140,46 +124,83 @@
                   {% if usuario.is_active %}INATIVAR{% else %}ATIVAR{% endif %}
                 </button>
               </form>
-
-
             </div>
-
-
           </div>
+          {% endfor %}
+        {% else %}
+          <div>
+            <p>Nenhum usuário encontrado.</p>
+          </div>
+        {% endif %}
+      </div>
 
-
-
-        {% endfor %}
-      {% else %}
+      {% if is_paginated %}
         <div>
-          <p>Nenhum usuário encontrado.</p>
+          {% if page_obj.has_previous %}
+            <a href="#">« primeira</a>
+            <a href="#">anterior</a>
+          {% endif %}
+          <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+          {% if page_obj.has_next %}
+            <a href="#">próxima</a>
+            <a href="#">última »</a>
+          {% endif %}
         </div>
       {% endif %}
     </div>
-  
-    {% if is_paginated %}
-      <div>
-        {% if page_obj.has_previous %}
-          <a href="#">« primeira</a>
-          <a href="#">anterior</a>
-        {% endif %}
-        
-        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-        
-        {% if page_obj.has_next %}
-          <a href="#">próxima</a>
-          <a href="#">última »</a>
-        {% endif %}
-      </div>
-    {% endif %}
-
   </div>
-
-
 </div>
-  
-  
-  
-  
 
-{% endblock %}	
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Iniciando sistema de filtros...');
+    
+    const filtroBtns = document.querySelectorAll('.btn-filtro-usuario');
+    const cards = document.querySelectorAll('.cardusuario');
+    const inputBusca = document.getElementById('inputBuscaUsuario');
+
+    function filtrarUsuarios() {
+        const filtroSelecionado = document.querySelector('.btn-filtro-usuario.ativo').dataset.filtro;
+        const termoBusca = inputBusca.value.trim().toLowerCase();
+        
+        cards.forEach(card => {
+            const statusCard = card.dataset.status;
+            const nome = card.dataset.nome;
+            const email = card.dataset.email;
+            
+            // Filtro de status
+            const statusMatch = 
+                filtroSelecionado === 'todos' ||
+                (filtroSelecionado === 'ativos' && statusCard === 'ativo') ||
+                (filtroSelecionado === 'inativos' && statusCard === 'inativo');
+            
+            // Filtro de busca
+            const buscaMatch = !termoBusca || 
+                             nome.includes(termoBusca) || 
+                             email.includes(termoBusca);
+            
+            // Aplicar filtros
+            card.style.display = (statusMatch && buscaMatch) ? 'flex' : 'none';
+        });
+    }
+
+    // Configurar eventos
+    filtroBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remover classe ativo de todos
+            filtroBtns.forEach(b => b.classList.remove('ativo'));
+            // Adicionar ao clicado
+            this.classList.add('ativo');
+            // Aplicar filtro
+            filtrarUsuarios();
+        });
+    });
+
+    // Evento de busca
+    inputBusca.addEventListener('input', filtrarUsuarios);
+    
+    // Filtrar inicialmente
+    filtrarUsuarios();
+});
+</script>
+{% endblock %}
