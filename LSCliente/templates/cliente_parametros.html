@@ -1,0 +1,296 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações do Sistema</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+
+<div>
+    <!-- Cabeçalho -->
+    <div>
+        <h1>Configurações do Sistema</h1>
+        <div>
+            <button id="btn-redefinir">Redefinir</button>
+            <button id="btn-salvar-geral">Salvar Todas</button>
+        </div>
+    </div>
+
+    <!-- LOGO DO CLIENTE -->
+    <div>
+        <h2>Logo do Cliente</h2>
+        
+        <div>
+            <div>
+                <input type="file" id="upload-logo" accept="image/*" style="display: none;" onchange="previewLogo(event)">
+                <button onclick="document.getElementById('upload-logo').click()">Escolher Logo</button>
+                <button data-action="update_logo">Aplicar Logo</button>
+            </div>
+            <div>
+                <div id="logo-preview" style="border: 1px solid #ccc; padding: 10px; min-height: 120px;">
+                    {% if configuracao.imagem_home_1 %}
+                        <img src="{{ configuracao.imagem_home_1.url }}" alt="Logo atual" style="max-width:100%; max-height:100px;">
+                    {% else %}
+                        <span>Nenhuma logo carregada</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <small>Recomendado: 500 x 500 pixels para melhor qualidade.</small>
+    </div>
+
+    <!-- CORES DO SISTEMA -->
+    <div>
+        <h2>Cores do Sistema</h2>
+        
+        <div>
+            <label>Cor Primária</label>
+            <div>
+                <input type="color" id="primary-color" value="{{ configuracao.system_primary_color }}">
+                <input type="text" id="primary-color-text" value="{{ configuracao.system_primary_color }}">
+            </div>
+        </div>
+        
+        <div>
+            <label>Cor Secundária</label>
+            <div>
+                <input type="color" id="second-color" value="{{ configuracao.system_second_color }}">
+                <input type="text" id="second-color-text" value="{{ configuracao.system_second_color }}">
+            </div>
+        </div>
+        
+        <button data-action="update_colors">Aplicar Cores</button>
+    </div>
+
+    <!-- TEMPO DE INATIVIDADE -->
+    <div>
+        <h2>Tempo Máximo de Inatividade</h2>
+        
+        <div>
+            <label>Tempo em Minutos</label>
+            <div>
+                <input type="number" id="timeout-minutes" min="1" max="1440" value="{{ configuracao.tempo_maximo_inatividade }}">
+                <span>min</span>
+            </div>
+            <small>Atual: {{ configuracao.tempo_maximo_inatividade }} minutos</small>
+        </div>
+        
+        <button data-action="update_timeout">Aplicar Tempo</button>
+    </div>
+
+    <!-- USUÁRIOS LOGADOS -->
+    <div>
+        <h2>Usuários Logados ({{ sessoes_ativas|length }}/{{ total_usuarios }})</h2>
+        
+        <!-- Tabela de usuários -->
+        <div style="max-height: 200px; overflow-y: auto;">
+            <table border="1" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Última Atividade</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sessao in sessoes_ativas %}
+                    <tr>
+                        <td><strong>{{ sessao.usuario.id }}</strong></td>
+                        <td>
+                            {% if sessao.usuario.user_img %}
+                                <img src="{{ sessao.usuario.user_img.url }}" alt="{{ sessao.usuario.nome }}" style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;">
+                            {% endif %}
+                            {{ sessao.usuario.nome|default:sessao.usuario.email }}
+                        </td>
+                        <td>{{ sessao.ultima_atividade|date:"d/m H:i" }}</td>
+                        <td>{{ sessao.endereco_ip }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">Nenhum usuário ativo.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Deslogar usuário -->
+        <div>
+            <input type="number" id="user-id-logout" placeholder="ID do usuário">
+            <button data-action="logout_user">Deslogar</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Preview da logo
+function previewLogo(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const preview = document.getElementById('logo-preview');
+    preview.innerHTML = '<span>Carregando...</span>';
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width:100%; max-height:100px;">`;
+    };
+    reader.readAsDataURL(file);
+}
+
+// Sincronizar campos de cor
+document.getElementById('primary-color').addEventListener('input', function(e) {
+    document.getElementById('primary-color-text').value = e.target.value;
+});
+document.getElementById('primary-color-text').addEventListener('input', function(e) {
+    document.getElementById('primary-color').value = e.target.value;
+});
+document.getElementById('second-color').addEventListener('input', function(e) {
+    document.getElementById('second-color-text').value = e.target.value;
+});
+document.getElementById('second-color-text').addEventListener('input', function(e) {
+    document.getElementById('second-color').value = e.target.value;
+});
+
+// Popup de notificação
+function showPopup(message, type = "success") {
+    $('#custom-popup').remove();
+    const bgColor = type === "success" ? "#16a34a" : "#dc2626";
+    const icon = type === "success" ? "✔️" : "❌";
+    
+    const popup = $(`
+        <div id="custom-popup" style="
+            position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
+            background: ${bgColor}; color: white; padding: 16px 24px;
+            border-radius: 8px; z-index: 9999; display: flex;
+            align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        ">
+            <span>${icon}</span>
+            <span>${message}</span>
+        </div>
+    `);
+    
+    $('body').append(popup);
+    setTimeout(() => $('#custom-popup').fadeOut(400, function() { $(this).remove(); }), 2500);
+}
+
+// Requisições AJAX
+function makeAjaxRequest(action, data, callback) {
+    const csrfToken = $('[name=csrfmiddlewaretoken]').val() || getCookie('csrftoken');
+    const formData = new FormData();
+    
+    formData.append('action', action);
+    formData.append('csrfmiddlewaretoken', csrfToken);
+    
+    for (const [key, value] of Object.entries(data)) {
+        formData.append(key, value);
+    }
+    
+    $.ajax({
+        url: window.location.pathname,
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                showPopup(response.message, "success");
+                if (callback) callback(response);
+            } else {
+                showPopup(response.message, "error");
+            }
+        },
+        error: function() {
+            showPopup('Erro ao processar solicitação', "error");
+        }
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Eventos
+$(document).ready(function() {
+    // Redefinir campos
+    $('#btn-redefinir').click(function() {
+        $('input[type="text"], input[type="number"]').val('');
+        $('textarea').val('');
+        $('input[type="file"]').val('');
+        $('#logo-preview').html('<span>Nenhuma logo carregada</span>');
+        $('#timeout-minutes').val('{{ configuracao.tempo_maximo_inatividade }}');
+        $('#primary-color, #primary-color-text').val('{{ configuracao.system_primary_color }}');
+        $('#second-color, #second-color-text').val('{{ configuracao.system_second_color }}');
+        showPopup('Campos redefinidos!', "success");
+    });
+
+    // Botões de aplicar
+    $('button[data-action]').click(function() {
+        const action = $(this).data('action');
+        
+        switch(action) {
+            case 'update_logo':
+                const fileInput = document.getElementById('upload-logo');
+                if (fileInput && fileInput.files.length > 0) {
+                    makeAjaxRequest('update_logo', { 'imagem_home_1': fileInput.files[0] });
+                } else {
+                    showPopup('Selecione uma imagem primeiro.', "error");
+                }
+                break;
+                
+            case 'update_colors':
+                makeAjaxRequest('update_colors', {
+                    'primary_color': $('#primary-color').val(),
+                    'second_color': $('#second-color').val()
+                });
+                break;
+                
+            case 'update_timeout':
+                const timeout = $('#timeout-minutes').val();
+                if (timeout) {
+                    makeAjaxRequest('update_timeout', { 'timeout_minutes': timeout });
+                } else {
+                    showPopup('Informe o tempo de inatividade.', "error");
+                }
+                break;
+                
+            case 'logout_user':
+                const userId = $('#user-id-logout').val();
+                if (userId) {
+                    makeAjaxRequest('logout_user', { 'user_id': userId }, function() {
+                        setTimeout(() => location.reload(), 1000);
+                    });
+                } else {
+                    showPopup('Informe o ID do usuário.', "error");
+                }
+                break;
+        }
+    });
+
+    // Salvar geral
+    $('#btn-salvar-geral').click(function() {
+        showPopup('Use os botões "Aplicar" de cada seção individualmente.', "error");
+    });
+});
+</script>
+
+</body>
+</html>

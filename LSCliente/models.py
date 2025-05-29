@@ -90,3 +90,36 @@ class UsuarioCliente(AbstractBaseUser, PermissionsMixin):
         Retorna o campo usado como identificador do usuário.
         """
         return self.email
+
+class SessaoUsuarioCliente(models.Model):
+    """Modelo para rastrear sessões ativas de usuários no contexto do cliente"""
+    usuario = models.ForeignKey('UsuarioCliente', on_delete=models.CASCADE, related_name='sessoes')
+    chave_sessao = models.CharField(max_length=40)
+    data_inicio = models.DateTimeField(auto_now_add=True)
+    ultima_atividade = models.DateTimeField(auto_now=True)
+    endereco_ip = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ('usuario', 'chave_sessao')
+        verbose_name = 'Sessão de Usuário Cliente'
+        verbose_name_plural = 'Sessões de Usuários Cliente'
+    
+    def __str__(self):
+        return f"Sessão de {self.usuario.nome} - {self.chave_sessao[:8]}"
+
+
+class ClienteSystemSettings(models.Model):
+    imagem_home_1 = models.ImageField(upload_to='logos_clientes/', null=True, blank=True)
+    system_primary_color = models.CharField(max_length=7, default="#3E3D3F")  # Cor padrão para Sair
+    system_second_color = models.CharField(max_length=7, default="#575758")  # Cor padrão para Geral
+    tempo_maximo_inatividade = models.IntegerField(default=30, help_text="Tempo máximo de inatividade em minutos")
+    
+    @classmethod
+    def obter_configuracao(cls):
+        """Retorna a configuração atual ou cria uma nova se não existir"""
+        configuracao, created = cls.objects.get_or_create(id=1)
+        return configuracao
+    
+    def __str__(self):
+        return "Configurações do Sistema"

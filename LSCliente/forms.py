@@ -9,7 +9,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.hashers import make_password
 
 #imports locais
-from .models import UsuarioCliente
+from .models import UsuarioCliente, ClienteSystemSettings
 
 class UserLoginForm(forms.Form):
     email = forms.EmailField(widget=forms.EmailInput(attrs={
@@ -211,3 +211,14 @@ class UsuarioClienteForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+class ClienteSystemSettingsForm(forms.ModelForm):
+    class Meta:
+        model = ClienteSystemSettings
+        fields = ['imagem_home_1', 'system_primary_color', 'system_second_color', 'tempo_maximo_inatividade']
+        widgets = {
+            'system_primary_color': forms.TextInput(attrs={'type': 'color', 'class': 'form-control'}),
+            'system_second_color': forms.TextInput(attrs={'type': 'color', 'class': 'form-control'}),
+            'tempo_maximo_inatividade': forms.NumberInput(attrs={'min': '1', 'max': '1440', 'class': 'form-control'}),
+        }

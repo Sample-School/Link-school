@@ -25,9 +25,13 @@ from django import forms
 from django.utils import timezone
 from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
 from django.db.models import Q
+from django.contrib.sessions.models import Session
 
-from .forms import CustomPasswordResetForm, UsuarioClienteForm
-from .models import UsuarioCliente
+
+from .forms import CustomPasswordResetForm, UsuarioClienteForm, ClienteSystemSettingsForm
+from .models import UsuarioCliente, ClienteSystemSettings, SessaoUsuarioCliente
+
+
 
 class ClienteUserLoginView(LoginView):
     template_name = "clienteLogin.html"
@@ -267,8 +271,207 @@ class ClienteProvaCreateView(LoginRequiredMixin, TemplateView):
 
 class ClienteParametroView(LoginRequiredMixin, TemplateView):
     template_name = 'cliente_parametros.html'
+    
+    def get(self, request):
+        # Obter ou criar configuração do cliente
+        configuracao = ClienteSystemSettings.obter_configuracao()
+        
+        # Obter sessões ativas dos usuários - CORRIGIDO
+        sessoes_ativas = []
+        try:
+            # Calcular tempo limite para sessões ativas
+            tempo_limite = timezone.now() - timezone.timedelta(minutes=configuracao.tempo_maximo_inatividade)
+            
+            # Buscar sessões ativas usando o modelo correto
+            from LSCliente.models import SessaoUsuarioCliente
+            sessoes_query = SessaoUsuarioCliente.objects.select_related('usuario').filter(
+                ultima_atividade__gte=tempo_limite
+            ).order_by('-ultima_atividade')
+            
+            # Debug: Verificar se existem sessões
+            print(f"Total de sessões encontradas: {sessoes_query.count()}")
+            
+            for sessao in sessoes_query:
+                print(f"Sessão: {sessao.usuario.nome if hasattr(sessao.usuario, 'nome') else sessao.usuario.email}")
+            
+            sessoes_ativas = list(sessoes_query)
+            
+        except Exception as e:
+            print(f"Erro ao buscar sessões ativas: {e}")
+            sessoes_ativas = []
+        
+        # Total de usuários no sistema
+        total_usuarios = UsuarioCliente.objects.filter(is_active=True).count()
+        
+        context = {
+            'configuracao': configuracao,
+            'sessoes_ativas': sessoes_ativas,
+            'total_usuarios': total_usuarios,
+            'title': 'Configurações do Sistema',
+            # Debug info
+            'debug_info': {
+                'total_sessoes': len(sessoes_ativas),
+                'tempo_limite': configuracao.tempo_maximo_inatividade,
+            }
+        }
+        
+        return render(request, self.template_name, context)
+    
+    def post(self, request):
+        action = request.POST.get('action')
+        configuracao = ClienteSystemSettings.obter_configuracao()
+        
+        try:
+            if action == 'logout_user':
+                user_id = request.POST.get('user_id')
+                try:
+                    user_id = int(user_id)
+                    
+                    # Buscar a sessão do usuário usando o modelo correto
+                    from LSCliente.models import SessaoUsuarioCliente
+                    sessao = SessaoUsuarioCliente.objects.filter(usuario_id=user_id).first()
+                    
+                    if sessao:
+                        # Nome do usuário para a mensagem
+                        usuario_nome = getattr(sessao.usuario, 'nome', None) or getattr(sessao.usuario, 'email', f'ID {user_id}')
+                        
+                        # Encerrar a sessão Django se existir
+                        if hasattr(sessao, 'chave_sessao') and sessao.chave_sessao:
+                            try:
+                                from django.contrib.sessions.models import Session
+                                Session.objects.filter(session_key=sessao.chave_sessao).delete()
+                            except Exception as e:
+                                print(f"Erro ao deletar sessão Django: {e}")
+                        
+                        # Remover do nosso rastreamento
+                        sessao.delete()
+                        
+                        return JsonResponse({
+                            'success': True, 
+                            'message': f'Usuário {usuario_nome} deslogado com sucesso!'
+                        })
+                    else:
+                        return JsonResponse({
+                            'success': False, 
+                            'message': 'Usuário não encontrado ou não está logado'
+                        })
+                        
+                except (ValueError, TypeError):
+                    return JsonResponse({'success': False, 'message': 'ID de usuário inválido'})
+            
+            elif action == 'update_logo':
+                # Debug: Verificar o que está chegando
+                print(f"DEBUG - Action: {action}")
+                print(f"DEBUG - request.FILES: {dict(request.FILES)}")
+                print(f"DEBUG - request.POST: {dict(request.POST)}")
+                print(f"DEBUG - FILES keys: {list(request.FILES.keys())}")
+                
+                # Processar upload da logo - verificar diferentes nomes de campo
+                logo_file = None
+                possible_names = ['logo', 'imagem_home_1', 'imagem', 'image', 'file', 'upload']
+                
+                for name in possible_names:
+                    if name in request.FILES:
+                        logo_file = request.FILES[name]
+                        print(f"DEBUG - Arquivo encontrado com nome: {name}")
+                        break
+                
+                if logo_file:
+                    try:
+                        # Verificar se é uma imagem válida
+                        if not logo_file.content_type.startswith('image/'):
+                            return JsonResponse({
+                                'success': False, 
+                                'message': f'Arquivo deve ser uma imagem. Tipo recebido: {logo_file.content_type}'
+                            })
+                        
+                        # Salvar no campo correto (imagem_home_1 baseado no template)
+                        configuracao.imagem_home_1 = logo_file
+                        configuracao.save()
+                        return JsonResponse({
+                            'success': True, 
+                            'message': 'Logo atualizada com sucesso!',
+                            'logo_url': configuracao.imagem_home_1.url if configuracao.imagem_home_1 else None
+                        })
+                    except Exception as e:
+                        print(f"Erro ao salvar logo: {e}")
+                        return JsonResponse({
+                            'success': False, 
+                            'message': f'Erro ao salvar imagem: {str(e)}'
+                        })
+                else:
+                    return JsonResponse({
+                        'success': False, 
+                        'message': f'Nenhuma imagem foi enviada. Campos disponíveis: {list(request.FILES.keys())}'
+                    })
+            
+            elif action == 'update_colors':
+                # Atualizar cores do sistema
+                try:
+                    primary_color = request.POST.get('primary_color', '').strip()
+                    second_color = request.POST.get('second_color', '').strip()
+                    
+                    if primary_color:
+                        configuracao.system_primary_color = primary_color
+                    if second_color:
+                        configuracao.system_second_color = second_color
+                    
+                    configuracao.save()
+                    
+                    return JsonResponse({
+                        'success': True, 
+                        'message': 'Cores atualizadas com sucesso!'
+                    })
+                    
+                except Exception as e:
+                    return JsonResponse({
+                        'success': False, 
+                        'message': f'Erro ao atualizar cores: {str(e)}'
+                    })
+            
+            elif action == 'update_timeout':
+                # Atualizar tempo de inatividade
+                try:
+                    timeout_minutes = int(request.POST.get('timeout_minutes', 0))
+                    if timeout_minutes > 0:
+                        configuracao.tempo_maximo_inatividade = timeout_minutes
+                        configuracao.save()
+                        
+                        return JsonResponse({
+                            'success': True, 
+                            'message': f'Tempo de inatividade atualizado para {timeout_minutes} minutos!'
+                        })
+                    else:
+                        return JsonResponse({
+                            'success': False, 
+                            'message': 'Tempo deve ser maior que 0'
+                        })
+                        
+                except (ValueError, TypeError):
+                    return JsonResponse({
+                        'success': False, 
+                        'message': 'Tempo inválido fornecido'
+                    })
+            
+            else:
+                # Ação não reconhecida
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'Ação não reconhecida'
+                })
+            
+        except Exception as e:
+            print(f"Erro no processamento: {e}")
+            return JsonResponse({
+                'success': False, 
+                'message': f'Erro interno do servidor: {str(e)}'
+            })
+
+
 
 
 def custom_logout_view(request):
     logout(request)
     return redirect('clientehome')
+
+

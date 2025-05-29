@@ -1,5 +1,6 @@
 from django_tenants.middleware import TenantMainMiddleware
 from LSDash.models import Dominio, ConfiguracaoSistema, SessaoUsuario
+from LSCliente.models import ClienteSystemSettings
 from django.utils import timezone
 from django.contrib.auth import logout
 from django.contrib import messages
@@ -30,9 +31,15 @@ class SessionTrackingMiddleware:
             and not isinstance(request.user, str)
         ):
             try:
-                # Obter configurações
-                configuracao = ConfiguracaoSistema.obter_configuracao()
-                tempo_maximo = configuracao.tempo_maximo_inatividade
+                # Obter configurações baseadas no tenant atual
+                if request.tenant.schema_name == get_public_schema_name():
+                    # Schema público - usar ConfiguracaoSistema
+                    configuracao = ConfiguracaoSistema.obter_configuracao()
+                    tempo_maximo = configuracao.tempo_maximo_inatividade
+                else:
+                    # Schema do cliente - usar ClienteSystemSettings
+                    configuracao = ClienteSystemSettings.obter_configuracao()
+                    tempo_maximo = configuracao.tempo_maximo_inatividade
 
                 # Verificar última atividade
                 ultima_atividade = request.session.get('ultima_atividade')
@@ -44,14 +51,19 @@ class SessionTrackingMiddleware:
                         # Tempo de inatividade excedido
                         logout(request)
                         messages.warning(request, "Sua sessão expirou devido à inatividade.")
-                        return redirect(reverse('login'))
+                        # Redirecionar para o login correto baseado no tenant
+                        if request.tenant.schema_name == get_public_schema_name():
+                            return redirect(reverse('login'))
+                        else:
+                            return redirect(reverse('LSCliente:clientelogin'))
 
                 # Atualizar última atividade
                 request.session['ultima_atividade'] = agora.isoformat()
 
-                # ⚠️ Verifica se estamos no schema público antes de rastrear sessão
-                if request.tenant.schema_name == get_public_schema_name():
-                    if hasattr(request, 'session') and request.session.session_key:
+                # NOVA LÓGICA: Rastrear sessão no contexto correto
+                if hasattr(request, 'session') and request.session.session_key:
+                    if request.tenant.schema_name == get_public_schema_name():
+                        # Schema público - criar sessão no contexto público
                         SessaoUsuario.objects.update_or_create(
                             usuario=request.user,
                             chave_sessao=request.session.session_key,
@@ -61,6 +73,20 @@ class SessionTrackingMiddleware:
                                 'user_agent': request.META.get('HTTP_USER_AGENT', '')
                             }
                         )
+                    else:
+                        # Schema do cliente - criar sessão no contexto do cliente
+                        # Mas usando o modelo SessaoUsuario que precisa existir no cliente também
+                        from LSCliente.models import SessaoUsuarioCliente
+                        SessaoUsuarioCliente.objects.update_or_create(
+                            usuario=request.user,
+                            chave_sessao=request.session.session_key,
+                            defaults={
+                                'ultima_atividade': agora,
+                                'endereco_ip': self.get_client_ip(request),
+                                'user_agent': request.META.get('HTTP_USER_AGENT', '')
+                            }
+                        )
+                        
             except Exception as e:
                 logger.error(f"[SessionTrackingMiddleware] Erro ao rastrear sessão: {e}")
 
