@@ -3,95 +3,125 @@
 
 {% block title %}{% endblock %}
 
-{% block styles %}{% endblock styles %}
+{% block styles %}
+  <link rel="stylesheet" href="{% static "global/css/cliente-navbar.css" %}">
+  <link rel="stylesheet" href="{% static 'LSCliente/css/style-cliente-manage.css' %}">
+{% endblock styles %}
 
 {% block content %}
+
+
   {% include "global/partials/cliente_navbar.html" %}
   
-  <h1>{% if form.instance.id %}Editar{% else %}Novo{% endif %} Usuário</h1>
-  <a href="/CLUserList/">Voltar para Lista</a>
+
   
-  {% if messages %}
-    <div>
-      {% for message in messages %}
-        <div>{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-  
-  {% if form.non_field_errors %}
-    <div>
-      {% for error in form.non_field_errors %}
-        <div>{{ error }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
   
   <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {% if form.instance.id %}
-    <input type="hidden" name="id" value="{{ form.instance.id }}">
-    {% endif %}
     
-    <div>
-      <label for="{{ form.nome.id_for_label }}">Nome</label>
-      {{ form.nome }}
-      {% if form.nome.errors %}
-      <div>{{ form.nome.errors }}</div>
-      {% endif %}
-    </div>
-    
-    <div>
-      <label for="{{ form.email.id_for_label }}">Email</label>
-      {{ form.email }}
-      {% if form.email.errors %}
-      <div>{{ form.email.errors }}</div>
-      {% endif %}
-    </div>
-    
-    <div>
-      <label for="{{ form.password.id_for_label }}">Senha</label>
-      {{ form.password }}
-      {% if form.password.errors %}
-      <div>{{ form.password.errors }}</div>
-      {% endif %}
-    </div>
-    
-    <div>
-      <label for="{{ form.password_confirm.id_for_label }}">Confirme a Senha</label>
-      {{ form.password_confirm }}
-      {% if form.password_confirm.errors %}
-      <div>{{ form.password_confirm.errors }}</div>
-      {% endif %}
-    </div>
-    
-    <div>
-      <label for="{{ form.is_active.id_for_label }}">Status</label>
-      <div>
-        {{ form.is_active }}
+    <div class="container-principal">
+
+      <div class="coluna-esquerda">
+        <h1>{% if form.instance.id %}Editar{% else %}Novo{% endif %} Usuário</h1>
+        <a href="/CLUserList/">Voltar para Lista</a>
+        
+        <div>
+          <button type="submit">Salvar</button>
+        </div>  
+
       </div>
-      {% if form.is_active.errors %}
-      <div>{{ form.is_active.errors }}</div>
-      {% endif %}
-    </div>
+
+      <div class="coluna-direita">
+        {% if messages %}
+          <div>
+            {% for message in messages %}
+              <div>{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
     
-    <div>
-      <label for="{{ form.foto.id_for_label }}">Foto</label>
-      {{ form.foto }}
-      {% if form.foto.errors %}
-      <div>{{ form.foto.errors }}</div>
+      {% if form.non_field_errors %}
+        <div>
+          {% for error in form.non_field_errors %}
+            <div>{{ error }}</div>
+          {% endfor %}
+        </div>
       {% endif %}
+    
+      {% csrf_token %}
+      {% if form.instance.id %}
+      <input type="hidden" name="id" value="{{ form.instance.id }}">
+      {% endif %}
+    
+      <div>
+        <label for="{{ form.nome.id_for_label }}">Nome</label>
+        {{ form.nome }}
+        {% if form.nome.errors %}
+          <div>{{ form.nome.errors }}</div>
+        {% endif %}
+      </div>
+    
+      <div>
+        <label for="{{ form.email.id_for_label }}">Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}
+          <div>{{ form.email.errors }}</div>
+        {% endif %}
+      </div>
+    
+      <div>
+        <label for="{{ form.password.id_for_label }}">Senha</label>
+        {{ form.password }}
+        {% if form.password.errors %}
+          <div>{{ form.password.errors }}</div>
+        {% endif %}
+      </div>
+    
+      <div>
+        <label for="{{ form.password_confirm.id_for_label }}">Confirme a Senha</label>
+        {{ form.password_confirm }}
+        {% if form.password_confirm.errors %}
+          <div>{{ form.password_confirm.errors }}</div>
+        {% endif %}
+      </div>
+    
+      <div>
+        <label for="{{ form.is_active.id_for_label }}">Status</label>
+        <div>
+          {{ form.is_active }}
+        </div>
+        {% if form.is_active.errors %}
+          <div>{{ form.is_active.errors }}</div>
+        {% endif %}
+      </div>
+    
+      <div>
+        <label for="{{ form.foto.id_for_label }}">Foto</label>
+        {{ form.foto }}
+        {% if form.foto.errors %}
+          <div>{{ form.foto.errors }}</div>
+        {% endif %}
       
-      {% if form.instance.foto %}
-      <div>
-        <img src="{{ form.instance.foto.url }}" alt="Foto atual">
+        {% if form.instance.foto %}
+        <div>
+          <img src="{{ form.instance.foto.url }}" alt="Foto atual">
+        </div>
+        {% endif %}
       </div>
-      {% endif %}
-    </div>
     
-    <div>
-      <button type="submit">Salvar</button>
-      <a href="#">Cancelar</a>
+      
+
+      </div>
+
     </div>
+
+
+    
+    
+    
+
+
   </form>
+
+
+
 {% endblock %}

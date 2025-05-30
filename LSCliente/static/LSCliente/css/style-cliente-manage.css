@@ -1,0 +1,30 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+
+* {
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+.container-principal {
+
+    display: flex;
+    gap: 20px; /* Espaço entre as colunas */
+    width: 100%;
+    max-width: 1200px; /* Largura máxima do container */
+    margin: 0 auto; /* Centraliza na página */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.coluna-esquerda {
+    flex: 1; /* Ocupa espaço disponível */
+  min-width: 0; /* Corrige problemas de overflow */
+}
+
+.coluna-direita {
+  flex: 1; /* Ocupa espaço igual */
+  min-width: 0;
+}
