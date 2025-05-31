@@ -116,7 +116,7 @@
             </div>
             <div class="opcoesusuario">
               <span class="botaoeditar">
-                <a href="#">EDITAR</a>
+                <a href="{% url 'LSCliente:CLUserMange' %}">EDITAR</a>
               </span>
               <form method="post" action="#">
                 {% csrf_token %}
