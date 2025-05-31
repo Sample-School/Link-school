@@ -16,6 +16,10 @@
  /* Padding apenas vertical */
 }
 
+.coluna-esquerda h1 {
+  font-size: 2rem;
+}
+
 .coluna-esquerda {
   flex: 0 0 40%; /* Largura fixa para a coluna esquerda */
   padding-left: 20px; /* Espaçamento interno esquerdo */
