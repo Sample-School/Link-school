@@ -113,17 +113,26 @@
           {% endif %}
         </div>
 
-        <div>
-          <strong><label for="{{ form.is_active.id_for_label }}">Status</label></strong>
-          <div>
-            {{ form.is_active }}
-          </div>
-          {% if form.is_active.errors %}
-            <div>{{ form.is_active.errors }}</div>
-          {% endif %}
-        </div>
-      
         
+      
+        <div class="container-status-foto">
+          <div class="foto">
+           
+          </div>
+
+          <div class="status">
+            <div>
+              <strong><label for="{{ form.is_active.id_for_label }}">Status</label></strong>
+              <div>
+                {{ form.is_active }}
+              </div>
+                {% if form.is_active.errors %}
+                  <div>{{ form.is_active.errors }}</div>
+                {% endif %}
+            </div>
+          </div>
+        </div>
+
 
         
       </div>

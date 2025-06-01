@@ -9,6 +9,25 @@
 }
 
 
+.container-status-foto {
+  display: flex;
+}
+
+.foto {
+  flex: 0 0 50%;
+  background-color: red;
+}
+
+.status {
+  flex: 1;
+  
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
 .container-principal {
   display: flex;
   gap: 0; /* Removemos o gap para controle preciso */
