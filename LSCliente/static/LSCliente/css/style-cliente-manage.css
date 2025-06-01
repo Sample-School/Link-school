@@ -8,6 +8,7 @@
   font-family: "Inter", sans-serif;
 }
 
+
 .container-principal {
   display: flex;
   gap: 0; /* Removemos o gap para controle preciso */
@@ -80,4 +81,20 @@
   background-color: rgba(195, 195, 195, 1);
   margin-top: 5%;
   
+}
+
+
+.formulario input[type="text"],
+.formulario input[type="email"],
+.formulario input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 20rem;
+  background-color: rgba(255, 255, 255, 1);
+  /*font-size: 1rem;*/
+  margin-top: 5px;
+  /*margin-bottom: 15px;*/
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }

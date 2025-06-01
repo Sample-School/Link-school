@@ -95,7 +95,10 @@
             <div>{{ form.password_confirm.errors }}</div>
           {% endif %}
         </div>
-      
+        
+
+        
+
         <div>
           <label for="{{ form.foto.id_for_label }}">Foto</label>
           {{ form.foto }}
@@ -111,7 +114,7 @@
         </div>
 
         <div>
-          <label for="{{ form.is_active.id_for_label }}">Status</label>
+          <strong><label for="{{ form.is_active.id_for_label }}">Status</label></strong>
           <div>
             {{ form.is_active }}
           </div>
