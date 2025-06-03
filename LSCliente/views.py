@@ -1,7 +1,7 @@
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.urls import reverse_lazy,  reverse
 from django.contrib import messages
 from django.views.generic import TemplateView, View, CreateView,  ListView
@@ -26,11 +26,37 @@ from django.utils import timezone
 from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
 from django.db.models import Q
 from django.contrib.sessions.models import Session
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+import json
+from io import BytesIO
+import os
+
+
+# Imports para exportação
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
+import io
+from PIL import Image as PILImage
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
+
+# Imports para DOC
+try:
+    from docx import Document
+    from docx.shared import Inches
+    HAS_DOCX = True
+except ImportError:
+    HAS_DOCX = False
 
 
 from .forms import CustomPasswordResetForm, UsuarioClienteForm, ClienteSystemSettingsForm
-from .models import UsuarioCliente, ClienteSystemSettings, SessaoUsuarioCliente
-
+from .models import  Prova,  Prova, QuestaoProva ,UsuarioCliente, ClienteSystemSettings, SessaoUsuarioCliente
+from .services import QuestaoService
 
 
 class ClienteUserLoginView(LoginView):
@@ -266,8 +292,369 @@ class ClienteUserToggleStatusView(LoginRequiredMixin, View):
             
         return redirect('LSCliente:CLUserList')
 
-class ClienteProvaCreateView(LoginRequiredMixin, TemplateView):
-    template_name = 'cliente_provaCreate.html'
+@method_decorator(login_required, name='dispatch')
+class ClienteProvaCreateView(LoginRequiredMixin, View):
+    template_name = 'cliente_provaCreate.html' 
+
+    def get(self, request):
+        """Exibe a tela de criação de prova"""
+        # Busca questões disponíveis do dashboard
+        questoes_dashboard = QuestaoService.buscar_questoes_dashboard()
+        
+        # Busca configurações do cliente
+        config_cliente = ClienteSystemSettings.obter_configuracao()
+        
+        context = {
+            'questoes_dashboard': questoes_dashboard,
+            'tipos_prova': Prova.TIPO_PROVA_CHOICES,
+            'config_cliente': config_cliente
+        }
+        
+        return render(request, self.template_name, context)
+    
+    def post(self, request):
+        """Processa a criação da prova"""
+        action = request.POST.get('action')
+        
+        if action == 'salvar_prova':
+            return self._salvar_prova(request)
+        elif action == 'exportar_pdf':
+            return self._exportar_pdf(request)
+        elif action == 'exportar_doc':
+            return self._exportar_doc(request)
+        elif action == 'buscar_questao':
+            return self._buscar_questao_ajax(request)
+        elif action == 'criar_questao':
+            return self._criar_nova_questao(request)
+        
+        return JsonResponse({'error': 'Ação não reconhecida'}, status=400)
+    
+    def _salvar_prova(self, request):
+        """Salva a prova no banco de dados"""
+        try:
+            titulo = request.POST.get('titulo')
+            materia = request.POST.get('materia')
+            tipo_prova = request.POST.get('tipo_prova')
+            questoes_selecionadas = json.loads(request.POST.get('questoes_selecionadas', '[]'))
+            
+            # Validações básicas
+            if not titulo or not materia or not tipo_prova:
+                return JsonResponse({'error': 'Todos os campos são obrigatórios'}, status=400)
+            
+            if not questoes_selecionadas:
+                return JsonResponse({'error': 'Adicione pelo menos uma questão'}, status=400)
+            
+            # Cria a prova
+            prova = Prova.objects.create(
+                titulo=titulo,
+                materia=materia,
+                tipo_prova=tipo_prova,
+                criado_por=request.user
+            )
+            
+            # Adiciona questões à prova
+            for i, questao_data in enumerate(questoes_selecionadas, 1):
+                questao_completa = QuestaoService.buscar_questao_completa(questao_data['id'])
+                
+                QuestaoProva.objects.create(
+                    prova=prova,
+                    questao_id=questao_data['id'],
+                    questao_dados=questao_completa,
+                    ordem=i
+                )
+            
+            messages.success(request, 'Prova salva com sucesso!')
+            return JsonResponse({'success': True, 'prova_id': prova.id})
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Dados das questões inválidos'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': f'Erro interno: {str(e)}'}, status=500)
+    
+    def _exportar_pdf(self, request):
+        """Exporta a prova como PDF"""
+        try:
+            # Coleta dados do formulário
+            titulo = request.POST.get('titulo', '').strip()
+            materia = request.POST.get('materia', '').strip()
+            tipo_prova = request.POST.get('tipo_prova', '').strip()
+            questoes_data = request.POST.get('questoes_selecionadas', '[]')
+            
+            # Validações
+            if not titulo or not materia or not tipo_prova:
+                return JsonResponse({'error': 'Preencha todos os campos obrigatórios'}, status=400)
+            
+            try:
+                questoes_selecionadas = json.loads(questoes_data)
+            except json.JSONDecodeError:
+                return JsonResponse({'error': 'Dados das questões inválidos'}, status=400)
+            
+            if not questoes_selecionadas:
+                return JsonResponse({'error': 'Adicione pelo menos uma questão'}, status=400)
+            
+            # Cria o PDF
+            buffer = BytesIO()
+            doc = SimpleDocTemplate(
+                buffer, 
+                pagesize=A4,
+                topMargin=1*inch,
+                bottomMargin=1*inch,
+                leftMargin=0.75*inch,
+                rightMargin=0.75*inch
+            )
+            
+            # Estilos
+            styles = getSampleStyleSheet()
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=16,
+                spaceAfter=30,
+                alignment=TA_CENTER
+            )
+            
+            normal_style = styles['Normal']
+            normal_style.fontSize = 12
+            normal_style.spaceAfter = 12
+            
+            story = []
+            
+            # Busca configurações do cliente
+            try:
+                config_cliente = ClienteSystemSettings.obter_configuracao()
+            except:
+                config_cliente = None
+            
+            # Logo do cliente (se existir)
+            if config_cliente and hasattr(config_cliente, 'imagem_home_1') and config_cliente.imagem_home_1:
+                try:
+                    if hasattr(config_cliente.imagem_home_1, 'path'):
+                        logo_path = config_cliente.imagem_home_1.path
+                        if os.path.exists(logo_path):
+                            logo = Image(logo_path, width=2*inch, height=1*inch)
+                            story.append(logo)
+                            story.append(Spacer(1, 12))
+                except Exception as e:
+                    print(f"Erro ao carregar logo: {e}")
+            
+            # Cabeçalho da prova
+            story.append(Paragraph(titulo, title_style))
+            
+            # Informações da prova
+            info_prova = f"""
+            <para align="center"><b>Matéria:</b> {materia}</para>
+            <para align="center"><b>Tipo:</b> {dict(Prova.TIPO_PROVA_CHOICES).get(tipo_prova, tipo_prova)}</para>
+            """
+            story.append(Paragraph(info_prova, normal_style))
+            story.append(Spacer(1, 20))
+            
+            # Campo para nome do aluno
+            nome_campo = """
+            <para><b>Nome:</b> _______________________________________________</para>
+            <para><b>Data:</b> ___/___/______</para>
+            """
+            story.append(Paragraph(nome_campo, normal_style))
+            story.append(Spacer(1, 30))
+            
+            # Linha separadora
+            story.append(Paragraph("_" * 80, normal_style))
+            story.append(Spacer(1, 20))
+            
+            # Questões
+            for i, questao_data in enumerate(questoes_selecionadas, 1):
+                try:
+                    # Se questao_data é um dicionário completo, usa diretamente
+                    if isinstance(questao_data, dict) and 'titulo' in questao_data:
+                        questao = questao_data
+                    else:
+                        # Caso contrário, busca os dados completos
+                        questao_id = questao_data.get('id') if isinstance(questao_data, dict) else questao_data
+                        questao = QuestaoService.buscar_questao_completa(questao_id)
+                    
+                    if not questao:
+                        continue
+                    
+                    # Número e enunciado da questão
+                    titulo_questao = questao.get('titulo', f'Questão {i}')
+                    story.append(Paragraph(f"<b>{i}. {titulo_questao}</b>", normal_style))
+                    story.append(Spacer(1, 10))
+                    
+                    # Tratamento por tipo de questão
+                    tipo_questao = questao.get('tipo', 'aberta')
+                    
+                    if tipo_questao == 'multipla':
+                        alternativas = questao.get('alternativas', [])
+                        for j, alt in enumerate(alternativas):
+                            letra = chr(ord('a') + j)
+                            texto_alt = alt.get('texto', '') if isinstance(alt, dict) else str(alt)
+                            story.append(Paragraph(f"<b>{letra})</b> {texto_alt}", normal_style))
+                    
+                    elif tipo_questao == 'vf':
+                        frases = questao.get('frases_vf', [])
+                        for frase in frases:
+                            texto_frase = frase.get('texto', '') if isinstance(frase, dict) else str(frase)
+                            story.append(Paragraph(f"( ) {texto_frase}", normal_style))
+                    
+                    elif tipo_questao == 'aberta':
+                        # Adiciona linhas para resposta
+                        for _ in range(4):
+                            story.append(Spacer(1, 20))
+                            story.append(Paragraph("_" * 80, normal_style))
+                    
+                    story.append(Spacer(1, 25))
+                    
+                except Exception as e:
+                    print(f"Erro ao processar questão {i}: {e}")
+                    continue
+            
+            # Gera o PDF
+            doc.build(story)
+            pdf_data = buffer.getvalue()
+            buffer.close()
+            
+            # Sanitiza o nome do arquivo
+            nome_arquivo = "".join(c for c in titulo if c.isalnum() or c in (' ', '-', '_')).rstrip()
+            if not nome_arquivo:
+                nome_arquivo = "prova"
+            
+            # Retorna o PDF
+            response = HttpResponse(pdf_data, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{nome_arquivo}.pdf"'
+            return response
+            
+        except Exception as e:
+            print(f"Erro ao exportar PDF: {e}")
+            return JsonResponse({'error': f'Erro ao gerar PDF: {str(e)}'}, status=500)
+    
+    def _exportar_doc(self, request):
+        """Exporta a prova como DOC"""
+        if not HAS_DOCX:
+            return JsonResponse({'error': 'Biblioteca python-docx não instalada'}, status=500)
+        
+        try:
+            # Coleta dados
+            titulo = request.POST.get('titulo', '').strip()
+            materia = request.POST.get('materia', '').strip()
+            tipo_prova = request.POST.get('tipo_prova', '').strip()
+            
+            # Validações
+            if not titulo or not materia or not tipo_prova:
+                return JsonResponse({'error': 'Preencha todos os campos obrigatórios'}, status=400)
+            
+            try:
+                questoes_selecionadas = json.loads(request.POST.get('questoes_selecionadas', '[]'))
+            except json.JSONDecodeError:
+                return JsonResponse({'error': 'Dados das questões inválidos'}, status=400)
+            
+            if not questoes_selecionadas:
+                return JsonResponse({'error': 'Adicione pelo menos uma questão'}, status=400)
+            
+            # Cria documento Word
+            doc = Document()
+            
+            # Cabeçalho
+            doc.add_heading(titulo, 0)
+            doc.add_paragraph(f'Matéria: {materia}')
+            doc.add_paragraph(f'Tipo: {dict(Prova.TIPO_PROVA_CHOICES).get(tipo_prova, tipo_prova)}')
+            doc.add_paragraph()
+            
+            # Campo para nome
+            doc.add_paragraph('Nome: _' + '_' * 50)
+            doc.add_paragraph('Data: ___/___/______')
+            doc.add_paragraph()
+            doc.add_paragraph('_' * 80)
+            doc.add_paragraph()
+            
+            # Questões
+            for i, questao_data in enumerate(questoes_selecionadas, 1):
+                try:
+                    # Trata os dados da questão
+                    if isinstance(questao_data, dict) and 'titulo' in questao_data:
+                        questao = questao_data
+                    else:
+                        questao_id = questao_data.get('id') if isinstance(questao_data, dict) else questao_data
+                        questao = QuestaoService.buscar_questao_completa(questao_id)
+                    
+                    if not questao:
+                        continue
+                    
+                    # Enunciado
+                    p = doc.add_paragraph()
+                    p.add_run(f'{i}. ').bold = True
+                    p.add_run(questao.get('titulo', f'Questão {i}'))
+                    
+                    # Conteúdo por tipo
+                    tipo_questao = questao.get('tipo', 'aberta')
+                    
+                    if tipo_questao == 'multipla':
+                        alternativas = questao.get('alternativas', [])
+                        for j, alt in enumerate(alternativas):
+                            letra = chr(ord('a') + j)
+                            texto_alt = alt.get('texto', '') if isinstance(alt, dict) else str(alt)
+                            doc.add_paragraph(f'{letra}) {texto_alt}')
+                    
+                    elif tipo_questao == 'vf':
+                        frases = questao.get('frases_vf', [])
+                        for frase in frases:
+                            texto_frase = frase.get('texto', '') if isinstance(frase, dict) else str(frase)
+                            doc.add_paragraph(f'( ) {texto_frase}')
+                    
+                    elif tipo_questao == 'aberta':
+                        for _ in range(4):
+                            doc.add_paragraph('_' * 80)
+                    
+                    doc.add_paragraph()
+                    
+                except Exception as e:
+                    print(f"Erro ao processar questão {i}: {e}")
+                    continue
+            
+            # Salva em buffer
+            buffer = BytesIO()
+            doc.save(buffer)
+            buffer.seek(0)
+            
+            # Sanitiza nome do arquivo
+            nome_arquivo = "".join(c for c in titulo if c.isalnum() or c in (' ', '-', '_')).rstrip()
+            if not nome_arquivo:
+                nome_arquivo = "prova"
+            
+            response = HttpResponse(
+                buffer.getvalue(),
+                content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            )
+            response['Content-Disposition'] = f'attachment; filename="{nome_arquivo}.docx"'
+            return response
+            
+        except Exception as e:
+            print(f"Erro ao exportar DOC: {e}")
+            return JsonResponse({'error': f'Erro ao gerar DOC: {str(e)}'}, status=500)
+    
+    def _buscar_questao_ajax(self, request):
+        """Busca dados completos de uma questão via AJAX"""
+        try:
+            questao_id = request.POST.get('questao_id')
+            if not questao_id:
+                return JsonResponse({'error': 'ID da questão não fornecido'}, status=400)
+            
+            questao = QuestaoService.buscar_questao_completa(questao_id)
+            
+            if questao:
+                return JsonResponse({'success': True, 'questao': questao})
+            else:
+                return JsonResponse({'error': 'Questão não encontrada'}, status=404)
+        
+        except Exception as e:
+            return JsonResponse({'error': f'Erro ao buscar questão: {str(e)}'}, status=500)
+    
+    def _criar_nova_questao(self, request):
+        """Cria uma nova questão no cliente"""
+        try:
+            # Implementar lógica para criar questões no tenant atual
+            return JsonResponse({'success': True, 'message': 'Funcionalidade em desenvolvimento'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
 
 class ClienteParametroView(LoginRequiredMixin, TemplateView):
     template_name = 'cliente_parametros.html'
@@ -473,5 +860,3 @@ class ClienteParametroView(LoginRequiredMixin, TemplateView):
 def custom_logout_view(request):
     logout(request)
     return redirect('clientehome')
-
-

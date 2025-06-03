@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Prova</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+    .questao-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        .questao-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .questao-selecionada {
+            background-color: #e8f5e8;
+            border-color: #28a745;
+        }
+        .preview-prova {
+            border: 2px solid #007bff;
+            background-color: #f8f9fa;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .questao-preview {
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+        }
+        .btn-export {
+            margin: 5px;
+        }
+        .questao-imagem {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+        }
+        .alternativa-item, .frase-vf-item {
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #f8f9fa;
+            border-radius: 3px;
+        }
+        
+        /* CORREÇÃO PRINCIPAL: Loading deve começar oculto */
+        .loading {
+            display: none !important; /* Força o display none inicial */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Quando mostrar o loading */
+        .loading.show {
+            display: flex !important;
+        }
+        
+        .search-box {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        /* Debug styles - removível em produção */
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 100, 0, 0.9);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 10000;
+            max-width: 300px;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Painel Esquerdo - Configurações e Questões -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-cog"></i> Configurações da Prova</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="form-prova">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="titulo" class="form-label">Título da Prova *</label>
+                                <input type="text" class="form-control" id="titulo" name="titulo" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="materia" class="form-label">Matéria *</label>
+                                <input type="text" class="form-control" id="materia" name="materia" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="tipo_prova" class="form-label">Tipo de Prova *</label>
+                                <select class="form-select" id="tipo_prova" name="tipo_prova" required>
+                                    <option value="">Selecione o tipo</option>
+                                    {% for value, label in tipos_prova %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-success" onclick="salvarProva()">
+                                    <i class="fas fa-save"></i> Salvar Prova
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="exportarPDF()">
+                                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                                </button>
+                                <button type="button" class="btn btn-info" onclick="exportarDOC()">
+                                    <i class="fas fa-file-word"></i> Exportar DOC
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Lista de Questões Disponíveis -->
+                <div class="card mt-3">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-question-circle"></i> Questões Disponíveis</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="search-box">
+                            <input type="text" class="form-control" id="search-questoes" 
+                                   placeholder="Buscar questões..." onkeyup="filtrarQuestoes()">
+                        </div>
+                        
+                        <div id="lista-questoes" style="max-height: 400px; overflow-y: auto;">
+                            {% for questao in questoes_dashboard %}
+                                <div class="questao-card p-3" data-id="{{ questao.id }}" 
+                                     data-titulo="{{ questao.titulo }}" 
+                                     data-materia="{{ questao.materia }}"
+                                     data-tipo="{{ questao.tipo }}">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">{{ questao.titulo|truncatechars:50 }}</h6>
+                                            <small class="text-muted">
+                                                {{ questao.materia }} - {{ questao.get_tipo_display }}
+                                                <br>{{ questao.ano_escolar }} - {{ questao.grupo_ensino }}
+                                            </small>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                onclick="adicionarQuestao({{ questao.id }})">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="p-3 text-center text-muted">
+                                    Nenhuma questão disponível
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botão para criar nova questão -->
+                <div class="card mt-3">
+                    <div class="card-body text-center">
+                        <button class="btn btn-warning" onclick="abrirModalNovaQuestao()">
+                            <i class="fas fa-plus-circle"></i> Criar Nova Questão
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Painel Direito - Preview da Prova -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="fas fa-eye"></i> Preview da Prova</h5>
+                    </div>
+                    <div class="card-body preview-prova">
+                        <div id="preview-content">
+                            <!-- Cabeçalho da Prova -->
+                            <div class="text-center mb-4 pb-3 border-bottom">
+                                {% if config_cliente.imagem_home_1 %}
+                                    <img src="{{ config_cliente.imagem_home_1.url }}" alt="Logo" style="max-height: 80px;">
+                                {% endif %}
+                                <h3 id="preview-titulo">Título da Prova</h3>
+                                <p class="mb-1"><strong>Matéria:</strong> <span id="preview-materia">-</span></p>
+                                <p class="mb-1"><strong>Tipo:</strong> <span id="preview-tipo">-</span></p>
+                                <hr>
+                                <p><strong>Nome:</strong> ____________________________________</p>
+                                <p><strong>Data:</strong> ___/___/______</p>
+                            </div>
+
+                            <!-- Questões Selecionadas -->
+                            <div id="questoes-preview">
+                                <p class="text-center text-muted">
+                                    <i class="fas fa-info-circle"></i> 
+                                    Adicione questões para visualizar o preview da prova
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Nova Questão -->
+    <div class="modal fade" id="modalNovaQuestao" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Criar Nova Questão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-nova-questao">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="nova-titulo" class="form-label">Enunciado da Questão *</label>
+                            <textarea class="form-control" id="nova-titulo" name="titulo" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="nova-materia" class="form-label">Matéria *</label>
+                                <input type="text" class="form-control" id="nova-materia" name="materia" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nova-tipo" class="form-label">Tipo de Questão *</label>
+                                <select class="form-select" id="nova-tipo" name="tipo" required onchange="toggleTipoQuestao()">
+                                    <option value="">Selecione</option>
+                                    <option value="aberta">Questão Aberta</option>
+                                    <option value="multipla">Múltipla Escolha</option>
+                                    <option value="vf">Verdadeiro ou Falso</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Alternativas para múltipla escolha -->
+                        <div id="alternativas-section" style="display: none;" class="mt-3">
+                            <h6>Alternativas</h6>
+                            <div id="alternativas-container">
+                                <div class="alternativa-input mb-2">
+                                    <div class="input-group">
+                                        <span class="input-group-text">a)</span>
+                                        <input type="text" class="form-control" name="alternativas[]" placeholder="Digite a alternativa">
+                                        <div class="input-group-text">
+                                            <input type="radio" name="correta" value="0" title="Marcar como correta">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="adicionarAlternativa()">
+                                <i class="fas fa-plus"></i> Adicionar Alternativa
+                            </button>
+                        </div>
+
+                        <!-- Frases para verdadeiro/falso -->
+                        <div id="vf-section" style="display: none;" class="mt-3">
+                            <h6>Frases</h6>
+                            <div id="frases-container">
+                                <div class="frase-input mb-2">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="frases[]" placeholder="Digite a frase">
+                                        <select class="form-select" name="verdadeira[]" style="max-width: 120px;">
+                                            <option value="1">Verdadeiro</option>
+                                            <option value="0">Falso</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="adicionarFrase()">
+                                <i class="fas fa-plus"></i> Adicionar Frase
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="salvarNovaQuestao()">Salvar Questão</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" 
+         style="background: rgba(0,0,0,0.5); z-index: 9999;">
+        <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let questoesSelecionadas = [];
+
+        // Atualiza preview quando campos são alterados
+        document.getElementById('titulo').addEventListener('input', function() {
+            document.getElementById('preview-titulo').textContent = this.value || 'Título da Prova';
+        });
+
+        document.getElementById('materia').addEventListener('input', function() {
+            document.getElementById('preview-materia').textContent = this.value || '-';
+        });
+
+        document.getElementById('tipo_prova').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            document.getElementById('preview-tipo').textContent = selectedOption.text || '-';
+        });
+
+        function filtrarQuestoes() {
+            const searchTerm = document.getElementById('search-questoes').value.toLowerCase();
+            const questoes = document.querySelectorAll('.questao-card');
+            
+            questoes.forEach(questao => {
+                const titulo = questao.dataset.titulo.toLowerCase();
+                const materia = questao.dataset.materia.toLowerCase();
+                
+                if (titulo.includes(searchTerm) || materia.includes(searchTerm)) {
+                    questao.style.display = 'block';
+                } else {
+                    questao.style.display = 'none';
+                }
+            });
+        }
+
+        async function adicionarQuestao(questaoId) {
+            try {
+                // Verifica se já foi adicionada
+                if (questoesSelecionadas.find(q => q.id == questaoId)) {
+                    alert('Esta questão já foi adicionada à prova!');
+                    return;
+                }
+
+                showLoading();
+
+                // Busca dados completos da questão
+                const formData = new FormData();
+                formData.append('action', 'buscar_questao');
+                formData.append('questao_id', questaoId);
+                formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+                const response = await fetch('', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    questoesSelecionadas.push(data.questao);
+                    atualizarPreview();
+                    
+                    // Marca questão como selecionada
+                    const questaoCard = document.querySelector(`.questao-card[data-id="${questaoId}"]`);
+                    questaoCard.classList.add('questao-selecionada');
+                } else {
+                    alert('Erro ao carregar questão: ' + data.error);
+                }
+            } catch (error) {
+                alert('Erro ao adicionar questão: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function removerQuestao(index) {
+            const questaoRemovida = questoesSelecionadas[index];
+            questoesSelecionadas.splice(index, 1);
+            
+            // Remove marcação da questão
+            const questaoCard = document.querySelector(`.questao-card[data-id="${questaoRemovida.id}"]`);
+            if (questaoCard) {
+                questaoCard.classList.remove('questao-selecionada');
+            }
+            
+            atualizarPreview();
+        }
+
+        function atualizarPreview() {
+            const container = document.getElementById('questoes-preview');
+            
+            if (questoesSelecionadas.length === 0) {
+                container.innerHTML = `
+                    <p class="text-center text-muted">
+                        <i class="fas fa-info-circle"></i> 
+                        Adicione questões para visualizar o preview da prova
+                    </p>
+                `;
+                return;
+            }
+
+            let html = '';
+            questoesSelecionadas.forEach((questao, index) => {
+                html += `
+                    <div class="questao-preview">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6><strong>${index + 1}. ${questao.titulo}</strong></h6>
+                            <button class="btn btn-sm btn-danger" onclick="removerQuestao(${index})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                `;
+
+                // Imagens da questão
+                if (questao.imagens && questao.imagens.length > 0) {
+                    questao.imagens.forEach(img => {
+                        if (img.imagem) {
+                            html += `<img src="/media/${img.imagem}" class="questao-imagem" alt="Imagem da questão">`;
+                            if (img.legenda) {
+                                html += `<p class="text-muted small"><em>${img.legenda}</em></p>`;
+                            }
+                        }
+                    });
+                }
+
+                // Conteúdo específico por tipo
+                if (questao.tipo === 'multipla' && questao.alternativas) {
+                    questao.alternativas.forEach((alt, altIndex) => {
+                        const letra = String.fromCharCode(97 + altIndex); // a, b, c, d...
+                        html += `<div class="alternativa-item">${letra}) ${alt.texto}</div>`;
+                    });
+                } else if (questao.tipo === 'vf' && questao.frases_vf) {
+                    questao.frases_vf.forEach(frase => {
+                        html += `<div class="frase-vf-item">( ) ${frase.texto}</div>`;
+                    });
+                } else if (questao.tipo === 'aberta') {
+                    html += `
+                        <div class="mt-3">
+                            <div style="border-bottom: 1px solid #ccc; margin: 10px 0; height: 20px;"></div>
+                            <div style="border-bottom: 1px solid #ccc; margin: 10px 0; height: 20px;"></div>
+                            <div style="border-bottom: 1px solid #ccc; margin: 10px 0; height: 20px;"></div>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        async function salvarProva() {
+            if (!validarFormulario()) return;
+
+            try {
+                showLoading();
+
+                const formData = new FormData(document.getElementById('form-prova'));
+                formData.append('action', 'salvar_prova');
+                formData.append('questoes_selecionadas', JSON.stringify(questoesSelecionadas));
+
+                const response = await fetch('', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Prova salva com sucesso!');
+                } else {
+                    alert('Erro ao salvar prova: ' + data.error);
+                }
+            } catch (error) {
+                alert('Erro ao salvar prova: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function exportarPDF() {
+            if (!validarFormulario()) return;
+
+            try {
+                showLoading();
+
+                const formData = new FormData(document.getElementById('form-prova'));
+                formData.append('action', 'exportar_pdf');
+                formData.append('questoes_selecionadas', JSON.stringify(questoesSelecionadas));
+
+                const response = await fetch('', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${document.getElementById('titulo').value || 'prova'}.pdf`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    const data = await response.json();
+                    alert('Erro ao exportar PDF: ' + data.error);
+                }
+            } catch (error) {
+                alert('Erro ao exportar PDF: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function exportarDOC() {
+            if (!validarFormulario()) return;
+
+            try {
+                showLoading();
+
+                const formData = new FormData(document.getElementById('form-prova'));
+                formData.append('action', 'exportar_doc');
+                formData.append('questoes_selecionadas', JSON.stringify(questoesSelecionadas));
+
+                const response = await fetch('', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${document.getElementById('titulo').value || 'prova'}.docx`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    const data = await response.json();
+                    alert('Erro ao exportar DOC: ' + data.error);
+                }
+            } catch (error) {
+                alert('Erro ao exportar DOC: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function validarFormulario() {
+            const titulo = document.getElementById('titulo').value.trim();
+            const materia = document.getElementById('materia').value.trim();
+            const tipo = document.getElementById('tipo_prova').value;
+
+            if (!titulo || !materia || !tipo) {
+                alert('Preencha todos os campos obrigatórios!');
+                return false;
+            }
+
+            if (questoesSelecionadas.length === 0) {
+                alert('Adicione pelo menos uma questão à prova!');
+                return false;
+            }
+
+            return true;
+        }
+
+        function abrirModalNovaQuestao() {
+            const modal = new bootstrap.Modal(document.getElementById('modalNovaQuestao'));
+            modal.show();
+        }
+
+        function toggleTipoQuestao() {
+            const tipo = document.getElementById('nova-tipo').value;
+            const alternativasSection = document.getElementById('alternativas-section');
+            const vfSection = document.getElementById('vf-section');
+
+            alternativasSection.style.display = 'none';
+            vfSection.style.display = 'none';
+
+            if (tipo === 'multipla') {
+                alternativasSection.style.display = 'block';
+            } else if (tipo === 'vf') {
+                vfSection.style.display = 'block';
+            }
+        }
+
+        function adicionarAlternativa() {
+            const container = document.getElementById('alternativas-container');
+            const count = container.children.length;
+            const letra = String.fromCharCode(97 + count);
+            
+            const div = document.createElement('div');
+            div.className = 'alternativa-input mb-2';
+            div.innerHTML = `
+                <div class="input-group">
+                    <span class="input-group-text">${letra})</span>
+                    <input type="text" class="form-control" name="alternativas[]" placeholder="Digite a alternativa">
+                    <div class="input-group-text">
+                        <input type="radio" name="correta" value="${count}" title="Marcar como correta">
+                    </div>
+                    <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function adicionarFrase() {
+            const container = document.getElementById('frases-container');
+            const div = document.createElement('div');
+            div.className = 'frase-input mb-2';
+            div.innerHTML = `
+                <div class="input-group">
+                    <input type="text" class="form-control" name="frases[]" placeholder="Digite a frase">
+                    <select class="form-select" name="verdadeira[]" style="max-width: 120px;">
+                        <option value="1">Verdadeiro</option>
+                        <option value="0">Falso</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        async function salvarNovaQuestao() {
+            // Implementar lógica para salvar nova questão
+            alert('Funcionalidade de criar nova questão em desenvolvimento');
+        }
+
+        function showLoading() {
+            document.querySelector('.loading').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.querySelector('.loading').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

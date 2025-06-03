@@ -123,3 +123,51 @@ class ClienteSystemSettings(models.Model):
     
     def __str__(self):
         return "Configurações do Sistema"
+
+
+class Prova(models.Model):
+    TIPO_PROVA_CHOICES = [
+        ('avaliacao', 'Avaliação'),
+        ('simulado', 'Simulado'),
+        ('teste', 'Teste'),
+        ('trabalho', 'Trabalho'),
+        ('prova_bimestral', 'Prova Bimestral'),
+        ('prova_final', 'Prova Final'),
+    ]
+    
+    titulo = models.CharField(max_length=200, verbose_name="Título da Prova")
+    materia = models.CharField(max_length=100, verbose_name="Matéria")
+    tipo_prova = models.CharField(max_length=20, choices=TIPO_PROVA_CHOICES, verbose_name="Tipo de Prova")
+    criado_por = models.ForeignKey('UsuarioCliente', on_delete=models.CASCADE, related_name='provas_criadas')
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    data_atualizacao = models.DateTimeField(auto_now=True)
+    
+    # Configurações de formatação (para futuras funcionalidades)
+    fonte_padrao = models.CharField(max_length=50, default="Arial", verbose_name="Fonte Padrão")
+    tamanho_fonte = models.IntegerField(default=12, verbose_name="Tamanho da Fonte")
+    
+    def __str__(self):
+        return f"{self.titulo} - {self.materia}"
+    
+    class Meta:
+        verbose_name = 'Prova'
+        verbose_name_plural = 'Provas'
+
+
+class QuestaoProva(models.Model):
+    """Relaciona questões à prova com ordem específica"""
+    prova = models.ForeignKey(Prova, on_delete=models.CASCADE, related_name='questoes_prova')
+    questao_id = models.IntegerField(verbose_name="ID da Questão do Dashboard")
+    questao_dados = models.JSONField(verbose_name="Dados da Questão")  # Cache dos dados da questão
+    ordem = models.IntegerField(verbose_name="Ordem na Prova")
+    
+    # Configurações específicas desta questão na prova
+    texto_destacado = models.JSONField(default=list, blank=True)  # Lista de textos para destacar
+    fonte_customizada = models.CharField(max_length=50, blank=True, null=True)
+    
+    class Meta:
+        ordering = ['ordem']
+        unique_together = ('prova', 'ordem')
+    
+    def __str__(self):
+        return f"Questão {self.ordem} - Prova {self.prova.titulo}"
