@@ -1,0 +1,119 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+
+* {
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+
+.container-status-foto {
+  display: flex;
+}
+
+.foto {
+  flex: 0 0 50%;
+  background-color: red;
+}
+
+.status {
+  flex: 1;
+  
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.container-principal {
+  display: flex;
+  gap: 0; /* Removemos o gap para controle preciso */
+  
+  margin: 0; /* Remove a centralização automática */
+ /* Padding apenas vertical */
+}
+
+.coluna-esquerda h1 {
+  font-size: 2rem;
+}
+
+.coluna-esquerda {
+  flex: 0 0 40%; /* Largura fixa para a coluna esquerda */
+  padding-left: 20px; /* Espaçamento interno esquerdo */
+}
+
+.coluna-direita {
+  flex: 1; /* Ocupa espaço igual */
+  min-width: 0;
+  
+  margin-right: auto;
+  margin-left: 5rem;
+}
+
+
+.botoes-salvar-voltar-lista {
+  margin-top: 80%;
+  font-size: 160%;
+}
+
+.botoes-salvar-voltar-lista a {
+  border: none;
+  border-radius: 20rem;
+
+  color: white;
+
+  background-color: rgba(126, 126, 126, 1);
+
+  padding: 2%;
+}
+
+.botoes-salvar-voltar-lista-btn {
+  scale: 150%;
+  margin-left: 25%;
+  margin-top: 4%;
+  
+}
+
+.botoes-salvar-voltar-lista-btn button {
+
+  color: white;
+
+  border: none;
+  border-radius: 20px;
+
+  background-color: rgba(126, 126, 126, 1);
+
+  padding: 2%;
+}
+
+.formulario {
+
+  border-radius: 2rem;
+  border-top-right-radius: 0rem;
+  border-bottom-right-radius: 0rem;
+
+  padding: 5%;
+  font-size: 1.5rem;
+  background-color: rgba(195, 195, 195, 1);
+  margin-top: 5%;
+  
+}
+
+
+.formulario input[type="text"],
+.formulario input[type="email"],
+.formulario input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 20rem;
+  background-color: rgba(255, 255, 255, 1);
+  /*font-size: 1rem;*/
+  margin-top: 5px;
+  /*margin-bottom: 15px;*/
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}

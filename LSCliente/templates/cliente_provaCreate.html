@@ -76,6 +76,71 @@
             border-bottom: 1px solid #ddd;
         }
         
+        /* Novo estilo para o botão grande de adicionar questão */
+        .btn-adicionar-questao {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-adicionar-questao:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+            background: linear-gradient(135deg, #0056b3, #003d82);
+            color: white;
+        }
+        
+        .btn-adicionar-questao:active {
+            transform: translateY(0);
+        }
+        
+        .btn-adicionar-questao i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        /* Modal de questões personalizável */
+        .modal-questoes {
+            max-width: 90vw;
+        }
+        
+        .questoes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .questao-card-modal {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: white;
+        }
+        
+        .questao-card-modal:hover {
+            border-color: #007bff;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .questao-card-modal.selecionada {
+            border-color: #28a745;
+            background-color: #f8fff8;
+        }
+        
         /* Debug styles - removível em produção */
         .debug-info {
             position: fixed;
@@ -96,7 +161,7 @@
 <body>
     <div class="container-fluid mt-4">
         <div class="row">
-            <!-- Painel Esquerdo - Configurações e Questões -->
+            <!-- Painel Esquerdo - Configurações -->
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
@@ -140,46 +205,6 @@
                     </div>
                 </div>
 
-                <!-- Lista de Questões Disponíveis -->
-                <div class="card mt-3">
-                    <div class="card-header bg-info text-white">
-                        <h5><i class="fas fa-question-circle"></i> Questões Disponíveis</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="search-box">
-                            <input type="text" class="form-control" id="search-questoes" 
-                                   placeholder="Buscar questões..." onkeyup="filtrarQuestoes()">
-                        </div>
-                        
-                        <div id="lista-questoes" style="max-height: 400px; overflow-y: auto;">
-                            {% for questao in questoes_dashboard %}
-                                <div class="questao-card p-3" data-id="{{ questao.id }}" 
-                                     data-titulo="{{ questao.titulo }}" 
-                                     data-materia="{{ questao.materia }}"
-                                     data-tipo="{{ questao.tipo }}">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1">{{ questao.titulo|truncatechars:50 }}</h6>
-                                            <small class="text-muted">
-                                                {{ questao.materia }} - {{ questao.get_tipo_display }}
-                                                <br>{{ questao.ano_escolar }} - {{ questao.grupo_ensino }}
-                                            </small>
-                                        </div>
-                                        <button class="btn btn-sm btn-outline-primary" 
-                                                onclick="adicionarQuestao({{ questao.id }})">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            {% empty %}
-                                <div class="p-3 text-center text-muted">
-                                    Nenhuma questão disponível
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Botão para criar nova questão -->
                 <div class="card mt-3">
                     <div class="card-body text-center">
@@ -220,6 +245,89 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                
+                <!-- Grande Botão de Adicionar Questão -->
+                <div class="card mt-3">
+                    <div class="card-body text-center p-4">
+                        <button class="btn btn-adicionar-questao w-100" onclick="abrirModalSelecionarQuestoes()">
+                            <i class="fas fa-plus-circle"></i>
+                            Adicionar Questões à Prova
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Selecionar Questões -->
+    <div class="modal fade" id="modalSelecionarQuestoes" tabindex="-1">
+        <div class="modal-dialog modal-questoes">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-question-circle text-primary"></i>
+                        Selecionar Questões para a Prova
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Barra de Pesquisa -->
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="search-questoes-modal" 
+                                   placeholder="Buscar por título, matéria ou tipo..." 
+                                   onkeyup="filtrarQuestoesModal()">
+                        </div>
+                    </div>
+                    
+                    <!-- Grid de Questões -->
+                    <div class="questoes-grid" id="questoes-grid">
+                        {% for questao in questoes_dashboard %}
+                            <div class="questao-card-modal" 
+                                 data-id="{{ questao.id }}" 
+                                 data-titulo="{{ questao.titulo }}" 
+                                 data-materia="{{ questao.materia }}"
+                                 data-tipo="{{ questao.tipo }}"
+                                 onclick="toggleQuestaoSelecao({{ questao.id }}, this)">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 text-primary">{{ questao.titulo|truncatechars:60 }}</h6>
+                                        <div class="d-flex flex-wrap gap-1 mb-2">
+                                            <span class="badge bg-secondary">{{ questao.materia }}</span>
+                                            <span class="badge bg-info">{{ questao.get_tipo_display }}</span>
+                                        </div>
+                                        <small class="text-muted">
+                                            {{ questao.ano_escolar }} - {{ questao.grupo_ensino }}
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <i class="fas fa-check-circle text-success" style="display: none;"></i>
+                                        <i class="fas fa-plus-circle text-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12 text-center text-muted p-4">
+                                <i class="fas fa-question-circle fa-3x mb-3"></i>
+                                <p>Nenhuma questão disponível</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="me-auto">
+                        <span class="text-muted">
+                            <span id="questoes-selecionadas-count">0</span> questão(ões) selecionada(s)
+                        </span>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmarSelecaoQuestoes()">
+                        <i class="fas fa-check"></i> Adicionar Selecionadas
+                    </button>
                 </div>
             </div>
         </div>
@@ -315,6 +423,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
         let questoesSelecionadas = [];
+        let questoesSelecionadasTemp = []; // Para o modal de seleção
 
         // Atualiza preview quando campos são alterados
         document.getElementById('titulo').addEventListener('input', function() {
@@ -330,15 +439,83 @@
             document.getElementById('preview-tipo').textContent = selectedOption.text || '-';
         });
 
-        function filtrarQuestoes() {
-            const searchTerm = document.getElementById('search-questoes').value.toLowerCase();
-            const questoes = document.querySelectorAll('.questao-card');
+        // Nova função para abrir modal de seleção de questões
+        function abrirModalSelecionarQuestoes() {
+            questoesSelecionadasTemp = [...questoesSelecionadas]; // Copia as questões já selecionadas
+            atualizarVisualizacaoModal();
+            const modal = new bootstrap.Modal(document.getElementById('modalSelecionarQuestoes'));
+            modal.show();
+        }
+
+        // Função para toggle de seleção de questão no modal
+        function toggleQuestaoSelecao(questaoId, element) {
+            const index = questoesSelecionadasTemp.findIndex(q => q.id == questaoId);
+            const icons = element.querySelectorAll('i');
+            const checkIcon = icons[0]; // check-circle
+            const plusIcon = icons[1]; // plus-circle
+            
+            if (index > -1) {
+                // Remove da seleção
+                questoesSelecionadasTemp.splice(index, 1);
+                element.classList.remove('selecionada');
+                checkIcon.style.display = 'none';
+                plusIcon.style.display = 'block';
+            } else {
+                // Busca dados da questão e adiciona à seleção temporária
+                const questaoData = {
+                    id: questaoId,
+                    titulo: element.dataset.titulo,
+                    materia: element.dataset.materia,
+                    tipo: element.dataset.tipo
+                };
+                questoesSelecionadasTemp.push(questaoData);
+                element.classList.add('selecionada');
+                checkIcon.style.display = 'block';
+                plusIcon.style.display = 'none';
+            }
+            
+            atualizarContadorSelecao();
+        }
+
+        // Atualiza a visualização do modal baseada nas questões já selecionadas
+        function atualizarVisualizacaoModal() {
+            const cards = document.querySelectorAll('.questao-card-modal');
+            cards.forEach(card => {
+                const questaoId = card.dataset.id;
+                const isSelected = questoesSelecionadasTemp.some(q => q.id == questaoId);
+                const icons = card.querySelectorAll('i');
+                const checkIcon = icons[0];
+                const plusIcon = icons[1];
+                
+                if (isSelected) {
+                    card.classList.add('selecionada');
+                    checkIcon.style.display = 'block';
+                    plusIcon.style.display = 'none';
+                } else {
+                    card.classList.remove('selecionada');
+                    checkIcon.style.display = 'none';
+                    plusIcon.style.display = 'block';
+                }
+            });
+            atualizarContadorSelecao();
+        }
+
+        // Atualiza contador de questões selecionadas
+        function atualizarContadorSelecao() {
+            document.getElementById('questoes-selecionadas-count').textContent = questoesSelecionadasTemp.length;
+        }
+
+        // Filtrar questões no modal
+        function filtrarQuestoesModal() {
+            const searchTerm = document.getElementById('search-questoes-modal').value.toLowerCase();
+            const questoes = document.querySelectorAll('.questao-card-modal');
             
             questoes.forEach(questao => {
                 const titulo = questao.dataset.titulo.toLowerCase();
                 const materia = questao.dataset.materia.toLowerCase();
+                const tipo = questao.dataset.tipo.toLowerCase();
                 
-                if (titulo.includes(searchTerm) || materia.includes(searchTerm)) {
+                if (titulo.includes(searchTerm) || materia.includes(searchTerm) || tipo.includes(searchTerm)) {
                     questao.style.display = 'block';
                 } else {
                     questao.style.display = 'none';
@@ -346,56 +523,64 @@
             });
         }
 
-        async function adicionarQuestao(questaoId) {
+        // Confirma a seleção de questões e carrega dados completos
+        async function confirmarSelecaoQuestoes() {
             try {
-                // Verifica se já foi adicionada
-                if (questoesSelecionadas.find(q => q.id == questaoId)) {
-                    alert('Esta questão já foi adicionada à prova!');
-                    return;
-                }
-
                 showLoading();
-
-                // Busca dados completos da questão
-                const formData = new FormData();
-                formData.append('action', 'buscar_questao');
-                formData.append('questao_id', questaoId);
-                formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-
-                const response = await fetch('', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
                 
-                if (data.success) {
-                    questoesSelecionadas.push(data.questao);
-                    atualizarPreview();
-                    
-                    // Marca questão como selecionada
-                    const questaoCard = document.querySelector(`.questao-card[data-id="${questaoId}"]`);
-                    questaoCard.classList.add('questao-selecionada');
-                } else {
-                    alert('Erro ao carregar questão: ' + data.error);
+                // Remove questões que não estão mais selecionadas
+                questoesSelecionadas = questoesSelecionadas.filter(q => 
+                    questoesSelecionadasTemp.some(temp => temp.id == q.id)
+                );
+                
+                // Adiciona novas questões selecionadas
+                for (const questaoTemp of questoesSelecionadasTemp) {
+                    if (!questoesSelecionadas.find(q => q.id == questaoTemp.id)) {
+                        // Busca dados completos da questão
+                        const questaoCompleta = await buscarQuestaoCompleta(questaoTemp.id);
+                        if (questaoCompleta) {
+                            questoesSelecionadas.push(questaoCompleta);
+                        }
+                    }
                 }
+                
+                atualizarPreview();
+                
+                // Fecha o modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalSelecionarQuestoes'));
+                modal.hide();
+                
             } catch (error) {
-                alert('Erro ao adicionar questão: ' + error.message);
+                alert('Erro ao adicionar questões: ' + error.message);
             } finally {
                 hideLoading();
             }
         }
 
-        function removerQuestao(index) {
-            const questaoRemovida = questoesSelecionadas[index];
-            questoesSelecionadas.splice(index, 1);
+        // Função para buscar dados completos da questão (mantém a lógica original)
+        async function buscarQuestaoCompleta(questaoId) {
+            const formData = new FormData();
+            formData.append('action', 'buscar_questao');
+            formData.append('questao_id', questaoId);
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+            const response = await fetch('', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
             
-            // Remove marcação da questão
-            const questaoCard = document.querySelector(`.questao-card[data-id="${questaoRemovida.id}"]`);
-            if (questaoCard) {
-                questaoCard.classList.remove('questao-selecionada');
+            if (data.success) {
+                return data.questao;
+            } else {
+                console.error('Erro ao carregar questão:', data.error);
+                return null;
             }
-            
+        }
+
+        function removerQuestao(index) {
+            questoesSelecionadas.splice(index, 1);
             atualizarPreview();
         }
 
