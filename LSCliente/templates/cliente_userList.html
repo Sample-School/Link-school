@@ -111,12 +111,12 @@
               {% if usuario.foto %}
                 <img src="{{ usuario.foto.url }}" alt="Foto de {{ usuario.nome }}">
               {% else %}
-                <img src="{% static 'img/default-user.png' %}" alt="Foto padrão">
+                <img src="{% static 'img/linkschool-logo.png' %}" alt="Foto padrão">
               {% endif %}
             </div>
             <div class="opcoesusuario">
               <span class="botaoeditar">
-                <a href="{% url 'LSCliente:CLUserMange' %}">EDITAR</a>
+                <a href="{% url 'LSCliente:CLUserMange' %}?id={{ usuario.id }}">Editar</a>
               </span>
               <form method="post" action="#">
                 {% csrf_token %}

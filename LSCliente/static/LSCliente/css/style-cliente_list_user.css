@@ -170,6 +170,18 @@
 .fotousuario {
   flex: 0 0 20%;
   margin-right: 4%;
+  width: 120px;
+  height: 120px;
+  border-radius: 20rem;
+
+}
+
+.fotousuario img {
+    width: 100px;  /* ou o tamanho que você achar melhor */
+    height: 100px; /* mantém proporcional */
+    object-fit: cover; /* corta a imagem mantendo o centro */
+    border-radius: 50%; /* se quiser deixar redonda */
+    border: 2px solid #ccc; /* opcional, para borda */
 }
 
 .opcoesusuario {
