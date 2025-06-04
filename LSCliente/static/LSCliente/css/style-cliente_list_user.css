@@ -278,6 +278,23 @@
   border-radius: 20px;
 }
 
+.botao-novo-usuario {
+    color: white;
+  background-color: rgba(151, 151, 151, 1);
+  padding-left: 5%;
+  padding-right: 5%;
+  padding-top: 5%;
+  padding-bottom: 5%;
+  margin-bottom: 2%;
+  margin-top: 10%;
+  border-radius: 20px;
+  
+}
+
+.botao-novo-usuario a {
+  color: white;
+}
+
 .botaoeditar {
   color: white;
   background-color: rgba(151, 151, 151, 1);
