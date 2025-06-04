@@ -1,8 +1,9 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Criar Prova</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -407,6 +408,48 @@
                         <input type="text" id="turno" class="header-input small" placeholder="Turno:">
                     </div>
                 </div>
+
+                <div class="mb-3">
+                  <label for="tipo_prova" class="form-label"
+                    >Tipo de Prova *</label
+                  >
+                  <select
+                    class="form-select"
+                    id="tipo_prova"
+                    name="tipo_prova"
+                    required
+                  >
+                    <option value="">Selecione o tipo</option>
+                    {% for value, label in tipos_prova %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="d-grid gap-2">
+                  <button
+                    type="button"
+                    class="btn btn-success"
+                    onclick="salvarProva()"
+                  >
+                    <i class="fas fa-save"></i> Salvar Prova
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-danger"
+                    onclick="exportarPDF()"
+                  >
+                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-info"
+                    onclick="exportarDOC()"
+                  >
+                    <i class="fas fa-file-word"></i> Exportar DOC
+                  </button>
+                </div>
+              </form>
             </div>
             
             <div class="prova-info">
@@ -443,80 +486,94 @@
                 <div class="add-text">Clique para adicionar questões</div>
             </div>
         </div>
-    </div>
+        <!-- Painel Direito - Preview da Prova -->
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header bg-success text-white">
+              <h5><i class="fas fa-eye"></i> Preview da Prova</h5>
+            </div>
+            <div class="card-body preview-prova">
+              <div id="preview-content">
+                <!-- Cabeçalho da Prova -->
+                <div class="text-center mb-4 pb-3 border-bottom">
+                  {% if config_cliente.imagem_home_1 %}
+                  <img
+                    src="{{ config_cliente.imagem_home_1.url }}"
+                    alt="Logo"
+                    style="max-height: 80px"
+                  />
+                  {% endif %}
+                  <h3 id="preview-titulo">Título da Prova</h3>
+                  <p class="mb-1">
+                    <strong>Matéria:</strong>
+                    <span id="preview-materia">-</span>
+                  </p>
+                  <p class="mb-1">
+                    <strong>Tipo:</strong> <span id="preview-tipo">-</span>
+                  </p>
+                  <hr />
+                  <p>
+                    <strong>Nome:</strong> ____________________________________
+                  </p>
+                  <p><strong>Data:</strong> ___/___/______</p>
+                </div>
+                <!-- Questões Selecionadas -->
+                <div id="questoes-preview">
+                  <p class="text-center text-muted">
+                    <i class="fas fa-info-circle"></i>
+                    Adicione questões para visualizar o preview da prova
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
 
+          <!-- Grande Botão de Adicionar Questão -->
+          <div class="card mt-3">
+            <div class="card-body text-center p-4">
+              <button
+                class="btn btn-adicionar-questao w-100"
+                onclick="abrirModalSelecionarQuestoes()"
+              >
+                <i class="fas fa-plus-circle"></i>
+                Adicionar Questões à Prova
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Modal para Selecionar Questões -->
     <div class="modal fade" id="modalSelecionarQuestoes" tabindex="-1">
-        <div class="modal-dialog modal-questoes">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-question-circle text-primary"></i>
-                        Selecionar Questões para a Prova
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Barra de Pesquisa -->
-                    <div class="mb-3">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="fas fa-search"></i>
-                            </span>
-                            <input type="text" class="form-control" id="search-questoes-modal" 
-                                   placeholder="Buscar por título, matéria ou tipo..." 
-                                   onkeyup="filtrarQuestoesModal()">
-                        </div>
-                    </div>
-                    
-                    <!-- Grid de Questões -->
-                    <div class="questoes-grid" id="questoes-grid">
-                        {% for questao in questoes_dashboard %}
-                            <div class="questao-card-modal" 
-                                 data-id="{{ questao.id }}" 
-                                 data-titulo="{{ questao.titulo }}" 
-                                 data-materia="{{ questao.materia }}"
-                                 data-tipo="{{ questao.tipo }}"
-                                 onclick="toggleQuestaoSelecao({{ questao.id }}, this)">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1 text-primary">{{ questao.titulo|truncatechars:60 }}</h6>
-                                        <div class="d-flex flex-wrap gap-1 mb-2">
-                                            <span class="badge bg-secondary">{{ questao.materia }}</span>
-                                            <span class="badge bg-info">{{ questao.get_tipo_display }}</span>
-                                        </div>
-                                        <small class="text-muted">
-                                            {{ questao.ano_escolar }} - {{ questao.grupo_ensino }}
-                                        </small>
-                                    </div>
-                                    <div class="text-end">
-                                        <i class="fas fa-check-circle text-success" style="display: none;"></i>
-                                        <i class="fas fa-plus-circle text-primary"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        {% empty %}
-                            <div class="col-12 text-center text-muted p-4">
-                                <i class="fas fa-question-circle fa-3x mb-3"></i>
-                                <p>Nenhuma questão disponível</p>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <div class="me-auto">
-                        <span class="text-muted">
-                            <span id="questoes-selecionadas-count">0</span> questão(ões) selecionada(s)
-                        </span>
-                    </div>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="confirmarSelecaoQuestoes()">
-                        <i class="fas fa-check"></i> Adicionar Selecionadas
-                    </button>
-                </div>
+      <div class="modal-dialog modal-questoes">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="fas fa-question-circle text-primary"></i>
+              Selecionar Questões para a Prova
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <!-- Barra de Pesquisa -->
+            <div class="mb-3">
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="fas fa-search"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="search-questoes-modal"
+                  placeholder="Buscar por título, matéria ou tipo..."
+                  onkeyup="filtrarQuestoesModal()"
+                />
+              </div>
             </div>
-        </div>
-    </div>
 
     <!-- Loading overlay -->
     <div class="loading">
@@ -527,374 +584,417 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
-        let questoesSelecionadas = [];
-        let questoesSelecionadasTemp = []; // Para o modal de seleção
+      let questoesSelecionadas = [];
+      let questoesSelecionadasTemp = []; // Para o modal de seleção
 
-        // Atualiza preview quando campos são alterados
-        document.getElementById('titulo').addEventListener('input', function() {
-            document.getElementById('preview-titulo').textContent = this.value || 'Título da Prova';
+      // Atualiza preview quando campos são alterados
+      document.getElementById("titulo").addEventListener("input", function () {
+        document.getElementById("preview-titulo").textContent =
+          this.value || "Título da Prova";
+      });
+
+      document.getElementById("materia").addEventListener("input", function () {
+        document.getElementById("preview-materia").textContent =
+          this.value || "-";
+      });
+
+      document
+        .getElementById("tipo_prova")
+        .addEventListener("change", function () {
+          const selectedOption = this.options[this.selectedIndex];
+          document.getElementById("preview-tipo").textContent =
+            selectedOption.text || "-";
         });
 
-        document.getElementById('materia').addEventListener('input', function() {
-            document.getElementById('preview-materia').textContent = this.value || '-';
+      // Nova função para abrir modal de seleção de questões
+      function abrirModalSelecionarQuestoes() {
+        questoesSelecionadasTemp = [...questoesSelecionadas]; // Copia as questões já selecionadas
+        atualizarVisualizacaoModal();
+        const modal = new bootstrap.Modal(
+          document.getElementById("modalSelecionarQuestoes")
+        );
+        modal.show();
+      }
+
+      // Função para toggle de seleção de questão no modal
+      function toggleQuestaoSelecao(questaoId, element) {
+        const index = questoesSelecionadasTemp.findIndex(
+          (q) => q.id == questaoId
+        );
+        const icons = element.querySelectorAll("i");
+        const checkIcon = icons[0]; // check-circle
+        const plusIcon = icons[1]; // plus-circle
+
+        if (index > -1) {
+          // Remove da seleção
+          questoesSelecionadasTemp.splice(index, 1);
+          element.classList.remove("selecionada");
+          checkIcon.style.display = "none";
+          plusIcon.style.display = "block";
+        } else {
+          // Busca dados da questão e adiciona à seleção temporária
+          const questaoData = {
+            id: questaoId,
+            titulo: element.dataset.titulo,
+            materia: element.dataset.materia,
+            tipo: element.dataset.tipo,
+          };
+          questoesSelecionadasTemp.push(questaoData);
+          element.classList.add("selecionada");
+          checkIcon.style.display = "block";
+          plusIcon.style.display = "none";
+        }
+
+        atualizarContadorSelecao();
+      }
+
+      // Atualiza a visualização do modal baseada nas questões já selecionadas
+      function atualizarVisualizacaoModal() {
+        const cards = document.querySelectorAll(".questao-card-modal");
+        cards.forEach((card) => {
+          const questaoId = card.dataset.id;
+          const isSelected = questoesSelecionadasTemp.some(
+            (q) => q.id == questaoId
+          );
+          const icons = card.querySelectorAll("i");
+          const checkIcon = icons[0];
+          const plusIcon = icons[1];
+
+          if (isSelected) {
+            card.classList.add("selecionada");
+            checkIcon.style.display = "block";
+            plusIcon.style.display = "none";
+          } else {
+            card.classList.remove("selecionada");
+            checkIcon.style.display = "none";
+            plusIcon.style.display = "block";
+          }
+        });
+        atualizarContadorSelecao();
+      }
+
+      // Atualiza contador de questões selecionadas
+      function atualizarContadorSelecao() {
+        document.getElementById("questoes-selecionadas-count").textContent =
+          questoesSelecionadasTemp.length;
+      }
+
+      // Filtrar questões no modal
+      function filtrarQuestoesModal() {
+        const searchTerm = document
+          .getElementById("search-questoes-modal")
+          .value.toLowerCase();
+        const questoes = document.querySelectorAll(".questao-card-modal");
+
+        questoes.forEach((questao) => {
+          const titulo = questao.dataset.titulo.toLowerCase();
+          const materia = questao.dataset.materia.toLowerCase();
+          const tipo = questao.dataset.tipo.toLowerCase();
+
+          if (
+            titulo.includes(searchTerm) ||
+            materia.includes(searchTerm) ||
+            tipo.includes(searchTerm)
+          ) {
+            questao.style.display = "block";
+          } else {
+            questao.style.display = "none";
+          }
+        });
+      }
+
+      // Confirma a seleção de questões e carrega dados completos
+      async function confirmarSelecaoQuestoes() {
+        try {
+          showLoading();
+
+          // Remove questões que não estão mais selecionadas
+          questoesSelecionadas = questoesSelecionadas.filter((q) =>
+            questoesSelecionadasTemp.some((temp) => temp.id == q.id)
+          );
+
+          // Adiciona novas questões selecionadas
+          for (const questaoTemp of questoesSelecionadasTemp) {
+            if (!questoesSelecionadas.find((q) => q.id == questaoTemp.id)) {
+              // Busca dados completos da questão
+              const questaoCompleta = await buscarQuestaoCompleta(
+                questaoTemp.id
+              );
+              if (questaoCompleta) {
+                questoesSelecionadas.push(questaoCompleta);
+              }
+            }
+          }
+
+          atualizarPreview();
+
+          // Fecha o modal
+          const modal = bootstrap.Modal.getInstance(
+            document.getElementById("modalSelecionarQuestoes")
+          );
+          modal.hide();
+        } catch (error) {
+          alert("Erro ao adicionar questões: " + error.message);
+        } finally {
+          hideLoading();
+        }
+      }
+
+      // Função para buscar dados completos da questão (mantém a lógica original)
+      async function buscarQuestaoCompleta(questaoId) {
+        const formData = new FormData();
+        formData.append("action", "buscar_questao");
+        formData.append("questao_id", questaoId);
+        formData.append(
+          "csrfmiddlewaretoken",
+          document.querySelector("[name=csrfmiddlewaretoken]").value
+        );
+
+        const response = await fetch("", {
+          method: "POST",
+          body: formData,
         });
 
-        document.getElementById('tipo_prova').addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            document.getElementById('preview-tipo').textContent = selectedOption.text || '-';
-        });
+        const data = await response.json();
 
-        // Nova função para abrir modal de seleção de questões
-        function abrirModalSelecionarQuestoes() {
-            questoesSelecionadasTemp = [...questoesSelecionadas]; // Copia as questões já selecionadas
-            atualizarVisualizacaoModal();
-            const modal = new bootstrap.Modal(document.getElementById('modalSelecionarQuestoes'));
-            modal.show();
+        if (data.success) {
+          return data.questao;
+        } else {
+          console.error("Erro ao carregar questão:", data.error);
+          return null;
         }
+      }
 
-        // Função para toggle de seleção de questão no modal
-        function toggleQuestaoSelecao(questaoId, element) {
-            const index = questoesSelecionadasTemp.findIndex(q => q.id == questaoId);
-            const icons = element.querySelectorAll('i');
-            const checkIcon = icons[0]; // check-circle
-            const plusIcon = icons[1]; // plus-circle
-            
-            if (index > -1) {
-                // Remove da seleção
-                questoesSelecionadasTemp.splice(index, 1);
-                element.classList.remove('selecionada');
-                checkIcon.style.display = 'none';
-                plusIcon.style.display = 'block';
-            } else {
-                // Busca dados da questão e adiciona à seleção temporária
-                const questaoData = {
-                    id: questaoId,
-                    titulo: element.dataset.titulo,
-                    materia: element.dataset.materia,
-                    tipo: element.dataset.tipo
-                };
-                questoesSelecionadasTemp.push(questaoData);
-                element.classList.add('selecionada');
-                checkIcon.style.display = 'block';
-                plusIcon.style.display = 'none';
-            }
-            
-            atualizarContadorSelecao();
-        }
+      function removerQuestao(index) {
+        questoesSelecionadas.splice(index, 1);
+        atualizarPreview();
+      }
 
-        // Atualiza a visualização do modal baseada nas questões já selecionadas
-        function atualizarVisualizacaoModal() {
-            const cards = document.querySelectorAll('.questao-card-modal');
-            cards.forEach(card => {
-                const questaoId = card.dataset.id;
-                const isSelected = questoesSelecionadasTemp.some(q => q.id == questaoId);
-                const icons = card.querySelectorAll('i');
-                const checkIcon = icons[0];
-                const plusIcon = icons[1];
-                
-                if (isSelected) {
-                    card.classList.add('selecionada');
-                    checkIcon.style.display = 'block';
-                    plusIcon.style.display = 'none';
-                } else {
-                    card.classList.remove('selecionada');
-                    checkIcon.style.display = 'none';
-                    plusIcon.style.display = 'block';
-                }
-            });
-            atualizarContadorSelecao();
-        }
+      function atualizarPreview() {
+        const container = document.getElementById("questoes-preview");
 
-        // Atualiza contador de questões selecionadas
-        function atualizarContadorSelecao() {
-            document.getElementById('questoes-selecionadas-count').textContent = questoesSelecionadasTemp.length;
-        }
-
-        // Filtrar questões no modal
-        function filtrarQuestoesModal() {
-            const searchTerm = document.getElementById('search-questoes-modal').value.toLowerCase();
-            const questoes = document.querySelectorAll('.questao-card-modal');
-            
-            questoes.forEach(questao => {
-                const titulo = questao.dataset.titulo.toLowerCase();
-                const materia = questao.dataset.materia.toLowerCase();
-                const tipo = questao.dataset.tipo.toLowerCase();
-                
-                if (titulo.includes(searchTerm) || materia.includes(searchTerm) || tipo.includes(searchTerm)) {
-                    questao.style.display = 'block';
-                } else {
-                    questao.style.display = 'none';
-                }
-            });
-        }
-
-        // Confirma a seleção de questões e carrega dados completos
-        async function confirmarSelecaoQuestoes() {
-            try {
-                showLoading();
-                
-                // Remove questões que não estão mais selecionadas
-                questoesSelecionadas = questoesSelecionadas.filter(q => 
-                    questoesSelecionadasTemp.some(temp => temp.id == q.id)
-                );
-                
-                // Adiciona novas questões selecionadas
-                for (const questaoTemp of questoesSelecionadasTemp) {
-                    if (!questoesSelecionadas.find(q => q.id == questaoTemp.id)) {
-                        // Busca dados completos da questão
-                        const questaoCompleta = await buscarQuestaoCompleta(questaoTemp.id);
-                        if (questaoCompleta) {
-                            questoesSelecionadas.push(questaoCompleta);
-                        }
-                    }
-                }
-                
-                atualizarPreview();
-                
-                // Fecha o modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('modalSelecionarQuestoes'));
-                modal.hide();
-                
-            } catch (error) {
-                alert('Erro ao adicionar questões: ' + error.message);
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Função para buscar dados completos da questão (mantém a lógica original)
-        async function buscarQuestaoCompleta(questaoId) {
-            const formData = new FormData();
-            formData.append('action', 'buscar_questao');
-            formData.append('questao_id', questaoId);
-            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-
-            const response = await fetch('', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-            
-            if (data.success) {
-                return data.questao;
-            } else {
-                console.error('Erro ao carregar questão:', data.error);
-                return null;
-            }
-        }
-
-        function removerQuestao(index) {
-            questoesSelecionadas.splice(index, 1);
-            atualizarPreview();
-        }
-
-        function atualizarPreview() {
-            const container = document.getElementById('questoes-preview');
-            
-            if (questoesSelecionadas.length === 0) {
-                container.innerHTML = `
+        if (questoesSelecionadas.length === 0) {
+          container.innerHTML = `
                     <p class="text-center text-muted">
                         <i class="fas fa-info-circle"></i> 
                         Adicione questões para visualizar o preview da prova
                     </p>
                 `;
-                return;
-            }
+          return;
+        }
 
-            let html = '';
-            questoesSelecionadas.forEach((questao, index) => {
-                html += `
+        let html = "";
+        questoesSelecionadas.forEach((questao, index) => {
+          html += `
                     <div class="questao-preview">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h6><strong>${index + 1}. ${questao.titulo}</strong></h6>
+                            <h6><strong>${index + 1}. ${
+            questao.titulo
+          }</strong></h6>
                             <button class="btn btn-sm btn-danger" onclick="removerQuestao(${index})">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
                 `;
 
-                // Imagens da questão
-                if (questao.imagens && questao.imagens.length > 0) {
-                    questao.imagens.forEach(img => {
-                        if (img.imagem) {
-                            html += `<img src="/media/${img.imagem}" class="questao-imagem" alt="Imagem da questão">`;
-                            if (img.legenda) {
-                                html += `<p class="text-muted small"><em>${img.legenda}</em></p>`;
-                            }
-                        }
-                    });
+          // Imagens da questão
+          if (questao.imagens && questao.imagens.length > 0) {
+            questao.imagens.forEach((img) => {
+              if (img.imagem) {
+                html += `<img src="/media/${img.imagem}" class="questao-imagem" alt="Imagem da questão">`;
+                if (img.legenda) {
+                  html += `<p class="text-muted small"><em>${img.legenda}</em></p>`;
                 }
+              }
+            });
+          }
 
-                // Conteúdo específico por tipo
-                if (questao.tipo === 'multipla' && questao.alternativas) {
-                    questao.alternativas.forEach((alt, altIndex) => {
-                        const letra = String.fromCharCode(97 + altIndex); // a, b, c, d...
-                        html += `<div class="alternativa-item">${letra}) ${alt.texto}</div>`;
-                    });
-                } else if (questao.tipo === 'vf' && questao.frases_vf) {
-                    questao.frases_vf.forEach(frase => {
-                        html += `<div class="frase-vf-item">( ) ${frase.texto}</div>`;
-                    });
-                } else if (questao.tipo === 'aberta') {
-                    html += `
+          // Conteúdo específico por tipo
+          if (questao.tipo === "multipla" && questao.alternativas) {
+            questao.alternativas.forEach((alt, altIndex) => {
+              const letra = String.fromCharCode(97 + altIndex); // a, b, c, d...
+              html += `<div class="alternativa-item">${letra}) ${alt.texto}</div>`;
+            });
+          } else if (questao.tipo === "vf" && questao.frases_vf) {
+            questao.frases_vf.forEach((frase) => {
+              html += `<div class="frase-vf-item">( ) ${frase.texto}</div>`;
+            });
+          } else if (questao.tipo === "aberta") {
+            html += `
                         <div class="mt-3">
                             <div style="border-bottom: 1px solid #ccc; margin: 10px 0; height: 20px;"></div>
                             <div style="border-bottom: 1px solid #ccc; margin: 10px 0; height: 20px;"></div>
                             <div style="border-bottom: 1px solid #ccc; margin: 10px 0; height: 20px;"></div>
                         </div>
                     `;
-                }
+          }
 
-                html += '</div>';
-            });
+          html += "</div>";
+        });
 
-            container.innerHTML = html;
+        container.innerHTML = html;
+      }
+
+      async function salvarProva() {
+        if (!validarFormulario()) return;
+
+        try {
+          showLoading();
+
+          const formData = new FormData(document.getElementById("form-prova"));
+          formData.append("action", "salvar_prova");
+          formData.append(
+            "questoes_selecionadas",
+            JSON.stringify(questoesSelecionadas)
+          );
+
+          const response = await fetch("", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            alert("Prova salva com sucesso!");
+          } else {
+            alert("Erro ao salvar prova: " + data.error);
+          }
+        } catch (error) {
+          alert("Erro ao salvar prova: " + error.message);
+        } finally {
+          hideLoading();
+        }
+      }
+
+      async function exportarPDF() {
+        if (!validarFormulario()) return;
+
+        try {
+          showLoading();
+
+          const formData = new FormData(document.getElementById("form-prova"));
+          formData.append("action", "exportar_pdf");
+          formData.append(
+            "questoes_selecionadas",
+            JSON.stringify(questoesSelecionadas)
+          );
+
+          const response = await fetch("", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${
+              document.getElementById("titulo").value || "prova"
+            }.pdf`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+          } else {
+            const data = await response.json();
+            alert("Erro ao exportar PDF: " + data.error);
+          }
+        } catch (error) {
+          alert("Erro ao exportar PDF: " + error.message);
+        } finally {
+          hideLoading();
+        }
+      }
+
+      async function exportarDOC() {
+        if (!validarFormulario()) return;
+
+        try {
+          showLoading();
+
+          const formData = new FormData(document.getElementById("form-prova"));
+          formData.append("action", "exportar_doc");
+          formData.append(
+            "questoes_selecionadas",
+            JSON.stringify(questoesSelecionadas)
+          );
+
+          const response = await fetch("", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${
+              document.getElementById("titulo").value || "prova"
+            }.docx`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+          } else {
+            const data = await response.json();
+            alert("Erro ao exportar DOC: " + data.error);
+          }
+        } catch (error) {
+          alert("Erro ao exportar DOC: " + error.message);
+        } finally {
+          hideLoading();
+        }
+      }
+
+      function validarFormulario() {
+        const titulo = document.getElementById("titulo").value.trim();
+        const materia = document.getElementById("materia").value.trim();
+        const tipo = document.getElementById("tipo_prova").value;
+
+        if (!titulo || !materia || !tipo) {
+          alert("Preencha todos os campos obrigatórios!");
+          return false;
         }
 
-        async function salvarProva() {
-            if (!validarFormulario()) return;
-
-            try {
-                showLoading();
-
-                const formData = new FormData(document.getElementById('form-prova'));
-                formData.append('action', 'salvar_prova');
-                formData.append('questoes_selecionadas', JSON.stringify(questoesSelecionadas));
-
-                const response = await fetch('', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-                
-                if (data.success) {
-                    alert('Prova salva com sucesso!');
-                } else {
-                    alert('Erro ao salvar prova: ' + data.error);
-                }
-            } catch (error) {
-                alert('Erro ao salvar prova: ' + error.message);
-            } finally {
-                hideLoading();
-            }
+        if (questoesSelecionadas.length === 0) {
+          alert("Adicione pelo menos uma questão à prova!");
+          return false;
         }
 
-        async function exportarPDF() {
-            if (!validarFormulario()) return;
+        return true;
+      }
 
-            try {
-                showLoading();
+      function abrirModalNovaQuestao() {
+        const modal = new bootstrap.Modal(
+          document.getElementById("modalNovaQuestao")
+        );
+        modal.show();
+      }
 
-                const formData = new FormData(document.getElementById('form-prova'));
-                formData.append('action', 'exportar_pdf');
-                formData.append('questoes_selecionadas', JSON.stringify(questoesSelecionadas));
+      function toggleTipoQuestao() {
+        const tipo = document.getElementById("nova-tipo").value;
+        const alternativasSection = document.getElementById(
+          "alternativas-section"
+        );
+        const vfSection = document.getElementById("vf-section");
 
-                const response = await fetch('', {
-                    method: 'POST',
-                    body: formData
-                });
+        alternativasSection.style.display = "none";
+        vfSection.style.display = "none";
 
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${document.getElementById('titulo').value || 'prova'}.pdf`;
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                } else {
-                    const data = await response.json();
-                    alert('Erro ao exportar PDF: ' + data.error);
-                }
-            } catch (error) {
-                alert('Erro ao exportar PDF: ' + error.message);
-            } finally {
-                hideLoading();
-            }
+        if (tipo === "multipla") {
+          alternativasSection.style.display = "block";
+        } else if (tipo === "vf") {
+          vfSection.style.display = "block";
         }
+      }
 
-        async function exportarDOC() {
-            if (!validarFormulario()) return;
+      function adicionarAlternativa() {
+        const container = document.getElementById("alternativas-container");
+        const count = container.children.length;
+        const letra = String.fromCharCode(97 + count);
 
-            try {
-                showLoading();
-
-                const formData = new FormData(document.getElementById('form-prova'));
-                formData.append('action', 'exportar_doc');
-                formData.append('questoes_selecionadas', JSON.stringify(questoesSelecionadas));
-
-                const response = await fetch('', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${document.getElementById('titulo').value || 'prova'}.docx`;
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                } else {
-                    const data = await response.json();
-                    alert('Erro ao exportar DOC: ' + data.error);
-                }
-            } catch (error) {
-                alert('Erro ao exportar DOC: ' + error.message);
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function validarFormulario() {
-            const titulo = document.getElementById('titulo').value.trim();
-            const materia = document.getElementById('materia').value.trim();
-            const tipo = document.getElementById('tipo_prova').value;
-
-            if (!titulo || !materia || !tipo) {
-                alert('Preencha todos os campos obrigatórios!');
-                return false;
-            }
-
-            if (questoesSelecionadas.length === 0) {
-                alert('Adicione pelo menos uma questão à prova!');
-                return false;
-            }
-
-            return true;
-        }
-
-        function abrirModalNovaQuestao() {
-            const modal = new bootstrap.Modal(document.getElementById('modalNovaQuestao'));
-            modal.show();
-        }
-
-        function toggleTipoQuestao() {
-            const tipo = document.getElementById('nova-tipo').value;
-            const alternativasSection = document.getElementById('alternativas-section');
-            const vfSection = document.getElementById('vf-section');
-
-            alternativasSection.style.display = 'none';
-            vfSection.style.display = 'none';
-
-            if (tipo === 'multipla') {
-                alternativasSection.style.display = 'block';
-            } else if (tipo === 'vf') {
-                vfSection.style.display = 'block';
-            }
-        }
-
-        function adicionarAlternativa() {
-            const container = document.getElementById('alternativas-container');
-            const count = container.children.length;
-            const letra = String.fromCharCode(97 + count);
-            
-            const div = document.createElement('div');
-            div.className = 'alternativa-input mb-2';
-            div.innerHTML = `
+        const div = document.createElement("div");
+        div.className = "alternativa-input mb-2";
+        div.innerHTML = `
                 <div class="input-group">
                     <span class="input-group-text">${letra})</span>
                     <input type="text" class="form-control" name="alternativas[]" placeholder="Digite a alternativa">
@@ -906,14 +1006,14 @@
                     </button>
                 </div>
             `;
-            container.appendChild(div);
-        }
+        container.appendChild(div);
+      }
 
-        function adicionarFrase() {
-            const container = document.getElementById('frases-container');
-            const div = document.createElement('div');
-            div.className = 'frase-input mb-2';
-            div.innerHTML = `
+      function adicionarFrase() {
+        const container = document.getElementById("frases-container");
+        const div = document.createElement("div");
+        div.className = "frase-input mb-2";
+        div.innerHTML = `
                 <div class="input-group">
                     <input type="text" class="form-control" name="frases[]" placeholder="Digite a frase">
                     <select class="form-select" name="verdadeira[]" style="max-width: 120px;">
@@ -925,21 +1025,21 @@
                     </button>
                 </div>
             `;
-            container.appendChild(div);
-        }
+        container.appendChild(div);
+      }
 
-        async function salvarNovaQuestao() {
-            // Implementar lógica para salvar nova questão
-            alert('Funcionalidade de criar nova questão em desenvolvimento');
-        }
+      async function salvarNovaQuestao() {
+        // Implementar lógica para salvar nova questão
+        alert("Funcionalidade de criar nova questão em desenvolvimento");
+      }
 
-        function showLoading() {
-            document.querySelector('.loading').style.display = 'flex';
-        }
+      function showLoading() {
+        document.querySelector(".loading").style.display = "flex";
+      }
 
-        function hideLoading() {
-            document.querySelector('.loading').style.display = 'none';
-        }
+      function hideLoading() {
+        document.querySelector(".loading").style.display = "none";
+      }
     </script>
     </body>
 </html>

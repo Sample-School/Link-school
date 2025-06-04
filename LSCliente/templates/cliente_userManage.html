@@ -6,6 +6,7 @@
 {% block styles %}
   <link rel="stylesheet" href="{% static "global/css/cliente-navbar.css" %}">
   <link rel="stylesheet" href="{% static 'LSCliente/css/style-cliente-manage.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock styles %}
 
 {% block content %}
@@ -57,7 +58,9 @@
       
         {% csrf_token %}
         {% if form.instance.id %}
-        <input type="hidden" name="id" value="{{ form.instance.id }}">
+        <!--<input type="hidden" name="id" value="{{ form.instance.id }}">-->
+        <input type="hidden" name="usuario_id" value="{{ form.instance.id }}">
+
         {% endif %}
       
         <div>
@@ -99,26 +102,33 @@
 
         
 
-        <div>
-          <label for="{{ form.foto.id_for_label }}">Foto</label>
-          {{ form.foto }}
-          {% if form.foto.errors %}
-            <div>{{ form.foto.errors }}</div>
-          {% endif %}
         
-          {% if form.instance.foto %}
-          <div>
-            <img src="{{ form.instance.foto.url }}" alt="Foto atual">
-          </div>
-          {% endif %}
-        </div>
 
         
       
         <div class="container-status-foto">
           <div class="foto">
-           
-          </div>
+            <label for="{{ form.foto.id_for_label }}">FOTO DO USUÁRIO</label>
+            <div class="foto-upload-container">
+                <!-- Upload -->
+                <div class="foto-upload-btn">
+                    <i class="fas fa-upload"></i>
+                    {{ form.foto }}
+                </div>
+                <!-- Preview -->
+                <div class="foto-preview">
+                    <i class="fas fa-circle-user"></i>
+                    <img src="{% if form.foto.value %}{{ form.foto.value.url }}{% endif %}" 
+                        alt="Preview da Foto" class="foto-preview-image">
+                </div>
+            </div>
+            {% if form.foto.errors %}
+                <div class="error">{{ form.foto.errors }}</div>
+            {% endif %}
+        </div>
+
+          
+
 
           <div class="status">
             <div>
@@ -151,6 +161,49 @@
 
   </form>
 
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos
+    const uploadBtn = document.querySelector('.foto-upload-btn');
+    const fotoInput = document.querySelector('.foto-upload-btn input[type="file"]');
+    const fotoPreview = document.querySelector('.foto-preview-image');
+    const defaultIcon = document.querySelector('.foto-preview i');
+    
+    // Verifica se os elementos existem
+    if (!uploadBtn || !fotoInput || !fotoPreview || !defaultIcon) {
+        console.error("Elementos não encontrados - verifique os seletores");
+        return;
+    }
+    
+    // Abre o seletor de arquivos ao clicar em qualquer parte do botão
+    uploadBtn.addEventListener('click', function(e) {
+        // Evita múltiplos eventos se clicar diretamente no input
+        if (e.target !== fotoInput) {
+            fotoInput.click();
+        }
+    });
+    
+    // Atualiza o preview quando selecionar arquivo
+    fotoInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                fotoPreview.src = e.target.result;
+                fotoPreview.style.display = 'block';
+                defaultIcon.style.display = 'none';
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+    
+    // Mostra a imagem atual se já existir
+    if (fotoPreview.src && fotoPreview.src !== window.location.href) {
+        fotoPreview.style.display = 'block';
+        defaultIcon.style.display = 'none';
+    }
+});
+</script>
 
 
 {% endblock %}
