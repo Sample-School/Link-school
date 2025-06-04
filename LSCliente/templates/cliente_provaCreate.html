@@ -5,48 +5,408 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Criar Prova</title>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="{% static "global/css/cliente-navbar.css" %}">
-    <link rel="stylesheet" href="{% static "LSCliente/css/style-criar-prova.css"
-    %}">
-  </head>
-  <body>
-    <div class="container">
-      <div class="row">
-        <!-- Painel Esquerdo - Configurações -->
-        <div class="col-md-4">
-          <div class="card">
-            <div class="card-header bg-primary text-white">
-              <h5><i class="fas fa-cog"></i> Configurações da Prova</h5>
-            </div>
-            <div class="card-body">
-              <form id="form-prova">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .left-panel {
+            width: 300px;
+            background-color: #e0e0e0;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo-text {
+            font-size: 48px;
+            font-weight: bold;
+            color: #888;
+        }
+        
+        .title-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title-main {
+            font-size: 64px;
+            font-weight: bold;
+            color: #999;
+            line-height: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: white;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .radio-item input[type="radio"] {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .save-button {
+            background-color: #888;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .export-buttons {
+            margin-top: 15px;
+        }
+        
+        .export-button {
+            background-color: #666;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .right-panel {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-left: 1px solid #ccc;
+        }
+        
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+        
+        .header-info {
+            flex: 1;
+        }
+        
+        .header-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .header-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            background-color: #f9f9f9;
+        }
+        
+        .header-input.small {
+            flex: 0.5;
+        }
+        
+        .logo-placeholder {
+            width: 100px;
+            height: 60px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 12px;
+        }
+        
+        .prova-info {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .prova-title {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            background-color: #f9f9f9;
+        }
+        
+        .prova-type {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            background-color: #f9f9f9;
+        }
+        
+        .accessibility-section {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .accessibility-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .accessibility-options {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .accessibility-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .accessibility-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .add-question-area {
+            background-color: #f0f0f0;
+            border: 2px dashed #ccc;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .add-question-area:hover {
+            background-color: #e8e8e8;
+            border-color: #999;
+        }
+        
+        .add-icon {
+            font-size: 48px;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+        
+        .add-text {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .questoes-preview {
+            margin-top: 20px;
+        }
+        
+        .questao-item {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .questao-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .questao-title {
+            font-weight: bold;
+            flex: 1;
+        }
+        
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            font-size: 18px;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .questao-content {
+            margin-top: 10px;
+        }
+        
+        .alternativa-item {
+            margin: 5px 0;
+            padding: 5px;
+            background-color: white;
+            border-radius: 3px;
+        }
+        
+        .questao-accessibility {
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        
+        /* Modal styles */
+        .modal-questoes {
+            max-width: 90vw;
+        }
+        
+        .questoes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .questao-card-modal {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: white;
+        }
+        
+        .questao-card-modal:hover {
+            border-color: #007bff;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+        }
+        
+        .questao-card-modal.selecionada {
+            border-color: #28a745;
+            background-color: #f8fff8;
+        }
+        
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .loading.show {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Painel Esquerdo -->
+        <div class="left-panel">
+            
+            
+        
+            
+            <form id="form-prova" class="form-section">
                 {% csrf_token %}
-                <div class="mb-3">
-                  <label for="titulo" class="form-label"
-                    >Título da Prova *</label
-                  >
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="titulo"
-                    name="titulo"
-                    required
-                  />
+                <div class="form-group">
+                    <label>Tipo de Prova</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="tipo_a" name="tipo_prova" value="A">
+                            <label for="tipo_a">Tipo A</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="tipo_b" name="tipo_prova" value="B">
+                            <label for="tipo_b">Tipo B</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="tipo_c" name="tipo_prova" value="C">
+                            <label for="tipo_c">Tipo C</label>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="mb-3">
-                  <label for="materia" class="form-label">Matéria *</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="materia"
-                    name="materia"
-                    required
-                  />
+                
+                <button type="button" class="save-button" onclick="salvarProva()">
+                    SALVAR PROVA
+                </button>
+                
+                <div class="export-buttons">
+                    <button type="button" class="export-button" onclick="exportarPDF()">
+                        <i class="fas fa-file-pdf"></i> Exportar PDF
+                    </button>
+                    <button type="button" class="export-button" onclick="exportarDOC()">
+                        <i class="fas fa-file-word"></i> Exportar DOC
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Painel Direito -->
+        <div class="right-panel">
+            <div class="header-section">
+                <div class="header-info">
+                    <div class="header-row">
+                        <input type="text" id="nome_escola" class="header-input" placeholder="Nome da Escola">
+                        <div class="logo-placeholder">Sua LOGO</div>
+                    </div>
+                    <div class="header-row">
+                        <input type="text" id="aluno" class="header-input" placeholder="Aluno:">
+                        <input type="text" id="nota" class="header-input small" placeholder="Nota">
+                    </div>
+                    <div class="header-row">
+                        <input type="text" id="serie" class="header-input small" placeholder="Série:">
+                        <input type="text" id="turma" class="header-input small" placeholder="Turma:">
+                        <input type="text" id="turno" class="header-input small" placeholder="Turno:">
+                    </div>
                 </div>
 
                 <div class="mb-3">
@@ -91,15 +451,40 @@
                 </div>
               </form>
             </div>
-          </div>
-          <!-- Botão para criar nova questão -->
-          <div class="card mt-3">
-            <div class="card-body text-center">
-              <button class="btn btn-warning" onclick="abrirModalNovaQuestao()">
-                <i class="fas fa-plus-circle"></i> Criar Nova Questão
-              </button>
+            
+            <div class="prova-info">
+                <input type="text" id="titulo" name="titulo" class="prova-title" placeholder="Título da Prova" required>
+                <input type="text" id="materia" name="materia" class="prova-type" placeholder="Tipo de prova" required>
             </div>
-          </div>
+            
+            <div class="accessibility-section">
+                <div class="accessibility-title">NÍVEL DE ACESSIBILIDADE DA PROVA:</div>
+                <div class="accessibility-options">
+                    <div class="accessibility-option">
+                        <input type="radio" id="grupo1" name="acessibilidade_prova" value="1" checked>
+                        <label for="grupo1">Grupo 1</label>
+                    </div>
+                    <div class="accessibility-option">
+                        <input type="radio" id="grupo2" name="acessibilidade_prova" value="2">
+                        <label for="grupo2">Grupo 2</label>
+                    </div>
+                    <div class="accessibility-option">
+                        <input type="radio" id="grupo3" name="acessibilidade_prova" value="3">
+                        <label for="grupo3">Grupo 3</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Área de Questões -->
+            <div id="questoes-preview">
+                <!-- Questões serão adicionadas aqui -->
+            </div>
+            
+            <!-- Área para Adicionar Questões -->
+            <div class="add-question-area" onclick="abrirModalSelecionarQuestoes()">
+                <div class="add-icon">+</div>
+                <div class="add-text">Clique para adicionar questões</div>
+            </div>
         </div>
         <!-- Painel Direito - Preview da Prova -->
         <div class="col-md-8">
@@ -190,227 +575,11 @@
               </div>
             </div>
 
-            <!-- Grid de Questões -->
-            <div class="questoes-grid" id="questoes-grid">
-              {% for questao in questoes_dashboard %}
-              <div
-                class="questao-card-modal"
-                data-id="{{ questao.id }}"
-                data-titulo="{{ questao.titulo }}"
-                data-materia="{{ questao.materia }}"
-                data-tipo="{{ questao.tipo }}"
-                onclick="toggleQuestaoSelecao({{ questao.id }}, this)"
-              >
-                <div
-                  class="d-flex justify-content-between align-items-start mb-2"
-                >
-                  <div class="flex-grow-1">
-                    <h6 class="mb-1 text-primary">
-                      {{ questao.titulo|truncatechars:60 }}
-                    </h6>
-                    <div class="d-flex flex-wrap gap-1 mb-2">
-                      <span class="badge bg-secondary"
-                        >{{ questao.materia }}</span
-                      >
-                      <span class="badge bg-info"
-                        >{{ questao.get_tipo_display }}</span
-                      >
-                    </div>
-                    <small class="text-muted">
-                      {{ questao.ano_escolar }} - {{ questao.grupo_ensino }}
-                    </small>
-                  </div>
-                  <div class="text-end">
-                    <i
-                      class="fas fa-check-circle text-success"
-                      style="display: none"
-                    ></i>
-                    <i class="fas fa-plus-circle text-primary"></i>
-                  </div>
-                </div>
-              </div>
-              {% empty %}
-              <div class="col-12 text-center text-muted p-4">
-                <i class="fas fa-question-circle fa-3x mb-3"></i>
-                <p>Nenhuma questão disponível</p>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-          <div class="modal-footer">
-            <div class="me-auto">
-              <span class="text-muted">
-                <span id="questoes-selecionadas-count">0</span> questão(ões)
-                selecionada(s)
-              </span>
-            </div>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="confirmarSelecaoQuestoes()"
-            >
-              <i class="fas fa-check"></i> Adicionar Selecionadas
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Modal para Nova Questão -->
-    <div class="modal fade" id="modalNovaQuestao" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Criar Nova Questão</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form id="form-nova-questao">
-              {% csrf_token %}
-              <div class="mb-3">
-                <label for="nova-titulo" class="form-label"
-                  >Enunciado da Questão *</label
-                >
-                <textarea
-                  class="form-control"
-                  id="nova-titulo"
-                  name="titulo"
-                  rows="3"
-                  required
-                ></textarea>
-              </div>
-
-              <div class="row">
-                <div class="col-md-6">
-                  <label for="nova-materia" class="form-label">Matéria *</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="nova-materia"
-                    name="materia"
-                    required
-                  />
-                </div>
-                <div class="col-md-6">
-                  <label for="nova-tipo" class="form-label"
-                    >Tipo de Questão *</label
-                  >
-                  <select
-                    class="form-select"
-                    id="nova-tipo"
-                    name="tipo"
-                    required
-                    onchange="toggleTipoQuestao()"
-                  >
-                    <option value="">Selecione</option>
-                    <option value="aberta">Questão Aberta</option>
-                    <option value="multipla">Múltipla Escolha</option>
-                    <option value="vf">Verdadeiro ou Falso</option>
-                  </select>
-                </div>
-              </div>
-              <!-- Alternativas para múltipla escolha -->
-              <div id="alternativas-section" style="display: none" class="mt-3">
-                <h6>Alternativas</h6>
-                <div id="alternativas-container">
-                  <div class="alternativa-input mb-2">
-                    <div class="input-group">
-                      <span class="input-group-text">a)</span>
-                      <input
-                        type="text"
-                        class="form-control"
-                        name="alternativas[]"
-                        placeholder="Digite a alternativa"
-                      />
-                      <div class="input-group-text">
-                        <input
-                          type="radio"
-                          name="correta"
-                          value="0"
-                          title="Marcar como correta"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-secondary"
-                  onclick="adicionarAlternativa()"
-                >
-                  <i class="fas fa-plus"></i> Adicionar Alternativa
-                </button>
-              </div>
-              <!-- Frases para verdadeiro/falso -->
-              <div id="vf-section" style="display: none" class="mt-3">
-                <h6>Frases</h6>
-                <div id="frases-container">
-                  <div class="frase-input mb-2">
-                    <div class="input-group">
-                      <input
-                        type="text"
-                        class="form-control"
-                        name="frases[]"
-                        placeholder="Digite a frase"
-                      />
-                      <select
-                        class="form-select"
-                        name="verdadeira[]"
-                        style="max-width: 120px"
-                      >
-                        <option value="1">Verdadeiro</option>
-                        <option value="0">Falso</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-secondary"
-                  onclick="adicionarFrase()"
-                >
-                  <i class="fas fa-plus"></i> Adicionar Frase
-                </button>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="salvarNovaQuestao()"
-            >
-              Salvar Questão
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
     <!-- Loading overlay -->
-    <div
-      class="loading position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-      style="background: rgba(0, 0, 0, 0.5); z-index: 9999"
-    >
-      <div class="spinner-border text-light" role="status">
-        <span class="visually-hidden">Carregando...</span>
-      </div>
+    <div class="loading">
+        <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -872,5 +1041,5 @@
         document.querySelector(".loading").style.display = "none";
       }
     </script>
-  </body>
+    </body>
 </html>
