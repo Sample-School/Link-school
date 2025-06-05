@@ -135,6 +135,12 @@ class Prova(models.Model):
         ('prova_final', 'Prova Final'),
     ]
     
+    ACESSIBILIDADE_CHOICES = [
+        (1, 'Grupo 1'),
+        (2, 'Grupo 2'),
+        (3, 'Grupo 3'),
+    ]
+    
     titulo = models.CharField(max_length=200, verbose_name="Título da Prova")
     materia = models.CharField(max_length=100, verbose_name="Matéria")
     tipo_prova = models.CharField(max_length=20, choices=TIPO_PROVA_CHOICES, verbose_name="Tipo de Prova")
@@ -142,7 +148,14 @@ class Prova(models.Model):
     data_criacao = models.DateTimeField(auto_now_add=True)
     data_atualizacao = models.DateTimeField(auto_now=True)
     
-    # Configurações de formatação (para futuras funcionalidades)
+    # Campo de acessibilidade da prova
+    acessibilidade_prova = models.IntegerField(
+        choices=ACESSIBILIDADE_CHOICES, 
+        default=1, 
+        verbose_name="Nível de Acessibilidade da Prova"
+    )
+    
+    # Configurações de formatação
     fonte_padrao = models.CharField(max_length=50, default="Arial", verbose_name="Fonte Padrão")
     tamanho_fonte = models.IntegerField(default=12, verbose_name="Tamanho da Fonte")
     
@@ -160,6 +173,13 @@ class QuestaoProva(models.Model):
     questao_id = models.IntegerField(verbose_name="ID da Questão do Dashboard")
     questao_dados = models.JSONField(verbose_name="Dados da Questão")  # Cache dos dados da questão
     ordem = models.IntegerField(verbose_name="Ordem na Prova")
+    
+    # Campo de acessibilidade específico para esta questão na prova
+    acessibilidade_questao = models.IntegerField(
+        choices=Prova.ACESSIBILIDADE_CHOICES,
+        default=1,
+        verbose_name="Nível de Acessibilidade da Questão"
+    )
     
     # Configurações específicas desta questão na prova
     texto_destacado = models.JSONField(default=list, blank=True)  # Lista de textos para destacar
