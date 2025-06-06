@@ -11,3 +11,11 @@
   box-sizing: border-box;
   font-family: "Inter", sans-serif;
 }
+
+.container {
+  background-color: red;
+}
+
+main {
+  background-color: gray;
+}
