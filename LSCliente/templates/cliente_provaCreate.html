@@ -5,96 +5,46 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Criar Prova</title>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="{% static "global/css/cliente-navbar.css" %}">
-    <link rel="stylesheet" href="{% static "LSCliente/css/style-criar-prova.css"%}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static "global/css/cliente-navbar.css" %}" />
+    <link rel="stylesheet" href="{% static "LSCliente/css/style-criar-prova.css"%}" />
   </head>
   <body>
     {% include "global/partials/cliente_navbar.html" %}
+
     <div class="container">
-      <div class="row">
-        <!-- Painel Esquerdo - Configurações -->
-        <div class="col-md-4">
-          <div class="card">
-            <div class="card-header bg-primary text-white">
-              <h5><i class="fas fa-cog"></i> Configurações da Prova</h5>
+      <p class="title">Criação <br> de <br> <span>Provas</span></p>
+      <div class="settings">
+        <div class="container__settings-test">
+          <div class="settings__content">
+            <div class="header">
+              <i class="fas fa-cog header__icon"><p>Configurações da Prova</p></i>
+              <p class="header__text"><span>*</span> : Campo obrigatório</p>
             </div>
-            <div class="card-body">
-              <form id="form-prova">
-                {% csrf_token %}
-                <div class="mb-3">
-                  <label for="titulo" class="form-label">Título da Prova *</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="titulo"
-                    name="titulo"
-                    required
-                  />
+            <form class="form" id="form">
+              {% csrf_token %}
+                <div class="form__title-test">
+                  <span>*</span>
+                  <input type="text" placeholder="Título da Prova" required />
                 </div>
 
-                <div class="mb-3">
-                  <label for="materia" class="form-label">Matéria *</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="materia"
-                    name="materia"
-                    required
-                  />
+                <div class="form__matter-test">
+                  <span>*</span>
+                  <input type="text" placeholder="Matéria" required />
                 </div>
 
-                <div class="mb-3">
-                  <label for="tipo_prova" class="form-label">Tipo de Prova *</label>
-                  <select
-                    class="form-select"
-                    id="tipo_prova"
-                    name="tipo_prova"
-                    required
-                  >
-                    <option value="">Selecione o tipo</option>
-                    {% for value, label in tipos_prova %}
-                      <option value="{{ value }}">{{ label }}</option>
-                    {% endfor %}
-                  </select>
+                <div class="form__type-test">
+                  <span>*</span>
+                  <div class="form__type-test__content">
+                    <label for="tipo_prova">Tipo de Prova:</label>
+                    <select id="tipo_prova" required >
+                      {% for value, label in tipos_prova %}
+                        <option value="{{ value }}">{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
                 </div>
-
-                <div class="d-grid gap-2">
-                  <button
-                    type="button"
-                    class="btn btn-success"
-                    onclick="salvarProva()"
-                  >
-                    <i class="fas fa-save"></i> Salvar Prova
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-danger"
-                    onclick="exportarPDF()"
-                  >
-                    <i class="fas fa-file-pdf"></i> Exportar PDF
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-info"
-                    onclick="exportarDOC()"
-                  >
-                    <i class="fas fa-file-word"></i> Exportar DOC
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-          <!-- Botão para criar nova questão -->
-          <div class="">
-            <div class="card-body text-center">
-              <button class="btn btn-warning" onclick="abrirModalNovaQuestao()">
-                <i class="fas fa-plus-circle"></i> Criar Nova Questão
-              </button>
-            </div>
+            </form>
           </div>
         </div>
 
@@ -102,7 +52,7 @@
         <div class="col-md-8">
           <div class="card">
             <div class="card-header bg-success text-white">
-              <h5><i class="fas fa-eye"></i> Preview da Prova</h5>
+              <i class="fas fa-eye"></i> Preview da Prova</h5>
             </div>
             <div class="card-body preview-prova">
               <div id="preview-content">
@@ -401,6 +351,31 @@
         <span class="visually-hidden">Carregando...</span>
       </div>
     </div>
+
+
+
+
+    <div class="container-buttons">
+      <button class="btn" type="button" onclick="salvarProva()">
+        <i class="fas fa-floppy-disk"><p>Salvar Prova</p></i>
+      </button>
+      <button class="btn" onclick="exportarPDF()">
+        <i class="fas fa-file-pdf"><p>Exportar PDF</p></i>
+      </button>
+      <button class="btn" onclick="exportarDOC()">
+        <i class="fas fa-file-word"><p>Exportar DOC</p></i>
+      </button>
+    </div>
+
+    <div class="btn-create-new-question">
+      <button onclick="abrirModalNovaQuestao()">
+        <i class="fas fa-plus-circle"><p>Criar Nova Questão</p></i>
+      </button>
+    </div>
+
+
+
+
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
