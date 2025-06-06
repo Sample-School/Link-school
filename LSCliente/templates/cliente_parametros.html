@@ -7,21 +7,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configurações do Sistema</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="{% static 'global/css/cliente-navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'LSCliente/css/style-parametros.css' %}">
 </head>
 <body>
-
-<div>
+    {% include "global/partials/cliente_navbar.html" %}
+<div class="conteiner">
     <!-- Cabeçalho -->
-    <div>
-        <h1>Configurações do Sistema</h1>
-        <div>
-            <button id="btn-redefinir">Redefinir</button>
+    <div class="geral">
+        <div class="name1"><h1>Parâmetros <br> do <br><span>Sistema</span></h1></div>
+        <div class="botoes">
+            <div class="botao1"><button id="btn-redefinir">Redefinir</button></div>
             <button id="btn-salvar-geral">Salvar Todas</button>
         </div>
     </div>
 
     <!-- LOGO DO CLIENTE -->
-    <div>
+    <div class="logo-cliente">
+        <div class="borde-geral2">
         <h2>Logo do Cliente</h2>
         
         <div>
@@ -45,7 +48,7 @@
     </div>
 
     <!-- CORES DO SISTEMA -->
-    <div>
+    <div class="cores-pri-sec">
         <h2>Cores do Sistema</h2>
         
         <div>
@@ -66,28 +69,14 @@
         
         <button data-action="update_colors">Aplicar Cores</button>
     </div>
-
-    <!-- TEMPO DE INATIVIDADE -->
-    <div>
-        <h2>Tempo Máximo de Inatividade</h2>
-        
-        <div>
-            <label>Tempo em Minutos</label>
-            <div>
-                <input type="number" id="timeout-minutes" min="1" max="1440" value="{{ configuracao.tempo_maximo_inatividade }}">
-                <span>min</span>
-            </div>
-            <small>Atual: {{ configuracao.tempo_maximo_inatividade }} minutos</small>
-        </div>
-        
-        <button data-action="update_timeout">Aplicar Tempo</button>
     </div>
+    <div class="border-geral">
 
-    <!-- USUÁRIOS LOGADOS -->
-    <div>
-        <h2>Usuários Logados ({{ sessoes_ativas|length }}/{{ total_usuarios }})</h2>
-        
+        <!-- USUÁRIOS LOGADOS -->
+        <div class="name-usuario"><h2>Usuários Logados</h2></div>
+        <div class="total"><h2>({{ sessoes_ativas|length }}/{{ total_usuarios }})</h2></div>
         <!-- Tabela de usuários -->
+         <div class="usr-logados">
         <div style="max-height: 200px; overflow-y: auto;">
             <table border="1" style="width: 100%; border-collapse: collapse;">
                 <thead>
@@ -119,14 +108,32 @@
                 </tbody>
             </table>
         </div>
+        </div>
         
         <!-- Deslogar usuário -->
-        <div>
+        <div class="deslo">
+            <h2>Deslogar Usuário</h2>
             <input type="number" id="user-id-logout" placeholder="ID do usuário">
             <button data-action="logout_user">Deslogar</button>
         </div>
+    <!-- TEMPO DE INATIVIDADE -->
+    <div class="time-inative">
+        <h2>Tempo Máximo de Inatividade</h2>
+        
+        <div>
+            <label>Tempo em Minutos</label>
+            <div>
+                <input type="number" id="timeout-minutes" min="1" max="1440" value="{{ configuracao.tempo_maximo_inatividade }}">
+                <span>min</span>
+            </div>
+            <small>Atual: {{ configuracao.tempo_maximo_inatividade }} minutos</small>
+        </div>
+        
+        <button data-action="update_timeout">Aplicar Tempo</button>
     </div>
-
+</div>
+</div>  
+</div>
 </div>
 
 <script>
