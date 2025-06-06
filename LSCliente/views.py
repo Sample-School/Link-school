@@ -330,11 +330,12 @@ class ClienteProvaCreateView(LoginRequiredMixin, View):
         return JsonResponse({'error': 'Ação não reconhecida'}, status=400)
     
     def _salvar_prova(self, request):
-        """Salva a prova no banco de dados"""
+        """Salva a prova no banco de dados com dados de acessibilidade"""
         try:
             titulo = request.POST.get('titulo')
             materia = request.POST.get('materia')
             tipo_prova = request.POST.get('tipo_prova')
+            acessibilidade_prova = request.POST.get('acessibilidade_prova', 1)  # Novo campo
             questoes_selecionadas = json.loads(request.POST.get('questoes_selecionadas', '[]'))
             
             # Validações básicas
@@ -344,23 +345,28 @@ class ClienteProvaCreateView(LoginRequiredMixin, View):
             if not questoes_selecionadas:
                 return JsonResponse({'error': 'Adicione pelo menos uma questão'}, status=400)
             
-            # Cria a prova
+            # Cria a prova com acessibilidade
             prova = Prova.objects.create(
                 titulo=titulo,
                 materia=materia,
                 tipo_prova=tipo_prova,
+                acessibilidade_prova=int(acessibilidade_prova),  # Salva acessibilidade da prova
                 criado_por=request.user
             )
             
-            # Adiciona questões à prova
+            # Adiciona questões à prova com seus níveis de acessibilidade
             for i, questao_data in enumerate(questoes_selecionadas, 1):
                 questao_completa = QuestaoService.buscar_questao_completa(questao_data['id'])
+                
+                # Obtém o nível de acessibilidade da questão (padrão 1 se não especificado)
+                acessibilidade_questao = questao_data.get('acessibilidade', 1)
                 
                 QuestaoProva.objects.create(
                     prova=prova,
                     questao_id=questao_data['id'],
                     questao_dados=questao_completa,
-                    ordem=i
+                    ordem=i,
+                    acessibilidade_questao=int(acessibilidade_questao)  # Salva acessibilidade da questão
                 )
             
             messages.success(request, 'Prova salva com sucesso!')
@@ -370,14 +376,16 @@ class ClienteProvaCreateView(LoginRequiredMixin, View):
             return JsonResponse({'error': 'Dados das questões inválidos'}, status=400)
         except Exception as e:
             return JsonResponse({'error': f'Erro interno: {str(e)}'}, status=500)
+
     
     def _exportar_pdf(self, request):
-        """Exporta a prova como PDF"""
+        """Exporta a prova como PDF com informações de acessibilidade"""
         try:
             # Coleta dados do formulário
             titulo = request.POST.get('titulo', '').strip()
             materia = request.POST.get('materia', '').strip()
             tipo_prova = request.POST.get('tipo_prova', '').strip()
+            acessibilidade_prova = request.POST.get('acessibilidade_prova', 1)  # Novo campo
             questoes_data = request.POST.get('questoes_selecionadas', '[]')
             
             # Validações
@@ -417,6 +425,15 @@ class ClienteProvaCreateView(LoginRequiredMixin, View):
             normal_style.fontSize = 12
             normal_style.spaceAfter = 12
             
+            # Estilo para informações de acessibilidade
+            accessibility_style = ParagraphStyle(
+                'AccessibilityInfo',
+                parent=styles['Normal'],
+                fontSize=10,
+                textColor=colors.grey,
+                spaceAfter=6
+            )
+            
             story = []
             
             # Busca configurações do cliente
@@ -444,6 +461,7 @@ class ClienteProvaCreateView(LoginRequiredMixin, View):
             info_prova = f"""
             <para align="center"><b>Matéria:</b> {materia}</para>
             <para align="center"><b>Tipo:</b> {dict(Prova.TIPO_PROVA_CHOICES).get(tipo_prova, tipo_prova)}</para>
+            <para align="center"><b>Nível de Acessibilidade:</b> Grupo {acessibilidade_prova}</para>
             """
             story.append(Paragraph(info_prova, normal_style))
             story.append(Spacer(1, 20))
@@ -477,6 +495,10 @@ class ClienteProvaCreateView(LoginRequiredMixin, View):
                     # Número e enunciado da questão
                     titulo_questao = questao.get('titulo', f'Questão {i}')
                     story.append(Paragraph(f"<b>{i}. {titulo_questao}</b>", normal_style))
+                    
+                    # Informação de acessibilidade da questão
+                    acessibilidade_questao = questao_data.get('acessibilidade', 1) if isinstance(questao_data, dict) else 1
+                    story.append(Paragraph(f"<i>Nível de Acessibilidade: Grupo {acessibilidade_questao}</i>", accessibility_style))
                     story.append(Spacer(1, 10))
                     
                     # Tratamento por tipo de questão
@@ -525,7 +547,7 @@ class ClienteProvaCreateView(LoginRequiredMixin, View):
         except Exception as e:
             print(f"Erro ao exportar PDF: {e}")
             return JsonResponse({'error': f'Erro ao gerar PDF: {str(e)}'}, status=500)
-    
+        
     def _exportar_doc(self, request):
         """Exporta a prova como DOC"""
         if not HAS_DOCX:

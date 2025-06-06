@@ -7,6 +7,7 @@
 
     font-size: 450%;
     margin-top: 6%;
+    margin-bottom: 20%;
     margin-left: 5%;
 }
 
@@ -170,6 +171,18 @@
 .fotousuario {
   flex: 0 0 20%;
   margin-right: 4%;
+  width: 120px;
+  height: 120px;
+  border-radius: 20rem;
+
+}
+
+.fotousuario img {
+    width: 100px;  /* ou o tamanho que você achar melhor */
+    height: 100px; /* mantém proporcional */
+    object-fit: cover; /* corta a imagem mantendo o centro */
+    border-radius: 50%; /* se quiser deixar redonda */
+    border: 2px solid #ccc; /* opcional, para borda */
 }
 
 .opcoesusuario {
@@ -198,7 +211,7 @@
   background-color: rgba(126, 126, 126, 1);
   border-radius: 20px;
   padding: 15px;
-  margin-top: 25%;
+  margin-top: 10%;
   width: 100%;
 }
 
@@ -264,6 +277,23 @@
 
   
   border-radius: 20px;
+}
+
+.botao-novo-usuario {
+    color: white;
+  background-color: rgba(151, 151, 151, 1);
+  padding-left: 5%;
+  padding-right: 5%;
+  padding-top: 5%;
+  padding-bottom: 5%;
+  margin-bottom: 2%;
+  margin-top: 60%;
+  border-radius: 20rem;
+  
+}
+
+.botao-novo-usuario a {
+  color: white;
 }
 
 .botaoeditar {
