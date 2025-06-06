@@ -13,30 +13,64 @@
 }
 
 .container {
+  display: grid;
+  padding: 5px;
+  grid-template-columns: repeat(2, 1fr);
+}
+.aside {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  padding: 15px;
-  position: relative;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 100vh;
 }
-.title {
+.aside h1 {
   color: #c2c2c2;
-  font-size: 5em;
-  font-weight: 500;
-  position: absolute;
-  top: 15%;
-  left: 5%;
+  font-size: 6em;
 }
-.title span {
+.aside h1 span {
   color: #7f7f7f;
+}
+.container-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 10px;
+  row-gap: 8px;
+  padding: 10px;
+  width: 100%;
+}
+.btn {
+  background-color: #ededed;
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+  border: none;
+  outline: none;
+  border-radius: 20px;
+  cursor: pointer;
+  width: 200px;
+  box-shadow: 1px 3px 6px rgba(0, 0, 0, 0.5);
+}
+.btn i {
+  color: #7f7f7f;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.btn p {
+  font-size: 1em;
+  font-weight: normal;
+}
+.width-full {
+  grid-column: 1 / -1;
+  justify-self: center;
 }
 .settings {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 55%;
+  width: 100%;
 }
-.container__settings-test {
+.container__settings-test, .preview {
   border: 1px solid #000000;
   border-radius: 15px;
 }
@@ -105,6 +139,7 @@
 .form__type-test__content label {
   width: 20%;
   color: #7f7f7f;
+  font-size: 0.9em;
   font-weight: bold;
 }
 .form__type-test__content select {
@@ -121,101 +156,69 @@
   color: #7f7f7f;
   font-weight: bold;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.container-buttons {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  place-items: center;
-  column-gap: 10px;
-  padding: 10px;
-  width: 100%;
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
 }
-.btn {
+.logo {
+  width: 100%;
+  text-align: center;
+}
+.logo img {
+  width: 100px;
+}
+.preview-content__texts {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.background-input {
+  background-color: #ededed;
+  padding: 5px;
+  border-radius: 20px;
+  color: #7f7f7f;
+  font-size: 1.2em;
+}
+.accessibility-section {
   background-color: #ededed;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   padding: 8px;
-  border: none;
-  outline: none;
-  border-radius: 20px;
-  cursor: pointer;
-  width: 200px;
-  box-shadow: 1px 3px 6px rgba(0, 0, 0, 0.5);
 }
-.btn i {
+.accessibility-section p {
   color: #7f7f7f;
   font-size: 1.2em;
   font-weight: bold;
 }
-.btn p {
-  font-size: 1em;
-  font-weight: normal;
+.accessibility-option label {
+  color: #c2c2c2;
 }
-.btn-create-new-question {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  padding: 10px;
-}
-.btn-create-new-question button {
-  background-color: #ededed;
-  padding: 8px;
-  border: none;
-  outline: none;
-  border-radius: 20px;
-  cursor: pointer;
-  width: 200px;
-  box-shadow: 1px 3px 6px rgba(0, 0, 0, 0.5);
-}
-.btn-create-new-question > button i {
-  color: #7f7f7f;
-  font-size: 1.2em;
-  font-weight: bold;
-}
-.btn-create-new-question > button p {
-  font-weight: normal;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.teste {
+  background-color: red;
 }

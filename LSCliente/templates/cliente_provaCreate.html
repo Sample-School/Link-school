@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 304fde7ab28d8cb1b2a7e4bb7d8c06b205b693b6
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -17,7 +13,24 @@
     {% include "global/partials/cliente_navbar.html" %}
 
     <div class="container">
-      <p class="title">Criação <br> de <br> <span>Provas</span></p>
+      <div class="aside">
+        <h1>Criação <br> de <br> <span>Provas</span></h1>
+        <div class="container-buttons">
+          <button class="btn" type="button" onclick="salvarProva()">
+            <i class="fas fa-floppy-disk"><p>Salvar Prova</p></i>
+          </button>
+          <button class="btn" onclick="exportarPDF()">
+            <i class="fas fa-file-pdf"><p>Exportar PDF</p></i>
+          </button>
+          <button class="btn" onclick="exportarDOC()">
+            <i class="fas fa-file-word"><p>Exportar DOC</p></i>
+          </button>
+          <button class="btn width-full" onclick="abrirModalNovaQuestao()">
+            <i class="fas fa-plus-circle"><p>Criar Nova Questão</p></i>
+          </button>
+        </div>
+      </div>
+      
       <div class="settings">
         <div class="container__settings-test">
           <div class="settings__content">
@@ -52,37 +65,37 @@
           </div>
         </div>
 
-        <!-- Painel Direito - Preview da Prova -->
-        <div class="col-md-8">
-          <div class="card">
-            <div class="card-header bg-success text-white">
-              <i class="fas fa-eye"></i> Preview da Prova</h5>
+        
+          <div class="preview">
+            <div class="header">
+              <i class="fas fa-cog header__icon"><p>Preview da Prova</p></i>
+              <p class="header__text"><span>*</span> : Campo obrigatório</p>
             </div>
-            <div class="card-body preview-prova">
-              <div id="preview-content">
-                <!-- Cabeçalho da Prova -->
-                <div class="text-center mb-4 pb-3 border-bottom">
-                  {% if config_cliente.imagem_home_1 %}
-                    <img
-                      src="{{ config_cliente.imagem_home_1.url }}"
-                      alt="Logo"
-                      style="max-height: 80px"
-                    />
-                  {% endif %}
-                  <h3 id="preview-titulo">Título da Prova</h3>
-                  <p class="mb-1">
-                    <strong>Matéria:</strong>
-                    <span id="preview-materia">-</span>
-                  </p>
-                  <p class="mb-1">
-                    <strong>Tipo:</strong> <span id="preview-tipo">-</span>
-                  </p>
-                  <hr />
-                  <p>
-                    <strong>Nome:</strong> ____________________________________
-                  </p>
-                  <p><strong>Data:</strong> ___/___/______</p>
+            <div class="preview__test">
+              <div class="preview__test-content">
+                {% if config_cliente.imagem_home_1 %}
+                  <div class="logo">
+                    <img src="{{ config_cliente.imagem_home_1.url }}" alt="Logo" />
+                  </div>
+                {% endif %}
+                <div class="preview-content__texts">
+                  <div class="background-input">
+                    <p><strong>Título da Prova:</strong></p>
+                  </div>
+                  <div class="background-input">
+                    <p><strong>Matéria:</strong></p>
+                  </div>
+                  <div class="background-input">
+                    <p><strong>Tipo:</strong></p>
+                  </div>
+                  <div class="background-input">
+                    <p><strong>Nome:</strong></p>
+                  </div>
+                  <div class="background-input">
+                    <p><strong>Data:</strong></p>
+                  </div>
                 </div>
+              </div>
             </div>
             
             <div class="prova-info">
@@ -91,21 +104,21 @@
             </div>
             
             <div class="accessibility-section">
-                <div class="accessibility-title">NÍVEL DE ACESSIBILIDADE DA PROVA:</div>
-                <div class="accessibility-options">
-                    <div class="accessibility-option">
-                        <input type="radio" id="grupo1" name="acessibilidade_prova" value="1" checked>
-                        <label for="grupo1">Grupo 1</label>
-                    </div>
-                    <div class="accessibility-option">
-                        <input type="radio" id="grupo2" name="acessibilidade_prova" value="2">
-                        <label for="grupo2">Grupo 2</label>
-                    </div>
-                    <div class="accessibility-option">
-                        <input type="radio" id="grupo3" name="acessibilidade_prova" value="3">
-                        <label for="grupo3">Grupo 3</label>
-                    </div>
+              <p>Nível de Acessibilidade da Prova:</p>
+              <div class="accessibility-options">
+                <div class="accessibility-option">
+                  <input type="radio" id="grupo1" name="acessibilidade_prova" value="1" checked>
+                  <label for="grupo1">Grupo 1</label>
                 </div>
+                <div class="accessibility-option">
+                  <input type="radio" id="grupo2" name="acessibilidade_prova" value="2">
+                  <label for="grupo2">Grupo 2</label>
+                </div>
+                <div class="accessibility-option">
+                  <input type="radio" id="grupo3" name="acessibilidade_prova" value="3">
+                  <label for="grupo3">Grupo 3</label>
+                </div>
+              </div>
             </div>
             
             <!-- Área de Questões -->
@@ -118,7 +131,7 @@
                 <div class="add-icon">+</div>
                 <div class="add-text">Clique para adicionar questões</div>
             </div>
-        </div>
+        
     </div>
 
     <!-- Modal para Selecionar Questões -->
@@ -340,23 +353,7 @@
         </div>
     </div>
 
-    <div class="container-buttons">
-      <button class="btn" type="button" onclick="salvarProva()">
-        <i class="fas fa-floppy-disk"><p>Salvar Prova</p></i>
-      </button>
-      <button class="btn" onclick="exportarPDF()">
-        <i class="fas fa-file-pdf"><p>Exportar PDF</p></i>
-      </button>
-      <button class="btn" onclick="exportarDOC()">
-        <i class="fas fa-file-word"><p>Exportar DOC</p></i>
-      </button>
-    </div>
-
-    <div class="btn-create-new-question">
-      <button onclick="abrirModalNovaQuestao()">
-        <i class="fas fa-plus-circle"><p>Criar Nova Questão</p></i>
-      </button>
-    </div>
+    
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
