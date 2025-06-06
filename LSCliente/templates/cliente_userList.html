@@ -22,19 +22,25 @@
       de <br>
       <div class="listadeusuarioletreiromaisescuro">Usuários</div>
     </h1>
+    <br>
+
+    <div>
+    </div>
+
+    <span class="botao-novo-usuario">
+        <a href="{% url 'LSCliente:CLUserMange' %}">NOVO USUÁRIO</a>
+    </span>
+
 
     <div class="painel-filtro-usuario">
 
       <h3> APENAS USUÁRIOS</h3>
-
+      
       <!-- Filtros de usuários -->
       <div class="filtro-usuarios">
        
-        
         <!--<button class="btn-filtro-usuario ativo" data-filtro="todos">TODOS</button> -->
-       
-        <button class="btn-filtro-usuario" data-filtro="ativos">ATIVOS</button>
-        
+        <button class="btn-filtro-usuario" data-filtro="ativos">ATIVOS</button> 
         <button class="btn-filtro-usuario" data-filtro="inativos">INATIVOS</button>
 
       </div>
@@ -115,8 +121,9 @@
               {% endif %}
             </div>
             <div class="opcoesusuario">
+              
               <span class="botaoeditar">
-                <a href="{% url 'LSCliente:CLUserMange' %}?id={{ usuario.id }}">Editar</a>
+                <a href="{% url 'LSCliente:CLUserMange' %}?id={{ usuario.id }}">EDITAR</a>
               </span>
               <form method="post" action="#">
                 {% csrf_token %}
