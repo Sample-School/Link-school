@@ -152,180 +152,178 @@
 
 <!--Script para o input de cores-->
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
+    // Atualizar os valores hex na tela
     function updateColorHex() {
-      document.getElementById('primary-hex').textContent = 
-        document.getElementById('id_cor_primaria').value;
-      document.getElementById('secondary-hex').textContent = 
-        document.getElementById('id_cor_secundaria').value;
+        const primary = document.getElementById('id_cor_primaria');
+        const secondary = document.getElementById('id_cor_secundaria');
+        if (primary && secondary) {
+            document.getElementById('primary-hex').textContent = primary.value;
+            document.getElementById('secondary-hex').textContent = secondary.value;
+        }
     }
 
-    document.getElementById('id_cor_primaria').addEventListener('input', updateColorHex);
-    document.getElementById('id_cor_secundaria').addEventListener('input', updateColorHex);
-
+    // Listener de input das cores
+    const primaryInput = document.getElementById('id_cor_primaria');
+    const secondaryInput = document.getElementById('id_cor_secundaria');
+    if (primaryInput) primaryInput.addEventListener('input', updateColorHex);
+    if (secondaryInput) secondaryInput.addEventListener('input', updateColorHex);
     updateColorHex();
-  });
-</script>
 
-<script>
-// Preview da logo
-function previewLogo(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    const preview = document.getElementById('logo-preview');
-    preview.innerHTML = '<span>Carregando...</span>';
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        preview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width:100%; max-height:100px;">`;
-    };
-    reader.readAsDataURL(file);
-}
+    // Preview da logo
+    const logoInput = document.getElementById('upload-logo');
+    if (logoInput) {
+        logoInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-// Sincronizar campos de cor
-document.getElementById('primary-color').addEventListener('input', function(e) {
-    document.getElementById('primary-color-text').value = e.target.value;
-});
-document.getElementById('primary-color-text').addEventListener('input', function(e) {
-    document.getElementById('primary-color').value = e.target.value;
-});
-document.getElementById('second-color').addEventListener('input', function(e) {
-    document.getElementById('second-color-text').value = e.target.value;
-});
-document.getElementById('second-color-text').addEventListener('input', function(e) {
-    document.getElementById('second-color').value = e.target.value;
-});
+            const preview = document.getElementById('logo-preview');
+            preview.innerHTML = '<span>Carregando...</span>';
 
-// Popup de notificação
-function showPopup(message, type = "success") {
-    $('#custom-popup').remove();
-    const bgColor = type === "success" ? "#16a34a" : "#dc2626";
-    const icon = type === "success" ? "✔️" : "❌";
-    
-    const popup = $(`
-        <div id="custom-popup" style="
-            position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
-            background: ${bgColor}; color: white; padding: 16px 24px;
-            border-radius: 8px; z-index: 9999; display: flex;
-            align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        ">
-            <span>${icon}</span>
-            <span>${message}</span>
-        </div>
-    `);
-    
-    $('body').append(popup);
-    setTimeout(() => $('#custom-popup').fadeOut(400, function() { $(this).remove(); }), 2500);
-}
-
-// Requisições AJAX
-function makeAjaxRequest(action, data, callback) {
-    const csrfToken = $('[name=csrfmiddlewaretoken]').val() || getCookie('csrftoken');
-    const formData = new FormData();
-    
-    formData.append('action', action);
-    formData.append('csrfmiddlewaretoken', csrfToken);
-    
-    for (const [key, value] of Object.entries(data)) {
-        formData.append(key, value);
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width:100%; max-height:100px;">`;
+            };
+            reader.readAsDataURL(file);
+        });
     }
-    
-    $.ajax({
-        url: window.location.pathname,
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function(response) {
-            if (response.success) {
-                showPopup(response.message, "success");
-                if (callback) callback(response);
-            } else {
-                showPopup(response.message, "error");
-            }
-        },
-        error: function() {
-            showPopup('Erro ao processar solicitação', "error");
-        }
-    });
-}
 
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+    // Popup de notificação
+    function showPopup(message, type = "success") {
+        $('#custom-popup').remove();
+        const bgColor = type === "success" ? "#16a34a" : "#dc2626";
+        const icon = type === "success" ? "✔️" : "❌";
+
+        const popup = $(`
+            <div id="custom-popup" style="
+                position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
+                background: ${bgColor}; color: white; padding: 16px 24px;
+                border-radius: 8px; z-index: 9999; display: flex;
+                align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            ">
+                <span>${icon}</span>
+                <span>${message}</span>
+            </div>
+        `);
+
+        $('body').append(popup);
+        setTimeout(() => $('#custom-popup').fadeOut(400, function() { $(this).remove(); }), 2500);
+    }
+
+    // Função de requisição AJAX
+    function makeAjaxRequest(action, data, callback) {
+        const csrfToken = $('[name=csrfmiddlewaretoken]').val() || getCookie('csrftoken');
+        const formData = new FormData();
+
+        formData.append('action', action);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+
+        for (const [key, value] of Object.entries(data)) {
+            formData.append(key, value);
+        }
+
+        $.ajax({
+            url: window.location.pathname,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    showPopup(response.message, "success");
+                    if (callback) callback(response);
+                } else {
+                    showPopup(response.message, "error");
+                }
+            },
+            error: function() {
+                showPopup('Erro ao processar solicitação', "error");
+            }
+        });
+    }
+
+    // Buscar cookie CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
         }
+        return cookieValue;
     }
-    return cookieValue;
-}
 
-// Eventos
-$(document).ready(function() {
-    // Redefinir campos
-    $('#btn-redefinir').click(function() {
-        $('input[type="text"], input[type="number"]').val('');
-        $('textarea').val('');
-        $('input[type="file"]').val('');
-        $('#logo-preview').html('<span>Nenhuma logo carregada</span>');
-        $('#timeout-minutes').val('{{ configuracao.tempo_maximo_inatividade }}');
-        $('#primary-color, #primary-color-text').val('{{ configuracao.system_primary_color }}');
-        $('#second-color, #second-color-text').val('{{ configuracao.system_second_color }}');
-        showPopup('Campos redefinidos!', "success");
-    });
+    // Executa quando o DOM estiver pronto
+    $(document).ready(function() {
+        // Botão de redefinir
+        $('#btn-redefinir').click(function() {
+            $('input[type="text"], input[type="number"]').val('');
+            $('textarea').val('');
+            $('input[type="file"]').val('');
+            $('#logo-preview').html('<span>Nenhuma logo carregada</span>');
+            $('#timeout-minutes').val('{{ configuracao.tempo_maximo_inatividade }}');
+            $('#id_cor_primaria').val('{{ configuracao.system_primary_color }}');
+            $('#id_cor_secundaria').val('{{ configuracao.system_second_color }}');
+            updateColorHex();
+            showPopup('Campos redefinidos!', "success");
+        });
 
-    // Botões de aplicar
-    $('button[data-action]').click(function() {
-        const action = $(this).data('action');
-        
-        switch(action) {
-            case 'update_logo':
-                const fileInput = document.getElementById('upload-logo');
-                if (fileInput && fileInput.files.length > 0) {
-                    makeAjaxRequest('update_logo', { 'imagem_home_1': fileInput.files[0] });
-                } else {
-                    showPopup('Selecione uma imagem primeiro.', "error");
+        // Ações de botão
+        $('button[data-action]').click(function() {
+            const action = $(this).data('action');
+
+            switch(action) {
+                case 'update_logo': {
+                    const fileInput = document.getElementById('upload-logo');
+                    if (fileInput && fileInput.files.length > 0) {
+                        makeAjaxRequest('update_logo', { 'imagem_home_1': fileInput.files[0] });
+                    } else {
+                        showPopup('Selecione uma imagem primeiro.', "error");
+                    }
+                    break;
                 }
-                break;
-                
-            case 'update_colors':
-                makeAjaxRequest('update_colors', {
-                    'primary_color': $('#primary-color').val(),
-                    'second_color': $('#second-color').val()
-                });
-                break;
-                
-            case 'update_timeout':
-                const timeout = $('#timeout-minutes').val();
-                if (timeout) {
-                    makeAjaxRequest('update_timeout', { 'timeout_minutes': timeout });
-                } else {
-                    showPopup('Informe o tempo de inatividade.', "error");
-                }
-                break;
-                
-            case 'logout_user':
-                const userId = $('#user-id-logout').val();
-                if (userId) {
-                    makeAjaxRequest('logout_user', { 'user_id': userId }, function() {
-                        setTimeout(() => location.reload(), 1000);
+
+                case 'update_colors': {
+                    makeAjaxRequest('update_colors', {
+                        'primary_color': $('#id_cor_primaria').val(),
+                        'second_color': $('#id_cor_secundaria').val()
                     });
-                } else {
-                    showPopup('Informe o ID do usuário.', "error");
+                    break;
                 }
-                break;
-        }
-    });
 
-    // Salvar geral
-    $('#btn-salvar-geral').click(function() {
-        showPopup('Use os botões "Aplicar" de cada seção individualmente.', "error");
+                case 'update_timeout': {
+                    const timeout = $('#timeout-minutes').val();
+                    if (timeout) {
+                        makeAjaxRequest('update_timeout', { 'timeout_minutes': timeout });
+                    } else {
+                        showPopup('Informe o tempo de inatividade.', "error");
+                    }
+                    break;
+                }
+
+                case 'logout_user': {
+                    const userId = $('#user-id-logout').val();
+                    if (userId) {
+                        makeAjaxRequest('logout_user', { 'user_id': userId }, function() {
+                            setTimeout(() => location.reload(), 1000);
+                        });
+                    } else {
+                        showPopup('Informe o ID do usuário.', "error");
+                    }
+                    break;
+                }
+            }
+        });
+
+        // Botão de salvar geral
+        $('#btn-salvar-geral').click(function() {
+            showPopup('Use os botões "Aplicar" de cada seção individualmente.', "error");
+        });
     });
 });
 </script>
