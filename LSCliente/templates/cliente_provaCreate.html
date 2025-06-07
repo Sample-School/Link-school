@@ -1,360 +1,354 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criar Prova</title>
+    <title>Criar Prova - Modal Corrigido</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="{% static "global/css/cliente-navbar.css" %}" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="{% static "LSCliente/css/style-criar-prova.css"%}" />
-  </head>
-  <body>
-    {% include "global/partials/cliente_navbar.html" %}
-
-    <div class="container">
-      <div class="aside">
-        <h1>Criação <br> de <br> <span>Provas</span></h1>
-        <div class="container-buttons">
-          <button class="btn" type="button" onclick="salvarProva()">
-            <i class="fas fa-floppy-disk"><p>Salvar Prova</p></i>
-          </button>
-          <button class="btn" onclick="exportarPDF()">
-            <i class="fas fa-file-pdf"><p>Exportar PDF</p></i>
-          </button>
-          <button class="btn" onclick="exportarDOC()">
-            <i class="fas fa-file-word"><p>Exportar DOC</p></i>
-          </button>
-          <button class="btn width-full" onclick="abrirModalNovaQuestao()">
-            <i class="fas fa-plus-circle"><p>Criar Nova Questão</p></i>
-          </button>
-        </div>
-      </div>
-      
-      <div class="settings">
-        <div class="container__settings-test">
-          <div class="settings__content">
-            <div class="header">
-              <i class="fas fa-cog header__icon"><p>Configurações da Prova</p></i>
-              <p class="header__text"><span>*</span> : Campo obrigatório</p>
-            </div>
-            <form class="form" id="form">
-              {% csrf_token %}
-                <div class="form__title-test">
-                  <span>*</span>
-                  <input type="text" placeholder="Título da Prova" required />
-                </div>
-
-                <div class="form__matter-test">
-                  <span>*</span>
-                  <input type="text" placeholder="Matéria" required />
-                </div>
-
-                <div class="form__type-test">
-                  <span>*</span>
-                  <div class="form__type-test__content">
-                    <label for="tipo_prova">Tipo de Prova:</label>
-                    <select id="tipo_prova" required >
-                      {% for value, label in tipos_prova %}
-                        <option value="{{ value }}">{{ label }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-            </form>
-          </div>
-        </div>
-
-        
-          <div class="preview">
-            <div class="header">
-              <i class="fas fa-cog header__icon"><p>Preview da Prova</p></i>
-              <p class="header__text"><span>*</span> : Campo obrigatório</p>
-            </div>
-            <div class="preview__test">
-              <div class="preview__test-content">
-                {% if config_cliente.imagem_home_1 %}
-                  <div class="logo">
-                    <img src="{{ config_cliente.imagem_home_1.url }}" alt="Logo" />
-                  </div>
-                {% endif %}
-                <div class="preview-content__texts">
-                  <div class="background-input">
-                    <p><strong>Título da Prova:</strong></p>
-                  </div>
-                  <div class="background-input">
-                    <p><strong>Matéria:</strong></p>
-                  </div>
-                  <div class="background-input">
-                    <p><strong>Tipo:</strong></p>
-                  </div>
-                  <div class="background-input">
-                    <p><strong>Nome:</strong></p>
-                  </div>
-                  <div class="background-input">
-                    <p><strong>Data:</strong></p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="prova-info">
-                <input type="text" id="titulo" name="titulo" class="prova-title" placeholder="Título da Prova" required>
-                <input type="text" id="materia" name="materia" class="prova-type" placeholder="Tipo de prova" required>
-            </div>
-            
-            <div class="accessibility-section">
-              <p>Nível de Acessibilidade da Prova:</p>
-              <div class="accessibility-options">
-                <div class="accessibility-option">
-                  <input type="radio" id="grupo1" name="acessibilidade_prova" value="1" checked>
-                  <label for="grupo1">Grupo 1</label>
-                </div>
-                <div class="accessibility-option">
-                  <input type="radio" id="grupo2" name="acessibilidade_prova" value="2">
-                  <label for="grupo2">Grupo 2</label>
-                </div>
-                <div class="accessibility-option">
-                  <input type="radio" id="grupo3" name="acessibilidade_prova" value="3">
-                  <label for="grupo3">Grupo 3</label>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Área de Questões -->
-            <div id="questoes-preview">
-                <!-- Questões serão adicionadas aqui -->
-            </div>
-            
-            <!-- Área para Adicionar Questões -->
-            <div class="add-question-area" onclick="abrirModalSelecionarQuestoes()">
-                <div class="add-icon">+</div>
-                <div class="add-text">Clique para adicionar questões</div>
-            </div>
-        
-    </div>
-
-    <!-- Modal para Selecionar Questões -->
-    <div class="modal fade" id="modalSelecionarQuestoes" tabindex="-1">
-      <div class="modal-dialog modal-questoes">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              <i class="fas fa-question-circle text-primary"></i>
-              Selecionar Questões para a Prova
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <!-- Barra de Pesquisa -->
-            <div class="mb-3">
-              <div class="input-group">
-                <span class="input-group-text">
-                  <i class="fas fa-search"></i>
-                </span>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="search-questoes-modal"
-                  placeholder="Buscar por título, matéria ou tipo..."
-                  onkeyup="filtrarQuestoesModal()"
-                />
-              </div>
-            </div>
-
-            <!-- Grid de Questões -->
-            <div class="questoes-grid" id="questoes-grid">
-              {% for questao in questoes_dashboard %}
-                <div
-                  class="questao-card-modal"
-                  data-id="{{ questao.id }}"
-                  data-titulo="{{ questao.titulo }}"
-                  data-materia="{{ questao.materia }}"
-                  data-tipo="{{ questao.tipo }}"
-                  onclick="toggleQuestaoSelecao({{ questao.id }}, this)"
-                >
-                  <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="flex-grow-1">
-                      <h6 class="mb-1 text-primary">
-                        {{ questao.titulo|truncatechars:60 }}
-                      </h6>
-                      <div class="d-flex flex-wrap gap-1 mb-2">
-                        <span class="badge bg-secondary">{{ questao.materia }}</span>
-                        <span class="badge bg-info">{{ questao.get_tipo_display }}</span>
-                      </div>
-                      <small class="text-muted">
-                        {{ questao.ano_escolar }} - {{ questao.grupo_ensino }}
-                      </small>
-                    </div>
-                    <div class="text-end">
-                      <i class="fas fa-check-circle text-success" style="display: none"></i>
-                      <i class="fas fa-plus-circle text-primary"></i>
-                    </div>
-                  </div>
-                </div>
-              {% empty %}
-                <div class="col-12 text-center text-muted p-4">
-                  <i class="fas fa-question-circle fa-3x mb-3"></i>
-                  <p>Nenhuma questão disponível</p>
-                </div>
-              {% endfor %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal para Nova Questão -->
-    <div class="modal fade" id="modalNovaQuestao" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Criar Nova Questão</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form id="form-nova-questao">
-              {% csrf_token %}
-              <div class="mb-3">
-                <label for="nova-titulo" class="form-label">Enunciado da Questão *</label>
-                <textarea
-                  class="form-control"
-                  id="nova-titulo"
-                  name="titulo"
-                  rows="3"
-                  required
-                ></textarea>
-              </div>
-
-              <div class="row">
-                <div class="col-md-6">
-                  <label for="nova-materia" class="form-label">Matéria *</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="nova-materia"
-                    name="materia"
-                    required
-                  />
-                </div>
-                <div class="col-md-6">
-                  <label for="nova-tipo" class="form-label">Tipo de Questão *</label>
-                  <select
-                    class="form-select"
-                    id="nova-tipo"
-                    name="tipo"
-                    required
-                    onchange="toggleTipoQuestao()"
-                  >
-                    <option value="">Selecione</option>
-                    <option value="aberta">Questão Aberta</option>
-                    <option value="multipla">Múltipla Escolha</option>
-                    <option value="vf">Verdadeiro ou Falso</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Alternativas para múltipla escolha -->
-              <div id="alternativas-section" style="display: none" class="mt-3">
-                <h6>Alternativas</h6>
-                <div id="alternativas-container">
-                  <div class="alternativa-input mb-2">
-                    <div class="input-group">
-                      <span class="input-group-text">a)</span>
-                      <input
-                        type="text"
-                        class="form-control"
-                        name="alternativas[]"
-                        placeholder="Digite a alternativa"
-                      />
-                      <div class="input-group-text">
-                        <input
-                          type="radio"
-                          name="correta"
-                          value="0"
-                          title="Marcar como correta"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-secondary"
-                  onclick="adicionarAlternativa()"
-                >
-                  <i class="fas fa-plus"></i> Adicionar Alternativa
+</head>
+<body>
+    <div class="container-main">
+        <div class="aside">
+            <h1>Criação <br> de <br> <span>Provas</span></h1>
+            <div class="container-buttons">
+                <button class="btn-custom" type="button" onclick="salvarProva()">
+                    <i class="fas fa-floppy-disk"></i>
+                    <p>Salvar Prova</p>
                 </button>
-              </div>
-
-              <!-- Frases para verdadeiro/falso -->
-              <div id="vf-section" style="display: none" class="mt-3">
-                <h6>Frases</h6>
-                <div id="frases-container">
-                  <div class="frase-input mb-2">
-                    <div class="input-group">
-                      <input
-                        type="text"
-                        class="form-control"
-                        name="frases[]"
-                        placeholder="Digite a frase"
-                      />
-                      <select
-                        class="form-select"
-                        name="verdadeira[]"
-                        style="max-width: 120px"
-                      >
-                        <option value="1">Verdadeiro</option>
-                        <option value="0">Falso</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-secondary"
-                  onclick="adicionarFrase()"
-                >
-                  <i class="fas fa-plus"></i> Adicionar Frase
+                <button class="btn-custom" onclick="exportarPDF()">
+                    <i class="fas fa-file-pdf"></i>
+                    <p>Exportar PDF</p>
                 </button>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="salvarNovaQuestao()"
-            >
-              Salvar Questão
-            </button>
-          </div>
+                <button class="btn-custom" onclick="exportarDOC()">
+                    <i class="fas fa-file-word"></i>
+                    <p>Exportar DOC</p>
+                </button>
+                <!-- BOTÃO PARA ABRIR MODAL DE CRIAR NOVA QUESTÃO -->
+                <button class="btn-custom width-full" onclick="abrirModalNovaQuestao()">
+                    <i class="fas fa-plus-circle"></i>
+                    <p>Criar Nova Questão</p>
+                </button>
+            </div>
         </div>
-      </div>
+        
+        <div class="settings">
+            <div class="container__settings-test">
+                <div class="settings__content">
+                    <div class="header">
+                        <div class="header__icon">
+                            <i class="fas fa-cog"></i>
+                            <p>Configurações da Prova</p>
+                        </div>
+                        <p class="header__text"><span>*</span> : Campo obrigatório</p>
+                    </div>
+                    <form class="form" id="form-prova">
+                        {% csrf_token %}
+                        <div class="form__title-test">
+                            <span>*</span>
+                            <input type="text" id="titulo" placeholder="Título da Prova" required />
+                        </div>
+
+                        <div class="form__matter-test">
+                            <span>*</span>
+                            <input type="text" id="materia" placeholder="Matéria" required />
+                        </div>
+
+                        <div class="form__type-test">
+                            <span>*</span>
+                            <div class="form__type-test__content">
+                                <label for="tipo_prova">Tipo de Prova:</label>
+                                <select id="tipo_prova" required>
+                                    <option value="">Selecione</option>
+                                    {% for value, label in tipos_prova %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% empty %}
+                                        <option value="av1">Primeira Avaliação</option>
+                                        <option value="av2">Segunda Avaliação</option>
+                                        <option value="recuperacao">Recuperação</option>
+                                        <option value="final">Prova Final</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="preview">
+                <div class="header">
+                    <div class="header__icon">
+                        <i class="fas fa-eye"></i>
+                        <p>Preview da Prova</p>
+                    </div>
+                </div>
+                <div class="preview__test">
+                    <div class="preview__test-content">
+                        {% if config_cliente.imagem_home_1 %}
+                            <div class="logo">
+                                <img src="{{ config_cliente.imagem_home_1.url }}" alt="Logo" />
+                            </div>
+                        {% endif %}
+                        <div class="preview-content__texts">
+                            <div class="background-input">
+                                <p><strong>Título da Prova:</strong> <span id="preview-titulo">-</span></p>
+                            </div>
+                            <div class="background-input">
+                                <p><strong>Matéria:</strong> <span id="preview-materia">-</span></p>
+                            </div>
+                            <div class="background-input">
+                                <p><strong>Tipo:</strong> <span id="preview-tipo">-</span></p>
+                            </div>
+                            <div class="background-input">
+                                <p><strong>Nome:</strong> ___________________</p>
+                            </div>
+                            <div class="background-input">
+                                <p><strong>Data:</strong> ___________________</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SEÇÃO DE ACESSIBILIDADE DA PROVA -->
+                <div class="accessibility-section">
+                    <p>Nível de Acessibilidade da Prova:</p>
+                    <div class="accessibility-options">
+                        <div class="accessibility-option">
+                            <input type="radio" id="grupo1" name="acessibilidade_prova" value="1" checked>
+                            <label for="grupo1">Grupo 1</label>
+                        </div>
+                        <div class="accessibility-option">
+                            <input type="radio" id="grupo2" name="acessibilidade_prova" value="2">
+                            <label for="grupo2">Grupo 2</label>
+                        </div>
+                        <div class="accessibility-option">
+                            <input type="radio" id="grupo3" name="acessibilidade_prova" value="3">
+                            <label for="grupo3">Grupo 3</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ÁREA ONDE AS QUESTÕES SELECIONADAS SÃO EXIBIDAS NO PREVIEW -->
+                <div id="questoes-preview">
+                    <p class="text-center text-muted">
+                        <i class="fas fa-info-circle"></i> 
+                        Adicione questões para visualizar o preview da prova
+                    </p>
+                </div>
+                
+                <!-- ÁREA CLICÁVEL PARA ABRIR O MODAL DE SELEÇÃO DE QUESTÕES -->
+                <div class="add-question-area" onclick="abrirModalSelecionarQuestoes()">
+                    <div class="add-icon">+</div>
+                    <div class="add-text">Clique para adicionar questões</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Loading overlay -->
+    <!-- ========================================== -->
+    <!-- MODAL PARA SELECIONAR QUESTÕES EXISTENTES -->
+    <!-- ========================================== -->
+    <div class="modal fade" id="modalSelecionarQuestoes" tabindex="-1" aria-labelledby="modalSelecionarQuestoesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-questoes modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <!-- CABEÇALHO DO MODAL -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalSelecionarQuestoesLabel">
+                        <i class="fas fa-question-circle text-primary"></i>
+                        Selecionar Questões para a Prova
+                    </h5>
+                    <!-- BOTÃO PARA FECHAR O MODAL -->
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- CORPO DO MODAL -->
+                <div class="modal-body">
+                    <!-- BARRA DE PESQUISA PARA FILTRAR QUESTÕES -->
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <!-- CAMPO DE BUSCA QUE CHAMA A FUNÇÃO filtrarQuestoesModal() -->
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="search-questoes-modal"
+                                placeholder="Buscar por título, matéria ou tipo..."
+                                onkeyup="filtrarQuestoesModal()"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- GRID ONDE AS QUESTÕES SÃO EXIBIDAS -->
+                    <div class="questoes-grid" id="questoes-grid">
+                        <!-- LOOP DJANGO PARA EXIBIR AS QUESTÕES DISPONÍVEIS -->
+                        {% for questao in questoes_dashboard %}
+                            <!-- CARD DE CADA QUESTÃO - CLICÁVEL PARA SELEÇÃO -->
+                            <div class="questao-card-modal" 
+                                 data-id="{{ questao.id }}" 
+                                 data-titulo="{{ questao.titulo }}" 
+                                 data-materia="{{ questao.materia }}" 
+                                 data-tipo="{{ questao.tipo }}" 
+                                 onclick="toggleQuestaoSelecao({{ questao.id }}, this)">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="flex-grow-1">
+                                        <!-- TÍTULO TRUNCADO DA QUESTÃO -->
+                                        <h6 class="mb-1 text-primary">{{ questao.titulo|truncatechars:60 }}</h6>
+                                        <!-- BADGES COM MATÉRIA E TIPO -->
+                                        <div class="d-flex flex-wrap gap-1 mb-2">
+                                            <span class="badge bg-secondary">{{ questao.materia }}</span>
+                                            <span class="badge bg-info">{{ questao.get_tipo_display }}</span>
+                                        </div>
+                                        <!-- INFORMAÇÕES ADICIONAIS -->
+                                        <small class="text-muted">{{ questao.ano_escolar }} - {{ questao.grupo_ensino }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <!-- ÍCONES DE SELEÇÃO - ALTERNADOS CONFORME ESTADO -->
+                                        <i class="fas fa-check-circle text-success" style="display: none;"></i>
+                                        <i class="fas fa-plus-circle text-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <!-- MENSAGEM QUANDO NÃO HÁ QUESTÕES -->
+                            <div class="col-12 text-center text-muted p-4">
+                                <i class="fas fa-question-circle fa-3x mb-3"></i>
+                                <p>Nenhuma questão disponível no banco de dados</p>
+                                <small>Crie algumas questões primeiro para poder adicioná-las às provas</small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- RODAPÉ DO MODAL -->
+                <div class="modal-footer">
+                    <!-- CONTADOR DE QUESTÕES SELECIONADAS -->
+                    <div class="me-auto">
+                        <span class="text-muted">
+                            <span id="questoes-selecionadas-count">0</span> questão(ões) selecionada(s)
+                        </span>
+                    </div>
+                    <!-- BOTÕES DE AÇÃO -->
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmarSelecaoQuestoes()">
+                        <i class="fas fa-check"></i> Adicionar Selecionadas
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- MODAL PARA CRIAR NOVA QUESTÃO -->
+    <!-- ============================== -->
+    <div class="modal fade" id="modalNovaQuestao" tabindex="-1" aria-labelledby="modalNovaQuestaoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <!-- CABEÇALHO DO MODAL -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNovaQuestaoLabel">Criar Nova Questão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- CORPO DO MODAL -->
+                <div class="modal-body">
+                    <!-- FORMULÁRIO PARA CRIAR NOVA QUESTÃO -->
+                    <form id="form-nova-questao">
+                        {% csrf_token %}
+                        
+                        <!-- CAMPO PARA ENUNCIADO DA QUESTÃO -->
+                        <div class="mb-3">
+                            <label for="nova-titulo" class="form-label">Enunciado da Questão *</label>
+                            <textarea class="form-control" id="nova-titulo" name="titulo" rows="3" required></textarea>
+                        </div>
+
+                        <!-- CAMPOS MATÉRIA E TIPO EM LINHA -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="nova-materia" class="form-label">Matéria *</label>
+                                <input type="text" class="form-control" id="nova-materia" name="materia" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nova-tipo" class="form-label">Tipo de Questão *</label>
+                                <!-- SELECT QUE CONTROLA QUAIS SEÇÕES APARECEM -->
+                                <select class="form-select" id="nova-tipo" name="tipo" required onchange="toggleTipoQuestao()">
+                                    <option value="">Selecione</option>
+                                    <option value="aberta">Questão Aberta</option>
+                                    <option value="multipla">Múltipla Escolha</option>
+                                    <option value="vf">Verdadeiro ou Falso</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- SEÇÃO PARA ALTERNATIVAS (MÚLTIPLA ESCOLHA) -->
+                        <!-- INICIALMENTE OCULTA - MOSTRADA APENAS QUANDO TIPO = "multipla" -->
+                        <div id="alternativas-section" style="display: none" class="mt-3">
+                            <h6>Alternativas</h6>
+                            <!-- CONTAINER ONDE AS ALTERNATIVAS SÃO ADICIONADAS DINAMICAMENTE -->
+                            <div id="alternativas-container">
+                                <!-- PRIMEIRA ALTERNATIVA (EXEMPLO) -->
+                                <div class="alternativa-input mb-2">
+                                    <div class="input-group">
+                                        <span class="input-group-text">a)</span>
+                                        <input type="text" class="form-control" name="alternativas[]" placeholder="Digite a alternativa" />
+                                        <!-- RADIO BUTTON PARA MARCAR COMO CORRETA -->
+                                        <div class="input-group-text">
+                                            <input type="radio" name="correta" value="0" title="Marcar como correta" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- BOTÃO PARA ADICIONAR MAIS ALTERNATIVAS -->
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="adicionarAlternativa()">
+                                <i class="fas fa-plus"></i> Adicionar Alternativa
+                            </button>
+                        </div>
+
+                        <!-- SEÇÃO PARA FRASES (VERDADEIRO/FALSO) -->
+                        <!-- INICIALMENTE OCULTA - MOSTRADA APENAS QUANDO TIPO = "vf" -->
+                        <div id="vf-section" style="display: none" class="mt-3">
+                            <h6>Frases</h6>
+                            <!-- CONTAINER ONDE AS FRASES SÃO ADICIONADAS DINAMICAMENTE -->
+                            <div id="frases-container">
+                                <!-- PRIMEIRA FRASE (EXEMPLO) -->
+                                <div class="frase-input mb-2">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="frases[]" placeholder="Digite a frase" />
+                                        <!-- SELECT PARA ESCOLHER SE É VERDADEIRA OU FALSA -->
+                                        <select class="form-select" name="verdadeira[]" style="max-width: 120px">
+                                            <option value="1">Verdadeiro</option>
+                                            <option value="0">Falso</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- BOTÃO PARA ADICIONAR MAIS FRASES -->
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="adicionarFrase()">
+                                <i class="fas fa-plus"></i> Adicionar Frase
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- RODAPÉ DO MODAL -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="salvarNovaQuestao()">Salvar Questão</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOADING OVERLAY -->
     <div class="loading">
         <div class="spinner-border text-light" role="status">
             <span class="visually-hidden">Carregando...</span>
         </div>
     </div>
-
-    
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
         let questoesSelecionadas = [];
