@@ -335,10 +335,7 @@ body {
     display: flex;
     gap: 1rem;
     align-items: center;
-    position: relative;
-
-    left: 70%;
-    right: 80rem;
-    
-    bottom: 1300%;
+    position: absolute;
+    left: 60%;
+    bottom: 10%;
 }
