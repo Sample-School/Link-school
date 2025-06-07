@@ -13,62 +13,73 @@
 <body>
     {% include "global/partials/cliente_navbar.html" %}
 <div class="conteiner">
-    <!-- Cabeçalho -->
-    <div class="geral">
-        <div class="name1"><h1>Parâmetros <br> do <br><span>Sistema</span></h1></div>
-        <div class="botoes">
-            <div class="botao1"><button id="btn-redefinir">Redefinir</button></div>
-            <button id="btn-salvar-geral">Salvar Todas</button>
-        </div>
-    </div>
-
-    <!-- LOGO DO CLIENTE -->
-    <div class="logo-cliente">
-        <div class="borde-geral2">
-        <h2>Logo do Cliente</h2>
-        
-        <div>
-            <div>
-                <input type="file" id="upload-logo" accept="image/*" style="display: none;" onchange="previewLogo(event)">
-                <button onclick="document.getElementById('upload-logo').click()">Escolher Logo</button>
-                <button data-action="update_logo">Aplicar Logo</button>
+        <!-- Cabeçalho -->
+        <div class="geral">
+            <div class="name1"><h1>Parâmetros <br> do <br><span>Sistema</span></h1></div>
+            <div class="botoes">
+                <div class="botao1"><button id="btn-redefinir">Redefinir</button></div>
+                <button id="btn-salvar-geral">Salvar Todas</button>
             </div>
-            <div>
-                <div id="logo-preview" style="border: 1px solid #ccc; padding: 10px; min-height: 120px;">
-                    {% if configuracao.imagem_home_1 %}
-                        <img src="{{ configuracao.imagem_home_1.url }}" alt="Logo atual" style="max-width:100%; max-height:100px;">
-                    {% else %}
-                        <span>Nenhuma logo carregada</span>
-                    {% endif %}
+        </div>
+
+        <!-- LOGO DO CLIENTE -->
+        <div class="logo-cliente">
+            <div class="borde-geral2">
+                
+                
+                <div class="logo-div">
+                    <h2>Logo do Cliente</h2>
+                    <div>
+                        <input type="file" id="upload-logo" accept="image/*" style="display: none;" onchange="previewLogo(event)">
+                        <button class="btn-sobre-logo" onclick="document.getElementById('upload-logo').click()">Escolher Logo</button>
+                    
+                        <button class="btn-sobre-logo" data-action="update_logo">Aplicar Logo</button>
+                    </div>
+                    <div>
+                        <div id="logo-preview" class="preview-image">
+                            {% if configuracao.imagem_home_1 %}
+                                <img src="{{ configuracao.imagem_home_1.url }}" alt="Logo atual" >
+                            {% else %}
+                                <span>Nenhuma logo carregada</span>
+                            {% endif %}
+                    
+                        </div>
+                        <small>Recomendado: 500 x 500 pixels para melhor qualidade.</small>
+                    </div>
                 </div>
-            </div>
-        </div>
-        
-        <small>Recomendado: 500 x 500 pixels para melhor qualidade.</small>
-    </div>
 
-    <!-- CORES DO SISTEMA -->
-    <div class="cores-pri-sec">
-        <h2>Cores do Sistema</h2>
-        
-        <div>
-            <label>Cor Primária</label>
-            <div>
-                <input type="color" id="primary-color" value="{{ configuracao.system_primary_color }}">
-                <input type="text" id="primary-color-text" value="{{ configuracao.system_primary_color }}">
-            </div>
+                <div class="cores">
+
+                    <div class="cor-primaria">
+                        <div class="color-item">
+                            <label>Cor Primária</label>
+                            <input type="color" name="cor_primaria" id="id_cor_primaria" value="#FFFFFF">
+                            <span class="hex-code" id="primary-hex">#FFFFFF</span>
+                        </div>
+                    </div>
+
+                    <div class="cor-secundaria">
+                        <div class="color-item">
+                            <label>Cor Secundária</label>
+                            <input type="color" name="cor_secundaria" id="id_cor_secundaria" value="#FFFFFF">
+                            <span class="hex-code" id="secondary-hex">#FFFFFF</span>
+                        </div>
+                    </div>
+
+                    
+
+                </div>
+            
+            
         </div>
+
+
         
-        <div>
-            <label>Cor Secundária</label>
-            <div>
-                <input type="color" id="second-color" value="{{ configuracao.system_second_color }}">
-                <input type="text" id="second-color-text" value="{{ configuracao.system_second_color }}">
-            </div>
-        </div>
+
+
         
-        <button data-action="update_colors">Aplicar Cores</button>
-    </div>
+
+        
     </div>
     <div class="border-geral">
 
@@ -114,11 +125,14 @@
         <div class="deslo">
             <h2>Deslogar Usuário</h2>
             <input type="number" id="user-id-logout" placeholder="ID do usuário">
+            <br>
             <button data-action="logout_user">Deslogar</button>
         </div>
+
+
     <!-- TEMPO DE INATIVIDADE -->
     <div class="time-inative">
-        <h2>Tempo Máximo de Inatividade</h2>
+        <h2>PERMANÊNCIA EM INATIVIDADE</h2>
         
         <div>
             <label>Tempo em Minutos</label>
@@ -135,6 +149,23 @@
 </div>  
 </div>
 </div>
+
+<!--Script para o input de cores-->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    function updateColorHex() {
+      document.getElementById('primary-hex').textContent = 
+        document.getElementById('id_cor_primaria').value;
+      document.getElementById('secondary-hex').textContent = 
+        document.getElementById('id_cor_secundaria').value;
+    }
+
+    document.getElementById('id_cor_primaria').addEventListener('input', updateColorHex);
+    document.getElementById('id_cor_secundaria').addEventListener('input', updateColorHex);
+
+    updateColorHex();
+  });
+</script>
 
 <script>
 // Preview da logo
