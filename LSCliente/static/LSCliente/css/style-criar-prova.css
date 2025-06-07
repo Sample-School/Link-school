@@ -1,417 +1,435 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
-        :root {
-            --color-light-gray: #c2c2c2;
-            --color-dark-gray: #7f7f7f;
-        }
+:root {
+  --color-light-gray: #c2c2c2;
+  --color-dark-gray: #7f7f7f;
+}
 
-        * {
-            margin: 0px;
-            padding: 0px;
-            box-sizing: border-box;
-            font-family: "Inter", sans-serif;
-        }
+* {
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
 
-        .container-main {
-            display: grid;
-            padding: 5px;
-            grid-template-columns: repeat(2, 1fr);
-            min-height: 100vh;
-        }
+.container-main {
+  display: grid;
+  padding: 5px;
+  grid-template-columns: repeat(2, 1fr);
+  min-height: 100vh;
+}
 
-        .aside {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-evenly;
-            align-items: center;
-            height: 100vh;
-        }
+.aside {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 100vh;
+}
 
-        .aside h1 {
-            color: #c2c2c2;
-            font-size: 6em;
-        }
+.aside h1 {
+  color: #c2c2c2;
+  font-size: 6em;
+  margin-right: 100px;
+  margin-bottom: 75px;
+  text-align: center;
+  width: 100%;
+}
 
-        .aside h1 span {
-            color: #7f7f7f;
-        }
+.aside h1 span {
+  color: #7f7f7f;
+}
 
-        .container-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            column-gap: 10px;
-            row-gap: 8px;
-            padding: 10px;
-            width: 100%;
-        }
+.container-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 10px;
+  row-gap: 8px;
+  padding: 10px;
+  width: 100%;
+}
 
-        .btn-custom {
-            background-color: #ededed;
-            display: flex;
-            justify-content: center;
-            padding: 8px;
-            border: none;
-            outline: none;
-            border-radius: 20px;
-            cursor: pointer;
-            width: 200px;
-            box-shadow: 1px 3px 6px rgba(0, 0, 0, 0.5);
-            align-items: center;
-            gap: 8px;
-        }
+.btn-custom {
+  background-color: #ededed;
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+  border: none;
+  outline: none;
+  border-radius: 20px;
+  cursor: pointer;
+  width: 200px;
+  box-shadow: 1px 3px 6px rgba(0, 0, 0, 0.5);
+  align-items: center;
+  gap: 8px;
+}
 
-        .btn-custom i {
-            color: #7f7f7f;
-            font-size: 1.2em;
-        }
+.btn-custom i {
+  color: #7f7f7f;
+  font-size: 1.2em;
+}
 
-        .btn-custom p {
-            font-size: 1em;
-            margin: 0;
-            color: #7f7f7f;
-        }
+.btn-custom p {
+  font-size: 1em;
+  margin: 0;
+  color: #7f7f7f;
+}
 
-        .width-full {
-            grid-column: 1 / -1;
-            justify-self: center;
-        }
+.width-full {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
 
-        .settings {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 100%;
-            padding: 10px;
-        }
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 10px;
+}
 
-        .container__settings-test, .preview {
-            border: 1px solid #000000;
-            border-radius: 15px;
-        }
+.container__settings-test,
+.preview {
+  border: 1px solid #000000;
+  border-radius: 15px;
+}
 
-        .settings__content {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-            padding: 8px;
-        }
+.settings__content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+}
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px;
-            width: 100%;
-        }
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+  width: 100%;
+}
 
-        .header__icon {
-            display: flex;
-            gap: 5px;
-            color: #7f7f7f;
-            align-items: center;
-        }
+.header__icon {
+  display: flex;
+  gap: 5px;
+  color: #7f7f7f;
+  align-items: center;
+}
 
-        .header__icon p {
-            font-weight: normal;
-            margin: 0;
-        }
+.header__icon p {
+  font-weight: normal;
+  margin: 0;
+}
 
-        .header__text {
-            color: #7f7f7f;
-            font-weight: normal;
-        }
+.header__text {
+  color: #7f7f7f;
+  font-weight: normal;
+}
 
-        .header__text span {
-            font-weight: bold;
-        }
+.header__text span {
+  font-weight: bold;
+}
 
-        .form__title-test, .form__matter-test {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 5px;
-        }
+.form__title-test,
+.form__matter-test {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px;
+}
 
-        .form__title-test span, .form__matter-test span, .form__type-test span {
-            color: #7f7f7f;
-            font-weight: bold;
-        }
+.form__title-test span,
+.form__matter-test span,
+.form__type-test span {
+  color: #7f7f7f;
+  font-weight: bold;
+}
 
-        .form__title-test input, .form__matter-test input {
-            background-color: #ededed;
-            border-radius: 20px;
-            border: none;
-            outline: none;
-            padding: 8px;
-            width: 100%;
-        }
+.form__title-test input,
+.form__matter-test input {
+  background-color: #ededed;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+  padding: 8px;
+  width: 100%;
+}
 
-        .form__title-test input::placeholder, .form__matter-test input::placeholder {
-            color: #7f7f7f;
-            font-size: 1.2em;
-            font-weight: bold;
-        }
+.form__title-test input::placeholder,
+.form__matter-test input::placeholder {
+  color: #7f7f7f;
+  font-size: 1.2em;
+  font-weight: bold;
+}
 
-        .form__type-test {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 5px;
-        }
+.form__type-test {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px;
+}
 
-        .form__type-test__content {
-            display: flex;
-            align-items: center;
-            width: 100%;
-        }
+.form__type-test__content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
 
-        .form__type-test__content label {
-            width: 20%;
-            color: #7f7f7f;
-            font-size: 0.9em;
-            font-weight: bold;
-        }
+.form__type-test__content label {
+  width: 20%;
+  color: #7f7f7f;
+  font-size: 0.8em;
+  font-weight: bold;
+}
 
-        .form__type-test__content select {
-            background-color: #ededed;
-            width: 100%;
-            border: none;
-            outline: none;
-            border-radius: 20px;
-            padding: 10px;
-            color: #7f7f7f;
-            font-weight: bold;
-        }
+.form__type-test__content select {
+  background-color: #ededed;
+  width: 100%;
+  border: none;
+  outline: none;
+  border-radius: 20px;
+  padding: 10px;
+  color: #7f7f7f;
+  font-weight: bold;
+}
 
-        .preview {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 8px;
-        }
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
 
-        .logo {
-            width: 100%;
-            text-align: center;
-        }
+.logo {
+  width: 100%;
+  text-align: center;
+}
 
-        .logo img {
-            width: 100px;
-        }
+.logo img {
+  width: 100px;
+}
 
-        .preview-content__texts {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
+.preview-content__texts {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
 
-        .background-input {
-            background-color: #ededed;
-            padding: 5px;
-            border-radius: 20px;
-            color: #7f7f7f;
-            font-size: 1.2em;
-        }
+.background-input {
+  display: flex;
+  align-items: center;
+  background-color: #ededed;
+  padding: 8px;
+  border-radius: 20px;
+  color: #7f7f7f;
+  font-size: 1.2em;
+}
 
-        .accessibility-section {
-            background-color: #ededed;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            padding: 8px;
-            border-radius: 10px;
-            margin: 10px 0;
-        }
+.background-input p {
+  margin: 0px;
+}
 
-        .accessibility-section p {
-            color: #7f7f7f;
-            font-size: 1.2em;
-            font-weight: bold;
-            margin: 0;
-        }
+.accessibility-section {
+  background-color: #ededed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 10px;
+  margin: 10px 0;
+}
 
-        .accessibility-options {
-            display: flex;
-            gap: 15px;
-        }
+.accessibility-section p {
+  color: #7f7f7f;
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 0;
+}
 
-        .accessibility-option {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+.accessibility-options {
+  display: flex;
+  gap: 15px;
+}
 
-        .accessibility-option label {
-            color: #7f7f7f;
-            margin: 0;
-        }
+.accessibility-option {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
 
-        /* ESTILOS PARA O BOTÃO DE ADICIONAR QUESTÕES */
-        .add-question-area {
-            background-color: #f8f9fa;
-            border: 2px dashed #7f7f7f;
-            border-radius: 15px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            margin: 20px 0;
-            transition: all 0.3s ease;
-            min-height: 120px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
+.accessibility-option label {
+  color: #7f7f7f;
+  margin: 0;
+}
 
-        .add-question-area:hover {
-            background-color: #e9ecef;
-            border-color: #5a5a5a;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
+/* ESTILOS PARA O BOTÃO DE ADICIONAR QUESTÕES */
+.add-question-area {
+  background-color: #f8f9fa;
+  border: 2px dashed #7f7f7f;
+  border-radius: 15px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  margin: 20px 0;
+  transition: all 0.3s ease;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 
-        .add-icon {
-            font-size: 3em;
-            color: #7f7f7f;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
+.add-question-area:hover {
+  background-color: #e9ecef;
+  border-color: #5a5a5a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
 
-        .add-text {
-            color: #7f7f7f;
-            font-size: 1.2em;
-            font-weight: 500;
-        }
+.add-icon {
+  font-size: 3em;
+  color: #7f7f7f;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
 
-        /* QUESTÕES PREVIEW */
-        .questao-preview {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 10px 0;
-        }
+.add-text {
+  color: #7f7f7f;
+  font-size: 1.2em;
+  font-weight: 500;
+}
 
-        .questao-imagem {
-            max-width: 100%;
-            height: auto;
-            margin: 10px 0;
-            border-radius: 5px;
-        }
+/* QUESTÕES PREVIEW */
+.questao-preview {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px 0;
+}
 
-        .alternativa-item, .frase-vf-item {
-            padding: 5px 0;
-            margin: 5px 0;
-        }
+.questao-imagem {
+  max-width: 100%;
+  height: auto;
+  margin: 10px 0;
+  border-radius: 5px;
+}
 
-        .question-accessibility-section {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 8px;
-        }
+.alternativa-item,
+.frase-vf-item {
+  padding: 5px 0;
+  margin: 5px 0;
+}
 
-        .accessibility-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #495057;
-        }
+.question-accessibility-section {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #e9ecef;
+  border-radius: 8px;
+}
 
-        /* ==============================================
+.accessibility-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #495057;
+}
+
+/* ==============================================
            ESTILOS ESPECÍFICOS PARA OS MODAIS
            ============================================== */
 
-        /* Modal principal de questões - Define largura responsiva */
-        .modal-questoes {
-            /* Largura do modal ocupa 90% da viewport width */
-            --bs-modal-width: 90vw;
-            /* Largura máxima de 1200px para telas muito grandes */
-            max-width: 1200px;
-        }
+/* Modal principal de questões - Define largura responsiva */
+.modal-questoes {
+  /* Largura do modal ocupa 90% da viewport width */
+  --bs-modal-width: 90vw;
+  /* Largura máxima de 1200px para telas muito grandes */
+  max-width: 1200px;
+}
 
-        /* Container em grid para exibir questões em formato de cards */
-        .questoes-grid {
-            /* Grid responsivo com colunas que se ajustam automaticamente */
-            display: grid;
-            /* Colunas automáticas com largura mínima de 300px */
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            /* Espaçamento entre os cards */
-            gap: 15px;
-            /* Altura máxima com scroll quando necessário */
-            max-height: 500px;
-            /* Scroll vertical quando o conteúdo excede a altura */
-            overflow-y: auto;
-            /* Padding interno para não colar nas bordas */
-            padding: 10px;
-        }
+/* Container em grid para exibir questões em formato de cards */
+.questoes-grid {
+  /* Grid responsivo com colunas que se ajustam automaticamente */
+  display: grid;
+  /* Colunas automáticas com largura mínima de 300px */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  /* Espaçamento entre os cards */
+  gap: 15px;
+  /* Altura máxima com scroll quando necessário */
+  max-height: 500px;
+  /* Scroll vertical quando o conteúdo excede a altura */
+  overflow-y: auto;
+  /* Padding interno para não colar nas bordas */
+  padding: 10px;
+}
 
-        /* Card individual de cada questão dentro do modal */
-        .questao-card-modal {
-            /* Fundo branco para contraste */
-            background-color: #ffffff;
-            /* Borda padrão cinza clara */
-            border: 2px solid #dee2e6;
-            /* Cantos arredondados */
-            border-radius: 10px;
-            /* Padding interno para espaçamento do conteúdo */
-            padding: 15px;
-            /* Cursor pointer para indicar que é clicável */
-            cursor: pointer;
-            /* Transição suave para efeitos hover e seleção */
-            transition: all 0.3s ease;
-            /* Posição relativa para elementos filhos absolutos */
-            position: relative;
-        }
+/* Card individual de cada questão dentro do modal */
+.questao-card-modal {
+  /* Fundo branco para contraste */
+  background-color: #ffffff;
+  /* Borda padrão cinza clara */
+  border: 2px solid #dee2e6;
+  /* Cantos arredondados */
+  border-radius: 10px;
+  /* Padding interno para espaçamento do conteúdo */
+  padding: 15px;
+  /* Cursor pointer para indicar que é clicável */
+  cursor: pointer;
+  /* Transição suave para efeitos hover e seleção */
+  transition: all 0.3s ease;
+  /* Posição relativa para elementos filhos absolutos */
+  position: relative;
+}
 
-        /* Estado hover do card de questão - feedback visual */
-        .questao-card-modal:hover {
-            /* Borda azul no hover */
-            border-color: #007bff;
-            /* Sombra azul suave */
-            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
-            /* Elevação sutil para efeito 3D */
-            transform: translateY(-2px);
-        }
+/* Estado hover do card de questão - feedback visual */
+.questao-card-modal:hover {
+  /* Borda azul no hover */
+  border-color: #007bff;
+  /* Sombra azul suave */
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+  /* Elevação sutil para efeito 3D */
+  transform: translateY(-2px);
+}
 
-        /* Estado selecionado do card - indica questão escolhida */
-        .questao-card-modal.selecionada {
-            /* Borda verde para indicar seleção */
-            border-color: #28a745;
-            /* Fundo verde muito claro */
-            background-color: #f8fff9;
-            /* Sombra verde para reforçar o estado selecionado */
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
-        }
+/* Estado selecionado do card - indica questão escolhida */
+.questao-card-modal.selecionada {
+  /* Borda verde para indicar seleção */
+  border-color: #28a745;
+  /* Fundo verde muito claro */
+  background-color: #f8fff9;
+  /* Sombra verde para reforçar o estado selecionado */
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
+}
 
-        /* Overlay de loading/carregamento para modais */
-        .loading {
-            /* Inicialmente oculto */
-            display: none;
-            /* Posição fixa para cobrir toda a tela */
-            position: fixed;
-            /* Z-index alto para ficar acima dos modais */
-            z-index: 1060;
-            /* Cobre toda a tela */
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            /* Fundo escuro semitransparente */
-            background: rgba(0,0,0,0.4);
-            /* Centraliza o conteúdo de loading */
-            align-items: center;
-            justify-content: center;
-        }
+/* Overlay de loading/carregamento para modais */
+.loading {
+  /* Inicialmente oculto */
+  display: none;
+  /* Posição fixa para cobrir toda a tela */
+  position: fixed;
+  /* Z-index alto para ficar acima dos modais */
+  z-index: 1060;
+  /* Cobre toda a tela */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Fundo escuro semitransparente */
+  background: rgba(0, 0, 0, 0.4);
+  /* Centraliza o conteúdo de loading */
+  align-items: center;
+  justify-content: center;
+}
 
-        /* Inputs dentro de modais - alternativas e frases */
-        .alternativa-input, .frase-input {
-            /* Espaçamento inferior entre inputs */
-            margin-bottom: 10px;
-        }
+/* Inputs dentro de modais - alternativas e frases */
+.alternativa-input,
+.frase-input {
+  /* Espaçamento inferior entre inputs */
+  margin-bottom: 10px;
+}
 
-        /* Badges/etiquetas usadas nos modais */
-        .badge {
-            /* Fonte menor para badges */
-            font-size: 0.75em;
-        }
+/* Badges/etiquetas usadas nos modais */
+.badge {
+  /* Fonte menor para badges */
+  font-size: 0.75em;
+}

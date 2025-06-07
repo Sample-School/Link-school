@@ -9,8 +9,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="{% static "LSCliente/css/style-criar-prova.css"%}" />
+    <link rel="stylesheet" href="{% static "global/css/cliente-navbar.css" %}">
 </head>
 <body>
+    {% include "global/partials/cliente_navbar.html" %}
     <div class="container-main">
         <div class="aside">
             <h1>Criação <br> de <br> <span>Provas</span></h1>
@@ -94,13 +96,13 @@
                         {% endif %}
                         <div class="preview-content__texts">
                             <div class="background-input">
-                                <p><strong>Título da Prova:</strong> <span id="preview-titulo">-</span></p>
+                                <p><strong>Título da Prova:</strong> <span id="preview-titulo">___________________</span></p>
                             </div>
                             <div class="background-input">
-                                <p><strong>Matéria:</strong> <span id="preview-materia">-</span></p>
+                                <p><strong>Matéria:</strong> <span id="preview-materia">___________________</span></p>
                             </div>
                             <div class="background-input">
-                                <p><strong>Tipo:</strong> <span id="preview-tipo">-</span></p>
+                                <p><strong>Tipo:</strong> <span id="preview-tipo">___________________</span></p>
                             </div>
                             <div class="background-input">
                                 <p><strong>Nome:</strong> ___________________</p>
@@ -148,9 +150,9 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- MODAL PARA SELECIONAR QUESTÕES EXISTENTES -->
-    <!-- ========================================== -->
+    <!-- =========================================== -->
+    <!--  MODAL PARA SELECIONAR QUESTÕES EXISTENTES  -->
+    <!-- =========================================== -->
     <div class="modal fade" id="modalSelecionarQuestoes" tabindex="-1" aria-labelledby="modalSelecionarQuestoesLabel" aria-hidden="true">
         <div class="modal-dialog modal-questoes modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
