@@ -1,51 +1,56 @@
 from django.contrib.auth.views import LoginView
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseRedirect
-from django.urls import reverse_lazy,  reverse
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
-from .forms import NewResetPasswordForm
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
-from .forms import UserLoginForm
-from django.contrib.auth import logout
-from django.shortcuts import redirect
 from django.db import IntegrityError
 from django_tenants.utils import tenant_context
 from django.utils.text import slugify
 from django import forms
 from django.utils import timezone
-#Imports Locais
-from .forms import UserLoginForm, CollabManageForm, ClienteForm, QuestaoForm, ImagemQuestaoFormSet, AlternativaMultiplaEscolhaForm, FraseVerdadeiroFalsoForm, ConfiguracaoSistemaForm
-from .models import UserModel, Pagina, Cliente, Dominio, UsuarioMaster, Questao, ImagemQuestao, AlternativaMultiplaEscolha, FraseVerdadeiroFalso, ConfiguracaoSistema, SessaoUsuario
+
+# Imports dos modelos e formulários locais
+from .forms import (
+    UserLoginForm, CollabManageForm, ClienteForm, QuestaoForm, 
+    ImagemQuestaoFormSet, AlternativaMultiplaEscolhaForm, 
+    FraseVerdadeiroFalsoForm, ConfiguracaoSistemaForm, NewResetPasswordForm
+)
+from .models import (
+    UserModel, Pagina, Cliente, Dominio, UsuarioMaster, Questao, 
+    ImagemQuestao, AlternativaMultiplaEscolha, FraseVerdadeiroFalso, 
+    ConfiguracaoSistema, SessaoUsuario
+)
 
 
 class UserLoginView(LoginView):
-    template_name = "login.html"  # Template a ser usado
-    success_url = reverse_lazy('home')  # Para onde redirecionar após login com sucesso
-    form_class = UserLoginForm  # Formulário de login personalizado
+    """View customizada para login de usuários com validação específica"""
+    template_name = "login.html"
+    success_url = reverse_lazy('home')
+    form_class = UserLoginForm
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request, data=request.POST)
         if form.is_valid():
-            # Django chama o campo de "username" no form, mesmo que seja um email
+            # Pega os dados do formulário - Django usa 'username' mesmo sendo email
             email = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
 
-            # Autentica o usuário com base no email (caso seu AUTH_USER_MODEL use email como USERNAME_FIELD)
+            # Autentica usando email como username
             user = authenticate(request, username=email, password=password)
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    return redirect(self.get_success_url())  # Redireciona após login
+                    return redirect(self.get_success_url())
                 else:
                     form.add_error(None, "Esta conta está inativa.")
             else:
@@ -56,14 +61,13 @@ class UserLoginView(LoginView):
         return self.success_url
 
     def get_context_data(self, **kwargs):
-        # Adiciona variável de contexto ao template
         context = super().get_context_data(**kwargs)
         context["title"] = "Login"
         return context
 
 
-# Página protegida por login
 class HomeView(LoginRequiredMixin, TemplateView):
+    """Página inicial do sistema - protegida por login"""
     template_name = 'index.html'
 
     def get_context_data(self, **kwargs):
@@ -72,7 +76,8 @@ class HomeView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class CollabManage(LoginRequiredMixin,  TemplateView):
+class CollabManage(LoginRequiredMixin, TemplateView):
+    """Gerenciamento de colaboradores - visualizar e editar usuários"""
     template_name = 'CollabManage.html'
 
     def get(self, request, *args, **kwargs):
@@ -88,9 +93,12 @@ class CollabManage(LoginRequiredMixin,  TemplateView):
             try:
                 selected_user = UserModel.objects.get(user_id=user_id)
                 print(f"Usuário encontrado: {selected_user.username}, ID: {selected_user.user_id}")
+                
                 context['selected_user'] = selected_user
                 context['form'] = CollabManageForm(instance=selected_user)
                 context['user_id'] = user_id
+                
+                # Define displays amigáveis para os status
                 context['tipo_usuario_display'] = (
                     'Administrador' if selected_user.is_staff and selected_user.is_superuser else 'Colaborador'
                 )
@@ -103,31 +111,34 @@ class CollabManage(LoginRequiredMixin,  TemplateView):
         else:
             context['form'] = CollabManageForm()
 
+        # Lista todos os usuários e o usuário logado atual
         context['users'] = UserModel.objects.all()
         context['logged_user'] = logged_user
         return context
     
     def post(self, request, *args, **kwargs):
+        """Atualiza dados do colaborador selecionado"""
         user_id = request.GET.get('user_id') or kwargs.get('user_id')
 
         if user_id:
             try:
-                selected_user = UserModel.objects.get(user_id=user_id)  # Mudado de user para selected_user
+                selected_user = UserModel.objects.get(user_id=user_id)
+                # Preserva a senha atual para não sobrescrever
                 old_password = selected_user.password
                 
-                form = CollabManageForm(request.POST,request.FILES, instance=selected_user)
+                form = CollabManageForm(request.POST, request.FILES, instance=selected_user)
                 
                 if form.is_valid():
                     updated_user = form.save(commit=False)
-                    updated_user.password = old_password
+                    updated_user.password = old_password  # Mantém a senha original
                     updated_user.save()
-                    # Salvar relações many-to-many, incluindo as páginas
+                    # Salva as relações many-to-many (páginas associadas)
                     form.save_m2m()
                     
                     messages.success(request, "Usuário atualizado com sucesso!", extra_tags="user_edit")
                     return redirect(f"{reverse('collabmanage')}?user_id={user_id}")
                 else:
-                    messages.error(request, "Erro no formulário. Por favor, verifique os campos." , extra_tags="user_edit")
+                    messages.error(request, "Erro no formulário. Por favor, verifique os campos.", extra_tags="user_edit")
                     return self.render_to_response(self.get_context_data(form=form, selected_user=selected_user))
             except UserModel.DoesNotExist:
                 messages.error(request, f"Usuário com ID {user_id} não encontrado.", extra_tags="user_edit")
@@ -138,8 +149,10 @@ class CollabManage(LoginRequiredMixin,  TemplateView):
 
 
 class CollabRegisterView(LoginRequiredMixin, View):
+    """Cadastro de novos colaboradores no sistema"""
+    
     def get(self, request):
-        # Obter todas as páginas para o select multiple
+        # Prepara o contexto inicial do formulário
         paginas = Pagina.objects.all()
         
         context = {
@@ -157,6 +170,7 @@ class CollabRegisterView(LoginRequiredMixin, View):
         return render(request, 'CollabRegister.html', context)
 
     def post(self, request):
+        # Coleta os dados do formulário
         username = request.POST.get('username')
         fullname = request.POST.get('fullname')
         email = request.POST.get('email')
@@ -170,7 +184,7 @@ class CollabRegisterView(LoginRequiredMixin, View):
         errors = {}
         UserModel = get_user_model()
 
-        # Validação básica dos campos
+        # Validações básicas dos campos obrigatórios
         if not username:
             errors['username'] = "O campo Nome de Usuário é obrigatório."
         elif UserModel.objects.filter(username=username).exists():
@@ -191,10 +205,8 @@ class CollabRegisterView(LoginRequiredMixin, View):
         elif len(password) < 6:
             errors['password'] = "A senha deve ter pelo menos 6 caracteres."
 
-        
-        # Se houver erros, retorna o formulário com os erros
+        # Se houver erros, retorna o formulário com as mensagens
         if errors:
-            # Obter novamente todas as páginas para o formulário
             paginas = Pagina.objects.all()
             
             context = {
@@ -213,6 +225,7 @@ class CollabRegisterView(LoginRequiredMixin, View):
             return render(request, 'CollabRegister.html', context)
 
         try:
+            # Cria o novo usuário
             user = UserModel.objects.create_user(
                 username=username,
                 fullname=fullname,
@@ -223,6 +236,7 @@ class CollabRegisterView(LoginRequiredMixin, View):
                 user_img=user_img
             )
 
+            # Define permissões baseadas no tipo de usuário
             if tipo_usuario == 'administrador':
                 user.is_staff = True
                 user.is_superuser = True
@@ -230,10 +244,9 @@ class CollabRegisterView(LoginRequiredMixin, View):
                 user.is_staff = False
                 user.is_superuser = False
 
-            
             user.save()
             
-            # Vincular páginas ao usuário
+            # Associa as páginas selecionadas ao usuário
             if paginas_ids:
                 paginas = Pagina.objects.filter(id__in=paginas_ids)
                 user.paginas.set(paginas)
@@ -242,7 +255,7 @@ class CollabRegisterView(LoginRequiredMixin, View):
             return redirect('collabregister')
 
         except IntegrityError as e:
-            # Tratamento específico para erros de integridade
+            # Trata erros específicos de integridade do banco
             if 'username' in str(e).lower():
                 errors['username'] = "Este nome de usuário já está em uso."
             elif 'email' in str(e).lower():
@@ -250,7 +263,6 @@ class CollabRegisterView(LoginRequiredMixin, View):
             else:
                 errors['general'] = "Erro ao criar usuário. Por favor, verifique os dados informados."
             
-            # Obter novamente todas as páginas para o formulário
             paginas = Pagina.objects.all()
             
             context = {
@@ -272,12 +284,15 @@ class CollabRegisterView(LoginRequiredMixin, View):
             messages.error(request, f"Erro inesperado: {str(e)}")
             return redirect('collabregister')
 
+
 def cliente_custom_logout_view(request):
+    """Função simples para logout e redirecionamento"""
     logout(request)
     return redirect('login')
 
 
 class CadastroClienteView(LoginRequiredMixin, View):
+    """Cadastro de novos clientes com criação de tenant e usuário master"""
     template_name = 'ClienteRegister.html'
     
     def get(self, request):
@@ -291,7 +306,7 @@ class CadastroClienteView(LoginRequiredMixin, View):
             dados = form.cleaned_data
             
             try:
-                # Criar o cliente com o usuário master usando nosso manager personalizado
+                # Cria o cliente com usuário master usando o manager personalizado
                 cliente = Cliente.objects.create_cliente_with_master(
                     nome=dados['nome'],
                     email_master=dados['email_master'],
@@ -303,11 +318,10 @@ class CadastroClienteView(LoginRequiredMixin, View):
                     observacoes=dados['observacoes'],
                     logo=dados.get('logo'),
                     qtd_usuarios=dados['qtd_usuarios'],
-                    
-                    schema_name = slugify(dados['nome'])
+                    schema_name=slugify(dados['nome'])
                 )
                 
-                # Criar o domínio
+                # Cria o domínio associado ao cliente
                 subdominio = dados['subdominio']
                 dominio_base = 'localhost'
                 dominio_completo = f"{subdominio}.{dominio_base}"
@@ -318,20 +332,19 @@ class CadastroClienteView(LoginRequiredMixin, View):
                 dominio.is_primary = True
                 dominio.save()
                 
-                # ADICIONAR ESTE BLOCO: Executar migrações para o novo tenant
+                # Executa migrações para o novo tenant
                 from django.core.management import call_command
                 with tenant_context(cliente):
                     call_command('migrate', '--schema', cliente.schema_name)
                 
-                # Sincronizar usuário master dentro do tenant
+                # Sincroniza usuário master dentro do contexto do tenant
                 with tenant_context(cliente):
                     from LSCliente.models import UsuarioCliente
                     
-                    # Criar um usuário equivalente dentro do tenant (sem nome)
+                    # Cria usuário equivalente dentro do tenant
                     usuario_tenant = UsuarioCliente.objects.create_superuser(
                         email=dados['email_master'],
                         password=dados['senha_master']
-                        # Campo nome foi removido
                     )
                 
                 messages.success(request, f"Cliente {cliente.nome} cadastrado com sucesso!")
@@ -341,8 +354,9 @@ class CadastroClienteView(LoginRequiredMixin, View):
                 messages.error(request, f"Erro ao cadastrar cliente: {str(e)}")
         
         return render(request, self.template_name, {'form': form})
-        
 
+
+# Configuração dos formsets para questões
 AlternativaFormSet = forms.inlineformset_factory(
     Questao, 
     AlternativaMultiplaEscolha,
@@ -361,7 +375,9 @@ FraseVFFormSet = forms.inlineformset_factory(
     can_delete=True
 )
 
+
 class QuestaoManageView(LoginRequiredMixin, View):
+    """Gerenciamento completo de questões - criação e edição"""
     template_name = 'questionRegister.html'
     
     def get(self, request):
@@ -371,16 +387,17 @@ class QuestaoManageView(LoginRequiredMixin, View):
     def post(self, request):
         questao_id = request.POST.get('questao_id')
         
-        # Se tiver ID, estamos editando uma questão existente
+        # Determina se é edição ou criação baseado no ID
         if questao_id:
             return self.update_questao(request, questao_id)
         else:
             return self.create_questao(request)
     
     def get_context_data(self, request):
+        """Prepara o contexto com formulários e dados necessários"""
         context = {}
         
-        # Busca por ID de questão
+        # Verifica se está editando uma questão específica
         questao_id = request.GET.get('questao_id')
         if questao_id:
             try:
@@ -389,42 +406,44 @@ class QuestaoManageView(LoginRequiredMixin, View):
                 context['questao_form'] = QuestaoForm(instance=questao)
                 context['imagem_formset'] = ImagemQuestaoFormSet(instance=questao)
                 
-                # Sempre inicializar todos os formsets, independente do tipo da questão
+                # Inicializa formsets baseados no tipo da questão
                 context['alternativa_formset'] = AlternativaFormSet(instance=questao if questao.tipo == 'multipla' else None)
                 context['frase_vf_formset'] = FraseVFFormSet(instance=questao if questao.tipo == 'vf' else None)
                     
             except Questao.DoesNotExist:
                 messages.error(request, f"Questão com ID {questao_id} não encontrada.")
+                # Formulários vazios em caso de erro
                 context['questao_form'] = QuestaoForm()
                 context['imagem_formset'] = ImagemQuestaoFormSet()
                 context['alternativa_formset'] = AlternativaFormSet()
                 context['frase_vf_formset'] = FraseVFFormSet()
         else:
+            # Formulários vazios para nova questão
             context['questao_form'] = QuestaoForm()
             context['imagem_formset'] = ImagemQuestaoFormSet()
             context['alternativa_formset'] = AlternativaFormSet()
             context['frase_vf_formset'] = FraseVFFormSet()
         
-        # Lista de questões para seleção
+        # Lista das 50 questões mais recentes para seleção
         context['questoes'] = Questao.objects.select_related('materia', 'ano_escolar', 'criado_por').all().order_by('-data_criacao')[:50]
         
         return context
     
     def create_questao(self, request):
+        """Cria uma nova questão com seus formsets associados"""
         questao_form = QuestaoForm(request.POST)
         imagem_formset = ImagemQuestaoFormSet(request.POST, request.FILES)
         
-        # FormSets serão processados conforme o tipo de questão
         alternativa_formset = None
         frase_vf_formset = None
         
         if questao_form.is_valid():
-            # Salvar a questão com o usuário atual
+            # Salva a questão principal
             questao = questao_form.save(commit=False)
             questao.criado_por = request.user
             questao.save()
             
-            # Validar e salvar o formset de imagens
+            # Processa formset de imagens
             imagem_formset = ImagemQuestaoFormSet(request.POST, request.FILES, instance=questao)
             if imagem_formset.is_valid():
                 imagens = imagem_formset.save(commit=False)
@@ -435,7 +454,7 @@ class QuestaoManageView(LoginRequiredMixin, View):
                 for obj in imagem_formset.deleted_objects:
                     obj.delete()
             
-            # Processar formsets específicos com base no tipo da questão
+            # Processa formsets específicos baseados no tipo da questão
             is_specific_formset_valid = True
             
             if questao.tipo == 'multipla':
@@ -470,7 +489,7 @@ class QuestaoManageView(LoginRequiredMixin, View):
                 messages.success(request, "Questão cadastrada com sucesso!")
                 return redirect('questao_manage')
         
-        # Se chegou aqui, houve erro em algum formulário
+        # Em caso de erro, retorna o formulário com os dados preenchidos
         messages.error(request, "Erro ao cadastrar questão. Verifique os dados informados.")
         context = {
             'questao_form': questao_form,
@@ -478,7 +497,7 @@ class QuestaoManageView(LoginRequiredMixin, View):
             'questoes': Questao.objects.all().order_by('-data_criacao')[:50]
         }
         
-        # Adicionar formsets específicos ao contexto, se necessário
+        # Adiciona formsets específicos ao contexto
         if questao_form.is_valid():
             tipo_questao = questao_form.cleaned_data['tipo']
             if tipo_questao == 'multipla':
@@ -492,19 +511,19 @@ class QuestaoManageView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
     
     def update_questao(self, request, questao_id):
+        """Atualiza uma questão existente"""
         questao = get_object_or_404(Questao, id=questao_id)
         questao_form = QuestaoForm(request.POST, instance=questao)
         imagem_formset = ImagemQuestaoFormSet(request.POST, request.FILES, instance=questao)
         
-        # FormSets serão processados conforme o tipo de questão
         alternativa_formset = None
         frase_vf_formset = None
         
         if questao_form.is_valid() and imagem_formset.is_valid():
-            # Salvar a questão principal
+            # Atualiza a questão principal
             questao = questao_form.save()
             
-            # Salvar o formset de imagens
+            # Atualiza formset de imagens
             imagens = imagem_formset.save(commit=False)
             for imagem in imagens:
                 imagem.questao = questao
@@ -513,7 +532,7 @@ class QuestaoManageView(LoginRequiredMixin, View):
             for obj in imagem_formset.deleted_objects:
                 obj.delete()
             
-            # Processar formsets específicos com base no tipo da questão
+            # Processa formsets específicos
             is_specific_formset_valid = True
             
             if questao.tipo == 'multipla':
@@ -546,13 +565,11 @@ class QuestaoManageView(LoginRequiredMixin, View):
             
             if is_specific_formset_valid:
                 messages.success(request, "Questão atualizada com sucesso!")
-                # AQUI ESTÁ A CORREÇÃO: Use reverse() com parâmetros de consulta corretamente
-                from django.urls import reverse
-                from django.http import HttpResponseRedirect
+                # Redireciona mantendo o ID da questão na URL
                 base_url = reverse('questao_manage')
                 return HttpResponseRedirect(f"{base_url}?questao_id={questao_id}")
         
-        # Se chegou aqui, houve erro em algum formulário
+        # Em caso de erro, retorna o formulário
         messages.error(request, "Erro ao atualizar questão. Verifique os dados informados.")
         context = {
             'questao': questao,
@@ -561,7 +578,7 @@ class QuestaoManageView(LoginRequiredMixin, View):
             'questoes': Questao.objects.all().order_by('-data_criacao')[:50]
         }
         
-        # Adicionar formsets específicos ao contexto, se necessário
+        # Adiciona formsets específicos ao contexto
         if questao.tipo == 'multipla':
             context['alternativa_formset'] = alternativa_formset or AlternativaFormSet(instance=questao)
         elif questao.tipo == 'vf':
@@ -569,33 +586,35 @@ class QuestaoManageView(LoginRequiredMixin, View):
         
         return render(request, self.template_name, context)
     
+
 class EditarClienteView(LoginRequiredMixin, View):
+    """Edição de clientes existentes com atualização de dados relacionados"""
     template_name = 'ClienteEdit.html'
     
     def get(self, request):
         cliente_id = request.GET.get('cliente_id')
         abrir_modal = False
         
-        # Buscar todos os clientes para o modal
+        # Busca todos os clientes para o modal de seleção
         todos_clientes = Cliente.objects.all().order_by('nome')
         
-        # Se um ID de cliente foi fornecido, buscar o cliente
+        # Processa cliente específico se ID foi fornecido
         if cliente_id:
             try:
                 cliente = get_object_or_404(Cliente, id=cliente_id)
                 
-                # Obter o domínio principal para extrair o subdomínio
+                # Extrai o subdomínio do domínio principal
                 dominio_principal = cliente.domains.filter(is_primary=True).first()
                 subdominio = dominio_principal.domain.split('.')[0] if dominio_principal else ""
                 
-                # Obter dados do usuário master para preencher o formulário
+                # Pega dados do usuário master
                 usuario_master = cliente.usuario_master
                 
-                # Inicializar o formulário com os dados do cliente
+                # Prepara dados iniciais para o formulário
                 initial_data = {
                     'subdominio': subdominio,
                     'email_master': usuario_master.email if usuario_master else "",
-                    'senha_master': "",  # Deixar em branco por segurança
+                    'senha_master': "",  # Deixa em branco por segurança
                     'data_inicio_assinatura': cliente.data_inicio_assinatura.strftime('%Y-%m-%d') if cliente.data_inicio_assinatura else "",
                     'data_validade_assinatura': cliente.data_validade_assinatura.strftime('%Y-%m-%d') if cliente.data_validade_assinatura else ""
                 }
@@ -605,9 +624,8 @@ class EditarClienteView(LoginRequiredMixin, View):
             except Exception as e:
                 messages.error(request, f"Erro ao carregar cliente: {str(e)}")
                 abrir_modal = True
-                form = ClienteForm()  # Formulário vazio em caso de erro
+                form = ClienteForm()
         else:
-            # Formulário vazio quando não há cliente selecionado
             form = ClienteForm()
         
         return render(request, self.template_name, {
@@ -619,6 +637,7 @@ class EditarClienteView(LoginRequiredMixin, View):
         })
     
     def post(self, request):
+        """Processa a atualização dos dados do cliente"""
         cliente_id = request.POST.get('cliente_id')
         
         if not cliente_id:
@@ -632,13 +651,11 @@ class EditarClienteView(LoginRequiredMixin, View):
             dados = form.cleaned_data
             
             try:
-                # Atualizar os dados do cliente
+                # Atualiza dados do cliente
                 cliente = form.save(commit=False)
-                
-                
                 cliente.save()
                 
-                # Atualizar o domínio se o subdomínio foi alterado
+                # Atualiza domínio se necessário
                 subdominio = dados['subdominio']
                 dominio_base = 'seudominio.com.br'
                 dominio_completo = f"{subdominio}.{dominio_base}"
@@ -648,14 +665,14 @@ class EditarClienteView(LoginRequiredMixin, View):
                     dominio.domain = dominio_completo
                     dominio.save()
                 elif not dominio:
-                    # Criar novo domínio se não existir
+                    # Cria novo domínio se não existir
                     dominio = Dominio()
                     dominio.domain = dominio_completo
                     dominio.tenant = cliente
                     dominio.is_primary = True
                     dominio.save()
                 
-                # Atualizar usuário master se a senha foi fornecida
+                # Atualiza usuário master se nova senha foi fornecida
                 if dados['senha_master']:
                     usuario_master = cliente.usuario_master
                     if usuario_master:
@@ -663,7 +680,7 @@ class EditarClienteView(LoginRequiredMixin, View):
                         usuario_master.email = dados['email_master']
                         usuario_master.save()
                         
-                        # Atualizar o usuário equivalente dentro do tenant
+                        # Sincroniza com o usuário no tenant
                         with tenant_context(cliente):
                             from LSCliente.models import UsuarioCliente
                             try:

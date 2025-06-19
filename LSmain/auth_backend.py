@@ -1,46 +1,37 @@
-from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth import get_user_model
-from django.db.models import Q
-import inspect
-from django.contrib.auth import get_user_model
-from django_tenants.utils import get_public_schema_name
-from django_tenants.utils import get_tenant_model, schema_context, tenant_context
+from django_tenants.utils import get_public_schema_name, get_tenant_model
 from threading import local
 
-# In auth_backend.py
-from django_tenants.utils import get_tenant_model, get_tenant_domain_model
-from threading import local
-
-# Use this if you don't already have it defined
+# Thread local storage para manter o tenant atual
 thread_locals = local()
 
 def get_current_tenant():
+    """
+    Retorna o tenant atual da thread, com fallback para conexão atual
+    """
     try:
         return thread_locals.tenant
     except AttributeError:
-        # Fallback method when tenant isn't in thread_locals
-        # Use the proper django-tenants methods to get tenant
+        # Se não tiver tenant no thread_locals, tenta pegar da conexão
         from django.db import connection
         
-        # If using django-tenants, the connection should have the tenant schema set
         if hasattr(connection, 'tenant'):
             return connection.tenant
             
-        # If no tenant in connection, try to get the default tenant
+        # Último recurso: busca o tenant público padrão
         TenantModel = get_tenant_model()
         try:
             default_tenant = TenantModel.objects.get(schema_name='public')
             return default_tenant
         except (TenantModel.DoesNotExist, TenantModel.MultipleObjectsReturned):
-            # Handle case where there's no default tenant or multiple defaults
             return None
 
 class TenantAwareAuthBackend:
     """
-    Backend de autenticação consciente de tenant.
+    Backend de autenticação que funciona com django-tenants.
+    Autentica usuários diferentes baseado no schema/tenant atual.
     """
     
-
     def authenticate(self, request, username=None, password=None, **kwargs):
         if request is None:
             return None
@@ -48,59 +39,65 @@ class TenantAwareAuthBackend:
         tenant = request.tenant
         tenant_name = tenant.schema_name
         
-        print(f"TenantAwareAuthBackend: Autenticando no tenant {tenant_name}")
+        print(f"Autenticando no tenant: {tenant_name}")
         
         try:
-            # Normalizar username/email
+            # Normaliza o username/email para lowercase
             username = username.lower() if username else None
-            print(f"TenantAwareAuthBackend: Buscando usuário com email/username: {username}")
+            print(f"Buscando usuário: {username}")
             
             if tenant.schema_name == get_public_schema_name():
-                # No schema público (master), usamos o UserModel padrão
+                # Schema público - usa o User padrão do Django
                 User = get_user_model()
                 try:
                     user = User.objects.get(email=username)
                 except User.DoesNotExist:
                     return None
             else:
-                # Nos schemas de clientes, usamos o UsuarioCliente
+                # Schema de cliente - usa o modelo customizado
                 from LSCliente.models import UsuarioCliente
                 try:
                     user = UsuarioCliente.objects.get(email=username)
                 except UsuarioCliente.DoesNotExist:
                     return None
             
-            print(f"TenantAwareAuthBackend: Usuário encontrado: {user.id}, {user.email}")
+            print(f"Usuário encontrado: {user.id} - {user.email}")
             
-            # Verificar a senha
+            # Verifica se a senha está correta
             if user.check_password(password):
-                print(f"TenantAwareAuthBackend: Senha verificada com sucesso")
+                print("Senha validada com sucesso")
                 
-                # Importante: Garantir que os atributos necessários estejam presentes
+                # Define o backend usado (necessário para o Django)
                 if not hasattr(user, 'backend'):
                     user.backend = f"{self.__module__}.{self.__class__.__name__}"
                 
                 return user
             else:
-                print(f"TenantAwareAuthBackend: Senha incorreta")
+                print("Senha incorreta")
                 return None
                 
         except Exception as e:
-            print(f"TenantAwareAuthBackend: Erro na autenticação: {str(e)}")
+            print(f"Erro na autenticação: {str(e)}")
             return None
     
     def get_user(self, user_id):
+        """
+        Recupera um usuário pelo ID, considerando o tenant atual
+        """
         tenant = get_current_tenant()
         
+        if not tenant:
+            return None
+        
         if tenant.schema_name == get_public_schema_name():
-            # No schema público (master)
+            # Schema público
             User = get_user_model()
             try:
                 return User.objects.get(pk=user_id)
             except User.DoesNotExist:
                 return None
         else:
-            # Nos schemas de clientes
+            # Schema de cliente
             from LSCliente.models import UsuarioCliente
             try:
                 return UsuarioCliente.objects.get(pk=user_id)

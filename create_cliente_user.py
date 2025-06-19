@@ -2,7 +2,7 @@ import os
 import django
 import argparse
 
-# Configurar o ambiente Django
+# Configuração do ambiente Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LSmain.settings')
 django.setup()
 
@@ -12,6 +12,9 @@ from LSCliente.models import UsuarioCliente
 
 
 def criar_usuario(schema, email, senha, nome):
+    """
+    Cria um usuário no schema do cliente especificado
+    """
     try:
         with schema_context(schema):
             if UsuarioCliente.objects.filter(email=email).exists():
@@ -21,7 +24,7 @@ def criar_usuario(schema, email, senha, nome):
             user = UsuarioCliente.objects.create(
                 email=email,
                 nome=nome,
-                password=make_password(senha),  # 👈 aqui está o segredo
+                password=make_password(senha),  # Hash da senha
                 is_active=True,
                 is_master=False,
                 is_staff=False,

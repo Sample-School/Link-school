@@ -1,14 +1,14 @@
-
-import requests
+# Serviço para acessar questões do Dashboard no schema público
 from django.db import connection
 from django_tenants.utils import schema_context
 
+
 class QuestaoService:
-    """Serviço para buscar questões do schema público (Dashboard)"""
+    """Gerencia acesso às questões armazenadas no Dashboard (schema público)"""
     
     @staticmethod
     def buscar_questoes_dashboard():
-        """Busca todas as questões disponíveis no dashboard"""
+        """Retorna lista de todas as questões disponíveis no dashboard"""
         with schema_context('public'):
             with connection.cursor() as cursor:
                 cursor.execute("""
@@ -44,9 +44,18 @@ class QuestaoService:
     
     @staticmethod
     def buscar_questao_completa(questao_id):
-        """Busca uma questão específica com todos os dados"""
+        """
+        Busca questão específica com todos os dados (imagens, alternativas, etc.)
+        
+        Args:
+            questao_id: ID da questão no dashboard
+            
+        Returns:
+            Dict com dados completos da questão ou None se não encontrar
+        """
         with schema_context('public'):
             with connection.cursor() as cursor:
+                # Buscar dados básicos da questão
                 cursor.execute("""
                     SELECT 
                         q.id,
@@ -64,6 +73,7 @@ class QuestaoService:
                 if not questao_data:
                     return None
                 
+                # Montar estrutura básica da questão
                 questao = {
                     'id': questao_data[0],
                     'titulo': questao_data[1],
@@ -75,6 +85,7 @@ class QuestaoService:
                     'frases_vf': []
                 }
                 
+                # Buscar imagens da questão
                 cursor.execute("""
                     SELECT imagem, legenda
                     FROM "LSDash_imagemquestao"
@@ -87,6 +98,7 @@ class QuestaoService:
                         'legenda': img_row[1]
                     })
                 
+                # Buscar dados específicos por tipo de questão
                 if questao['tipo'] == 'multipla':
                     cursor.execute("""
                         SELECT texto, correta, ordem

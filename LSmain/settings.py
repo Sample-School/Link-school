@@ -15,7 +15,8 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-LOGIN_REDIRECT_URL = 'home'  # Redireciona para a URL nomeada 'home' após login
+# Configurações de login e redirecionamento
+LOGIN_REDIRECT_URL = 'home'
 LOGIN_URL = '/login/'
 
 # Quick-start development settings - unsuitable for production
@@ -29,14 +30,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['finalteste.localhost','localhost', '127.0.0.1', 'testejaum.localhost', 'clienteteste.localhost']
 
-#User model
+# User model customizado
 AUTH_USER_MODEL = 'LSDash.UserModel'
 
-# Application definition
+# API Keys
+OPENAI_API_KEY = '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'
 
-
-
-
+# Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -45,26 +45,28 @@ EMAIL_HOST_USER = 'jaumamaralpessoal@gmail.com'
 EMAIL_HOST_PASSWORD = 'marw oycd lsqy bhxq'
 DEFAULT_FROM_EMAIL = 'jaumamaralpessoal@gmail.com'
 
+# Password reset timeout (2 dias)
 PASSWORD_RESET_TIMEOUT = 86400 * 2 
 
+# Authentication backends - custom tenant-aware backend primeiro
 AUTHENTICATION_BACKENDS = [
-    'LSmain.auth_backend.TenantAwareAuthBackend',  # Seu backend personalizado
-    'django.contrib.auth.backends.ModelBackend',  # Mantenha o backend padrão como fallback
+    'LSmain.auth_backend.TenantAwareAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',  # Fallback padrão
 ]
 
 MIDDLEWARE = [
-    'django_tenants.middleware.main.TenantMainMiddleware',  # Primeiro o middleware de tenant
+    'django_tenants.middleware.main.TenantMainMiddleware',  # Tenant middleware sempre primeiro
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',  # Middleware de sessão deve vir antes do auth
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',  # Auth middleware em posição correta
-    'LSmain.middleware.TenantAwareSettingsMiddleware',  # Configurações de tenant após auth
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'LSmain.middleware.TenantAwareSettingsMiddleware',  # Ajustes de configuração por tenant
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'LSmain.middleware.SessionDebugMiddleware',  # Middleware de debug
-    'LSmain.middleware.TenantAccessControlMiddleware',  # Controle de acesso após todas as configs
-    'LSmain.middleware.SessionTrackingMiddleware'  # Middleware de rastreamento no final
+    'LSmain.middleware.SessionDebugMiddleware',  # Debug - remover em produção
+    'LSmain.middleware.TenantAccessControlMiddleware',  # Controle de acesso
+    'LSmain.middleware.SessionTrackingMiddleware'  # Rastreamento de sessão
 ]
 
 ROOT_URLCONF = 'LSmain.urls'
@@ -74,7 +76,8 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             BASE_DIR / 'templates',
-            BASE_DIR / 'base',],
+            BASE_DIR / 'base',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -82,7 +85,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'LSmain.context_processors.tenant_settings',  # Novo context processor
+                'LSmain.context_processors.tenant_settings',  # Context processor para tenant
             ],
         },
     },
@@ -90,10 +93,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'LSmain.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 
 DATABASES = {
     'default': {
@@ -128,18 +129,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'pt-br'
-
 TIME_ZONE = 'America/Sao_Paulo'
-
 USE_I18N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -149,14 +145,15 @@ STATICFILES_DIRS = [
     BASE_DIR / "base" / 'static'
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# Django-tenants configuration
 TENANT_APPS = [
-    # Apps que serão específicos para cada cliente
+    # Apps específicos para cada cliente/tenant
     'django.contrib.contenttypes',
     'django.contrib.auth',
     'django.contrib.sessions',
@@ -165,6 +162,7 @@ TENANT_APPS = [
 ]
 
 SHARED_APPS = [
+    # Apps compartilhados entre todos os tenants
     'django_tenants',
     'LSDash',
     'django.contrib.contenttypes',
@@ -173,15 +171,17 @@ SHARED_APPS = [
     'django.contrib.messages',
     'django.contrib.admin',
     'django.contrib.staticfiles',
-    
 ]
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-TENANT_MODEL = "LSDash.Cliente"  # Seu modelo de tenant
-TENANT_DOMAIN_MODEL = "LSDash.Dominio"  # Seu modelo de domínio
+# Configurações do sistema multi-tenant
+TENANT_MODEL = "LSDash.Cliente"
+TENANT_DOMAIN_MODEL = "LSDash.Dominio"
 PUBLIC_SCHEMA_NAME = 'public'
 PUBLIC_SCHEMA_URLCONF = 'LSmain.urls'
 TENANT_URLCONF = 'LSmain.tenant_urls'
 
+# Lista final de apps instalados
 INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
+
+# Email backend para desenvolvimento - console output
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

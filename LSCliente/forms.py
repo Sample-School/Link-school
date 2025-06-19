@@ -1,17 +1,16 @@
-
-from django.contrib.auth.forms import AuthenticationForm, SetPasswordForm
+# Forms para autenticação e gerenciamento do sistema cliente
+from django.contrib.auth.forms import SetPasswordForm, PasswordResetForm
+from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
 from django import forms
-from django.contrib.auth.forms import PasswordResetForm
-from django.contrib.auth import authenticate
-from django.contrib.auth import get_user_model
-from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth.hashers import make_password
 
-#imports locais
+# Models locais
 from .models import UsuarioCliente, ClienteSystemSettings
 
+
 class UserLoginForm(forms.Form):
+    """Form de login customizado para o sistema cliente"""
     email = forms.EmailField(widget=forms.EmailInput(attrs={
         'placeholder': 'E-mail',
         'class': 'form-control'
@@ -22,7 +21,7 @@ class UserLoginForm(forms.Form):
     }))
     
     def __init__(self, *args, **kwargs):
-        # Extract request from kwargs if it exists
+        # Preciso do request para o contexto de autenticação
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
     
@@ -32,7 +31,7 @@ class UserLoginForm(forms.Form):
         password = cleaned_data.get('password')
 
         if email and password:
-            # É CRUCIAL passar o objeto request aqui!
+            # Request é essencial aqui para o tenant funcionar
             self.user = authenticate(request=self.request, username=email, password=password)
             if self.user is None:
                 raise ValidationError("E-mail ou senha incorretos.")
@@ -43,10 +42,9 @@ class UserLoginForm(forms.Form):
     def get_user(self):
         return self.user
 
+
 class NewResetPasswordForm(SetPasswordForm):
-    """
-    Formulário personalizado para redefinição de senha que funciona com o modelo UsuarioCliente
-    """
+    """Form para redefinir senha - funciona especificamente com UsuarioCliente"""
     new_password1 = forms.CharField(
         label="Nova senha",
         widget=forms.PasswordInput(attrs={
@@ -66,11 +64,11 @@ class NewResetPasswordForm(SetPasswordForm):
     )
     
     def __init__(self, user=None, *args, **kwargs):
-        # Verificar se o usuário é do tipo correto
+        # Garantir que estamos trabalhando com UsuarioCliente
         from LSCliente.models import UsuarioCliente
         
         if user is not None and not isinstance(user, UsuarioCliente):
-            # Tente obter o usuário correto se o ID for passado
+            # Tentar converter se veio ID ou objeto errado
             try:
                 if hasattr(user, 'pk'):
                     user_id = user.pk
@@ -86,17 +84,16 @@ class NewResetPasswordForm(SetPasswordForm):
         super(SetPasswordForm, self).__init__(*args, **kwargs)
         
     def save(self, commit=True):
-        # Defina a senha para o usuário UsuarioCliente
+        # Salvar a nova senha no UsuarioCliente
         password = self.cleaned_data["new_password1"]
         self.user.set_password(password)
         if commit:
             self.user.save()
         return self.user
 
+
 class CustomPasswordResetForm(PasswordResetForm):
-    """
-    Formulário personalizado para solicitação de redefinição de senha
-    """
+    """Form personalizado para solicitar reset de senha"""
     email = forms.EmailField(
         widget=forms.EmailInput(attrs={
             'placeholder': 'Seu endereço de e-mail',
@@ -105,27 +102,24 @@ class CustomPasswordResetForm(PasswordResetForm):
     )
     
     def __init__(self, *args, **kwargs):
-        # Extrair o request dos kwargs
+        # Request necessário para trabalhar com tenants
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
     
     def clean_email(self):
-        """
-        Valida que o email fornecido está associado a uma conta de usuário 
-        e mostra mensagens de erro mais claras
-        """
+        """Valida se o email existe e está ativo no sistema"""
         email = self.cleaned_data.get('email')
         if email:
-            # Debug info
+            # Debug para acompanhar o processo
             print(f"[DEBUG] Verificando email: {email}")
             print(f"[DEBUG] Tenant atual: {self.request.tenant.schema_name if hasattr(self.request, 'tenant') else 'Desconhecido'}")
             
-            # No contexto de um tenant, sempre use UsuarioCliente
+            # Dentro de um tenant, sempre usar UsuarioCliente
             if hasattr(self.request, 'tenant') and self.request.tenant.schema_name != 'public':
                 active_users = UsuarioCliente.objects.filter(email__iexact=email, is_active=True)
                 print(f"[DEBUG] Usuários encontrados no tenant {self.request.tenant.schema_name}: {active_users.count()}")
             else:
-                # No schema público, use o modelo UserModel padrão
+                # No schema público, usar o modelo padrão
                 model = get_user_model()
                 active_users = model.objects.filter(email__iexact=email, is_active=True)
                 print(f"[DEBUG] Usuários encontrados no schema público: {active_users.count()}")
@@ -135,25 +129,24 @@ class CustomPasswordResetForm(PasswordResetForm):
         return email
 
     def get_users(self, email):
-        """
-        Este método é chamado pelo PasswordResetForm para obter uma QuerySet
-        dos usuários elegíveis para redefinição de senha.
-        """
+        """Retorna os usuários elegíveis para reset de senha"""
         print(f"[DEBUG] get_users chamado para email: {email}")
         
         if hasattr(self, 'request') and self.request and hasattr(self.request, 'tenant') and self.request.tenant.schema_name != 'public':
-            # Em um tenant, sempre use UsuarioCliente
+            # Em tenant, usar UsuarioCliente
             active_users = UsuarioCliente.objects.filter(email__iexact=email, is_active=True)
             print(f"[DEBUG] Buscando UsuarioCliente no tenant {self.request.tenant.schema_name}, encontrados: {active_users.count()}")
             return active_users
         else:
-            # No schema público, use o modelo UserModel padrão
+            # No público, usar modelo padrão
             UserModel = get_user_model()
             active_users = UserModel.objects.filter(email__iexact=email, is_active=True)
             print(f"[DEBUG] Buscando UserModel no schema público, encontrados: {active_users.count()}")
             return active_users
 
+
 class UsuarioClienteForm(forms.ModelForm):
+    """Form para criar/editar usuários do sistema cliente"""
     password = forms.CharField(
         required=False,
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
@@ -186,11 +179,11 @@ class UsuarioClienteForm(forms.ModelForm):
         password = cleaned_data.get('password')
         password_confirm = cleaned_data.get('password_confirm')
 
-        # Se for novo usuário (sem PK), senha é obrigatória
+        # Para usuário novo, senha é obrigatória
         if not self.instance.pk and not password:
             self.add_error('password', 'A senha é obrigatória para novos usuários.')
 
-        # Se a senha for preenchida, precisa confirmar
+        # Se preencheu senha, tem que confirmar
         if password and password != password_confirm:
             self.add_error('password_confirm', 'As senhas não coincidem.')
 
@@ -200,11 +193,11 @@ class UsuarioClienteForm(forms.ModelForm):
         user = super().save(commit=False)
         password = self.cleaned_data.get('password')
 
-        # Só define nova senha se foi informada
+        # Só alterar senha se foi informada
         if password:
             user.password = make_password(password)
 
-        # Garantir consistência nas permissões
+        # Manter consistência - usuário cliente não tem acesso admin
         user.is_staff = False
         user.is_superuser = False
 
@@ -214,6 +207,7 @@ class UsuarioClienteForm(forms.ModelForm):
 
 
 class ClienteSystemSettingsForm(forms.ModelForm):
+    """Form para configurações gerais do sistema cliente"""
     class Meta:
         model = ClienteSystemSettings
         fields = ['imagem_home_1', 'system_primary_color', 'system_second_color', 'tempo_maximo_inatividade']

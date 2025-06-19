@@ -7,13 +7,14 @@ from LSCliente import views
 # URLs específicas para tenants de cliente
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # Redirecionar a raiz para a view clientehome
+    # Rota raiz redireciona para home do cliente
     path('', views.ClienteHomeView.as_view(), name='root'),
-    # Adicione uma rota específica para /home/
+    # Home específica do cliente
     path('home/', views.ClienteHomeView.as_view(), name='clientehome'),
-    # Incluir o resto das URLs do LSCliente com o namespace
+    # Todas as URLs do LSCliente com namespace
     path('', include(('LSCliente.urls', 'LSCliente'), namespace='LSCliente')),
 ]
 
+# Servir arquivos de mídia em desenvolvimento
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

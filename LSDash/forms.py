@@ -1,15 +1,22 @@
-from django.contrib.auth.forms import AuthenticationForm, SetPasswordForm
+# Forms do sistema de ensino
+from django.contrib.auth.forms import AuthenticationForm, SetPasswordForm, PasswordResetForm
 from django.core.exceptions import ValidationError
 from django import forms
 
-#imports locais
-from .models import UserModel, Pagina, Cliente, GrupoEnsino, AnoEscolar, Materia, Questao, ImagemQuestao, AlternativaMultiplaEscolha, FraseVerdadeiroFalso, ConfiguracaoSistema
-from django.contrib.auth.forms import PasswordResetForm
+# Importações locais
+from .models import (
+    UserModel, Pagina, Cliente, GrupoEnsino, AnoEscolar, Materia, 
+    Questao, ImagemQuestao, AlternativaMultiplaEscolha, 
+    FraseVerdadeiroFalso, ConfiguracaoSistema
+)
+
 
 class UserLoginForm(AuthenticationForm):
+    """Form customizado para login com validação por email"""
+    
     def clean_username(self):
-        # Realiza a verificação do usuário por email
-        email = self.cleaned_data.get('username')  # AuthenticationForm sempre usa 'username'
+        """Valida se o usuário existe e está ativo"""
+        email = self.cleaned_data.get('username')  # AuthenticationForm usa 'username'
         try:
             user = UserModel.objects.get(email=email)
         except UserModel.DoesNotExist:
@@ -21,9 +28,9 @@ class UserLoginForm(AuthenticationForm):
         return email
 
     def clean_password(self):
-        # Realiza a verificação da senha
+        """Valida a senha do usuário"""
         password = self.cleaned_data.get('password')
-        email = self.cleaned_data.get('username')  # Aqui o campo é username, mas contém o email
+        email = self.cleaned_data.get('username')
         
         if email and password:
             try:
@@ -31,11 +38,14 @@ class UserLoginForm(AuthenticationForm):
                 if not user.check_password(password):
                     raise ValidationError("Senha incorreta.")
             except UserModel.DoesNotExist:
-                pass  # Este erro já será capturado em clean_username
+                pass  # Erro já capturado em clean_username
         
         return password
 
+
 class NewResetPasswordForm(SetPasswordForm):
+    """Form para redefinição de senha com estilos customizados"""
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['new_password1'].widget.attrs.update({
@@ -47,7 +57,21 @@ class NewResetPasswordForm(SetPasswordForm):
             'class': 'password-input'
         })
 
+
+class CustomPasswordResetForm(PasswordResetForm):
+    """Form customizado para solicitação de reset de senha"""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({
+            'placeholder': 'Seu endereço de e-mail',
+            'class': 'email-input'
+        })
+
+
 class CollabManageForm(forms.ModelForm):
+    """Form para gerenciamento de colaboradores do sistema"""
+    
     tipo_usuario = forms.ChoiceField(
         choices=[('colaborador', 'Colaborador'), ('adm', 'Administrador')],
         widget=forms.RadioSelect,
@@ -68,7 +92,7 @@ class CollabManageForm(forms.ModelForm):
 
     password = forms.CharField(
         widget=forms.PasswordInput,
-        required=False,  # Permite que a senha não seja obrigatória para atualização
+        required=False,  # Não obrigatório para edição
         label="Senha",
         error_messages={
             'required': 'Por favor, insira uma senha.',
@@ -91,6 +115,7 @@ class CollabManageForm(forms.ModelForm):
         label="Páginas",
         help_text="Selecione uma ou mais páginas"
     )
+    
     user_img = forms.ImageField(
         required=False,
         label="Imagem do Usuário",
@@ -116,28 +141,31 @@ class CollabManageForm(forms.ModelForm):
         self.instance = kwargs.get('instance', None)
         super().__init__(*args, **kwargs)
 
-        # Garantir que o queryset de páginas está sempre atualizado
+        # Garantir queryset atualizado de páginas
         self.fields['paginas'].queryset = Pagina.objects.all()
 
         if self.instance:
-            # Definir valores iniciais com base no instance
+            # Definir valores iniciais baseados na instância
             self.fields['tipo_usuario'].initial = 'adm' if self.instance.is_staff else 'colaborador'
             self.fields['status'].initial = 'ativo' if self.instance.is_active else 'inativo'
             self.fields['observacoes'].initial = self.instance.observacoes
 
     def clean_username(self):
+        """Valida se o username não está em uso"""
         username = self.cleaned_data.get('username')
         if UserModel.objects.filter(username=username).exclude(pk=self.instance.pk if self.instance else None).exists():
             raise ValidationError("Este nome de usuário já está em uso. Escolha outro.")
         return username
 
     def clean_email(self):
+        """Valida se o email não está em uso"""
         email = self.cleaned_data.get('email')
         if UserModel.objects.filter(email=email).exclude(pk=self.instance.pk if self.instance else None).exists():
             raise ValidationError("Este email já está cadastrado. Por favor, use outro.")
         return email
 
     def clean_tipo_usuario(self):
+        """Define permissões baseadas no tipo de usuário"""
         tipo_usuario = self.cleaned_data.get('tipo_usuario')
         if tipo_usuario == 'adm':
             self.instance.is_staff = True
@@ -148,41 +176,50 @@ class CollabManageForm(forms.ModelForm):
         return tipo_usuario
 
     def clean_status(self):
+        """Define se o usuário está ativo"""
         status = self.cleaned_data.get('status')
         self.instance.is_active = (status == 'ativo')
         return status
 
     def save(self, commit=True):
-        # Salva o usuário, incluindo os grupos de acesso
+        """Salva o usuário com senha e relações many-to-many"""
         user = super().save(commit=False)
         password = self.cleaned_data.get('password')
         
-        if password:  # Só define a senha se o campo estiver preenchido
+        if password:  # Define senha apenas se preenchida
             user.set_password(password)
 
         if commit:
             user.save()
-            self.save_m2m()  # Salva as relações many-to-many, incluindo páginas
+            self.save_m2m()  # Salva relações many-to-many (páginas)
         return user
 
 
 class ClienteForm(forms.ModelForm):
-    subdominio = forms.CharField(max_length=50, help_text="Será usado como: subdominio.seudominio.com.br")
+    """Form para cadastro e edição de clientes/tenants"""
+    
+    subdominio = forms.CharField(
+        max_length=50, 
+        help_text="Será usado como: subdominio.seudominio.com.br"
+    )
     email_master = forms.EmailField(help_text="Email do usuário master")
-    senha_master = forms.CharField(widget=forms.PasswordInput, help_text="Senha do usuário master")
+    senha_master = forms.CharField(
+        widget=forms.PasswordInput, 
+        help_text="Senha do usuário master"
+    )
     data_inicio_assinatura = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'})
     )
     data_validade_assinatura = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'})
     )
-    
-    
 
     class Meta:
         model = Cliente
-        fields = ['nome', 'cor_primaria', 'cor_secundaria', 'data_inicio_assinatura', 
-                    'data_validade_assinatura', 'observacoes', 'logo', 'qtd_usuarios']
+        fields = [
+            'nome', 'cor_primaria', 'cor_secundaria', 'data_inicio_assinatura', 
+            'data_validade_assinatura', 'observacoes', 'logo', 'qtd_usuarios'
+        ]
         widgets = {
             'data_inicio_assinatura': forms.DateInput(attrs={'type': 'date'}),
             'data_validade_assinatura': forms.DateInput(attrs={'type': 'date'}),
@@ -190,12 +227,19 @@ class ClienteForm(forms.ModelForm):
             'cor_secundaria': forms.TextInput(attrs={'type': 'color'}),
         }
 
+
+# Sistema de questões
 class QuestaoForm(forms.ModelForm):
+    """Form para criação e edição de questões"""
+    
     class Meta:
         model = Questao
         fields = ['titulo', 'materia', 'ano_escolar', 'tipo']
         widgets = {
-            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enunciado da Questão'}),
+            'titulo': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Enunciado da Questão'
+            }),
             'materia': forms.Select(attrs={'class': 'form-control'}),
             'ano_escolar': forms.Select(attrs={'class': 'form-control'}),
             'tipo': forms.Select(attrs={'class': 'form-control'}),
@@ -210,7 +254,7 @@ class QuestaoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Agrupar anos escolares por grupo de ensino para o select
+        # Agrupar anos escolares por grupo de ensino para melhor organização
         anos_por_grupo = {}
         for ano in AnoEscolar.objects.select_related('grupo_ensino').all():
             grupo_nome = ano.grupo_ensino.nome
@@ -218,35 +262,43 @@ class QuestaoForm(forms.ModelForm):
                 anos_por_grupo[grupo_nome] = []
             anos_por_grupo[grupo_nome].append((ano.id, ano.nome))
         
-        # Criar as opções do campo com grupos
+        # Criar opções agrupadas para o select
         choices = []
         for grupo_nome, anos in anos_por_grupo.items():
             group_options = [(id, nome) for id, nome in anos]
             choices.append((grupo_nome, group_options))
         
-        # Atualizar o campo ano_escolar com as opções agrupadas
         self.fields['ano_escolar'].choices = choices
 
+
 class ImagemQuestaoForm(forms.ModelForm):
+    """Form para anexar imagens às questões"""
+    
     class Meta:
         model = ImagemQuestao
         fields = ['imagem', 'legenda']
         widgets = {
-            'legenda': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Legenda'}),
+            'legenda': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Legenda'
+            }),
             'imagem': forms.FileInput(attrs={'class': 'form-control-file'}),
         }
 
-# FormSet para múltiplas imagens
+
+# FormSet para múltiplas imagens por questão
 ImagemQuestaoFormSet = forms.inlineformset_factory(
     Questao, 
     ImagemQuestao,
     form=ImagemQuestaoForm,
-    extra=1,  # Começa com 1 formulário vazio
-    can_delete=True  # Permite excluir imagens
+    extra=1,  # Inicia com 1 formulário vazio
+    can_delete=True  # Permite exclusão de imagens
 )
 
 
 class AlternativaMultiplaEscolhaForm(forms.ModelForm):
+    """Form para alternativas de questões de múltipla escolha"""
+    
     class Meta:
         model = AlternativaMultiplaEscolha
         fields = ['texto', 'correta', 'ordem']
@@ -256,28 +308,34 @@ class AlternativaMultiplaEscolhaForm(forms.ModelForm):
             'ordem': forms.HiddenInput(),
         }
 
+
 class FraseVerdadeiroFalsoForm(forms.ModelForm):
+    """Form para frases de questões verdadeiro/falso"""
+    
     class Meta:
         model = FraseVerdadeiroFalso
         fields = ['texto', 'verdadeira', 'ordem']
         widgets = {
-            'texto': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Texto da Frase'}),
+            'texto': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Texto da Frase'
+            }),
             'verdadeira': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'ordem': forms.HiddenInput(),
         }
 
+
 class ConfiguracaoSistemaForm(forms.ModelForm):
+    """Form para configurações globais do sistema"""
+    
     class Meta:
         model = ConfiguracaoSistema
         fields = ['imagem_home_1', 'imagem_home_2', 'observacoes', 'tempo_maximo_inatividade']
         widgets = {
             'observacoes': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
-            'tempo_maximo_inatividade': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 1440}),
+            'tempo_maximo_inatividade': forms.NumberInput(attrs={
+                'class': 'form-control', 
+                'min': 1, 
+                'max': 1440  # Máximo de 24h em minutos
+            }),
         }
-class CustomPasswordResetForm(PasswordResetForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['email'].widget.attrs.update({
-            'placeholder': 'Seu endereço de e-mail',
-            'class': 'email-input'
-        })

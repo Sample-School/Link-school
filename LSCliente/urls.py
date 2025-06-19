@@ -1,28 +1,32 @@
-# LSCliente urls
-from django.views.generic import TemplateView
-from django.urls import path
+# URLs do módulo LSCliente
+from django.urls import path, reverse_lazy
 from django.contrib.auth import views as auth_views
-from django.urls import reverse_lazy
 
-# import locais
-from LSCliente.forms import NewResetPasswordForm, CustomPasswordResetForm
+# Imports das views e forms do app
+from LSCliente.forms import CustomPasswordResetForm
 from LSCliente import views
-from LSCliente.views import TenantAwarePasswordResetConfirmView  # Adicione esta importação
 
 app_name = 'LSCliente'
 
 urlpatterns = [
+    # Dashboard principal do cliente
     path('home/', views.ClienteHomeView.as_view(), name='clientehome'),
+    
+    # Autenticação
     path('clientelogin/', views.ClienteUserLoginView.as_view(), name='clientelogin'),
-    path('CLUserMange/', views.ClienteUserMangeView.as_view(), name='CLUserMange'),
-    path('CLProvaCreate/', views.ClienteProvaCreateView.as_view(), name='CLProvaCreate'),
-    path('CLParametros/', views.ClienteParametroView.as_view(), name='CLParametros'),
     path('logout/', views.custom_logout_view, name='clientelogout'),
+    
+    # Gerenciamento de usuários
+    path('CLUserMange/', views.ClienteUserMangeView.as_view(), name='CLUserMange'),
     path('CLUserList/', views.ClienteUserListView.as_view(), name='CLUserList'),
     path('CLUserToggleStatus/<int:pk>/', views.ClienteUserToggleStatusView.as_view(), name='CLUserToggleStatus'),
     
+    # Funcionalidades principais
+    path('CLProvaCreate/', views.ClienteProvaCreateView.as_view(), name='CLProvaCreate'),
+    path('CLParametros/', views.ClienteParametroView.as_view(), name='CLParametros'),
+    
 
-    # urls para recuperação de conta - ATUALIZADO
+    # Sistema de recuperação de senha
     path('clientepassword_reset/', views.TenantPasswordResetView.as_view(
         template_name='cliente_password_reset/password_reset_email_form.html',
         email_template_name='cliente_password_reset/email.html',

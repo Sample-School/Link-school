@@ -5,11 +5,11 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('LSDash.urls')),  # Suas URLs customizadas
+    path('', include('LSDash.urls')),  # URLs do app principal
 ]
 
 if settings.DEBUG:
     urlpatterns += [
-        path('', include('LSCliente.urls')),  # URLs adicionais em modo DEBUG
+        path('', include('LSCliente.urls')),  # URLs de cliente em desenvolvimento
     ]
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

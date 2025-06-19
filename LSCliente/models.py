@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 
-# Create your models here.
+
 class UsuarioClienteManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -24,10 +24,8 @@ class UsuarioClienteManager(BaseUserManager):
 
 
 class UsuarioCliente(AbstractBaseUser, PermissionsMixin):
-    """
-    Usuário dentro de um tenant específico.
-    Este modelo fica no schema do tenant.
-    """
+    # Modelo customizado de usuário para trabalhar com multi-tenancy
+    # Cada tenant tem seus próprios usuários no schema específico
     id = models.AutoField(primary_key=True)
     nome = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
@@ -35,10 +33,9 @@ class UsuarioCliente(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    is_master = models.BooleanField(default=False)  # Se é administrador dentro do tenant
+    is_master = models.BooleanField(default=False)  # Admin do tenant específico
     date_joined = models.DateTimeField(default=timezone.now)
     foto = models.ImageField(upload_to='usuarios/', blank=True, null=True)
-
 
     objects = UsuarioClienteManager()
     
@@ -53,46 +50,33 @@ class UsuarioCliente(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = 'Usuários Cliente'
     
     def set_password(self, raw_password):
-        """
-        Define a senha do usuário, convertendo-a para um hash utilizando
-        o sistema de hash de senhas do Django.
-        """
+        # Converte a senha para hash usando o sistema do Django
         self.password = make_password(raw_password)
-        # Só use update_fields se o objeto já tiver um ID
+        # Só salva se o objeto já existe no banco
         if self.pk:
             self.save(update_fields=['password'])
-        # Caso contrário, não salve aqui - o save será chamado posteriormente
     
     def check_password(self, raw_password):
-        """
-        Verifica se a senha fornecida corresponde à senha armazenada.
-        """
+        # Verifica se a senha informada bate com a armazenada
         return check_password(raw_password, self.password)
     
     @property
     def is_authenticated(self):
-        """
-        Sempre retorna True para usuários reais. Este é um requisito para
-        usar o sistema de autenticação do Django.
-        """
+        # Sempre True para usuários válidos - requisito do Django auth
         return True
     
     @property
     def is_anonymous(self):
-        """
-        Sempre retorna False para usuários reais. Este é um requisito para
-        usar o sistema de autenticação do Django.
-        """
+        # Sempre False para usuários válidos - requisito do Django auth
         return False
     
     def get_username(self):
-        """
-        Retorna o campo usado como identificador do usuário.
-        """
+        # Retorna o email como identificador único
         return self.email
 
+
 class SessaoUsuarioCliente(models.Model):
-    """Modelo para rastrear sessões ativas de usuários no contexto do cliente"""
+    # Controla as sessões ativas dos usuários dentro do tenant
     usuario = models.ForeignKey('UsuarioCliente', on_delete=models.CASCADE, related_name='sessoes')
     chave_sessao = models.CharField(max_length=40)
     data_inicio = models.DateTimeField(auto_now_add=True)
@@ -110,14 +94,15 @@ class SessaoUsuarioCliente(models.Model):
 
 
 class ClienteSystemSettings(models.Model):
+    # Configurações globais do sistema para cada tenant
     imagem_home_1 = models.ImageField(upload_to='logos_clientes/', null=True, blank=True)
-    system_primary_color = models.CharField(max_length=7, default="#3E3D3F")  # Cor padrão para Sair
-    system_second_color = models.CharField(max_length=7, default="#575758")  # Cor padrão para Geral
+    system_primary_color = models.CharField(max_length=7, default="#3E3D3F")
+    system_second_color = models.CharField(max_length=7, default="#575758")
     tempo_maximo_inatividade = models.IntegerField(default=30, help_text="Tempo máximo de inatividade em minutos")
     
     @classmethod
     def obter_configuracao(cls):
-        """Retorna a configuração atual ou cria uma nova se não existir"""
+        # Singleton pattern - sempre retorna a mesma instância de configuração
         configuracao, created = cls.objects.get_or_create(id=1)
         return configuracao
     
@@ -125,69 +110,77 @@ class ClienteSystemSettings(models.Model):
         return "Configurações do Sistema"
 
 
+class QuestaoProva(models.Model):
+    FONTE_IMAGEM_CHOICES = [
+        ('estatica', 'Imagem Estática'),
+        ('dalle', 'Gerada por DALL-E'),
+        ('upload', 'Upload do Usuário'),
+    ]
+    
+    prova = models.ForeignKey('Prova', on_delete=models.CASCADE, related_name='questoes_prova')
+    questao_id = models.CharField(max_length=100)  # ID vindo do dashboard
+    questao_dados = models.JSONField()  # Todos os dados da questão em JSON
+    ordem = models.PositiveIntegerField()
+    acessibilidade_questao = models.IntegerField(default=1, choices=[(1, 'Grau 1'), (2, 'Grau 2'), (3, 'Grau 3')])
+    
+    # Campos para integração com DALL-E
+    imagem_gerada = models.ImageField(upload_to='questoes/dalle/', blank=True, null=True)
+    fonte_imagem = models.CharField(max_length=20, choices=FONTE_IMAGEM_CHOICES, default='estatica')
+    prompt_dalle = models.TextField(blank=True, null=True)  # Guarda o prompt usado na geração
+    data_geracao_imagem = models.DateTimeField(blank=True, null=True)
+    
+    class Meta:
+        ordering = ['ordem']
+        unique_together = ['prova', 'ordem']
+    
+    def get_imagem_url(self):
+        # Retorna a URL correta da imagem baseada na fonte configurada
+        if self.fonte_imagem == 'dalle' and self.imagem_gerada:
+            return self.imagem_gerada.url
+        elif self.fonte_imagem == 'estatica':
+            # Imagens estáticas ficam no diretório static
+            return f"/static/LSCliente/img/questions/question_{self.questao_id}.png"
+        elif self.fonte_imagem == 'upload' and self.imagem_gerada:
+            return self.imagem_gerada.url
+        return None
+    
+    def precisa_gerar_imagem(self):
+        # Questões de acessibilidade grau 3 precisam de imagem gerada
+        return (self.acessibilidade_questao == 3 and 
+                self.fonte_imagem == 'dalle' and 
+                not self.imagem_gerada)
+
+
 class Prova(models.Model):
     TIPO_PROVA_CHOICES = [
-        ('avaliacao', 'Avaliação'),
-        ('simulado', 'Simulado'),
-        ('teste', 'Teste'),
-        ('trabalho', 'Trabalho'),
-        ('prova_bimestral', 'Prova Bimestral'),
-        ('prova_final', 'Prova Final'),
+        ('av1', 'Primeira Avaliação'),
+        ('av2', 'Segunda Avaliação'),
+        ('recuperacao', 'Recuperação'),
+        ('final', 'Prova Final'),
     ]
     
-    ACESSIBILIDADE_CHOICES = [
-        (1, 'Grupo 1'),
-        (2, 'Grupo 2'),
-        (3, 'Grupo 3'),
-    ]
+    titulo = models.CharField(max_length=200)
+    materia = models.CharField(max_length=100)
+    tipo_prova = models.CharField(max_length=20, choices=TIPO_PROVA_CHOICES)
+    acessibilidade_prova = models.IntegerField(default=1, choices=[(1, 'Grau 1'), (2, 'Grau 2'), (3, 'Grau 3')])
+    criado_por = models.ForeignKey(UsuarioCliente, on_delete=models.CASCADE)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
     
-    titulo = models.CharField(max_length=200, verbose_name="Título da Prova")
-    materia = models.CharField(max_length=100, verbose_name="Matéria")
-    tipo_prova = models.CharField(max_length=20, choices=TIPO_PROVA_CHOICES, verbose_name="Tipo de Prova")
-    criado_por = models.ForeignKey('UsuarioCliente', on_delete=models.CASCADE, related_name='provas_criadas')
-    data_criacao = models.DateTimeField(auto_now_add=True)
-    data_atualizacao = models.DateTimeField(auto_now=True)
-    
-    # Campo de acessibilidade da prova
-    acessibilidade_prova = models.IntegerField(
-        choices=ACESSIBILIDADE_CHOICES, 
-        default=1, 
-        verbose_name="Nível de Acessibilidade da Prova"
-    )
-    
-    # Configurações de formatação
-    fonte_padrao = models.CharField(max_length=50, default="Arial", verbose_name="Fonte Padrão")
-    tamanho_fonte = models.IntegerField(default=12, verbose_name="Tamanho da Fonte")
+    # Controle de geração de imagens via DALL-E
+    imagens_geradas = models.BooleanField(default=False)
+    data_geracao_imagens = models.DateTimeField(blank=True, null=True)
     
     def __str__(self):
         return f"{self.titulo} - {self.materia}"
     
-    class Meta:
-        verbose_name = 'Prova'
-        verbose_name_plural = 'Provas'
-
-
-class QuestaoProva(models.Model):
-    """Relaciona questões à prova com ordem específica"""
-    prova = models.ForeignKey(Prova, on_delete=models.CASCADE, related_name='questoes_prova')
-    questao_id = models.IntegerField(verbose_name="ID da Questão do Dashboard")
-    questao_dados = models.JSONField(verbose_name="Dados da Questão")  # Cache dos dados da questão
-    ordem = models.IntegerField(verbose_name="Ordem na Prova")
+    def get_questoes_com_imagem(self):
+        # Filtra questões que precisam de imagem (acessibilidade grau 3)
+        return self.questoes_prova.filter(acessibilidade_questao=3)
     
-    # Campo de acessibilidade específico para esta questão na prova
-    acessibilidade_questao = models.IntegerField(
-        choices=Prova.ACESSIBILIDADE_CHOICES,
-        default=1,
-        verbose_name="Nível de Acessibilidade da Questão"
-    )
-    
-    # Configurações específicas desta questão na prova
-    texto_destacado = models.JSONField(default=list, blank=True)  # Lista de textos para destacar
-    fonte_customizada = models.CharField(max_length=50, blank=True, null=True)
-    
-    class Meta:
-        ordering = ['ordem']
-        unique_together = ('prova', 'ordem')
-    
-    def __str__(self):
-        return f"Questão {self.ordem} - Prova {self.prova.titulo}"
+    def todas_imagens_geradas(self):
+        # Verifica se todas as imagens necessárias já foram processadas
+        questoes_com_imagem = self.get_questoes_com_imagem()
+        if not questoes_com_imagem.exists():
+            return True
+        return not questoes_com_imagem.filter(imagem_gerada__isnull=True).exists()

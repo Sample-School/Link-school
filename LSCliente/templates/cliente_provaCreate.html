@@ -3,6 +3,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    {% csrf_token %}
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Criar Prova - Modal Corrigido</title>
@@ -13,7 +15,7 @@
 </head>
 <body>
     {% include "global/partials/cliente_navbar.html" %}
-    <div class="container-main">
+  <div class="container-main">
         <div class="aside">
             <h1>Criação <br> de <br> <span>Provas</span></h1>
             <div class="container-buttons">
@@ -21,18 +23,21 @@
                     <i class="fas fa-floppy-disk"></i>
                     <p>Salvar Prova</p>
                 </button>
-                <button class="btn-custom" onclick="exportarPDF()">
+                <button class="btn-custom" onclick="">
                     <i class="fas fa-file-pdf"></i>
                     <p>Exportar PDF</p>
                 </button>
-                <button class="btn-custom" onclick="exportarDOC()">
+                <button class="btn-custom" onclick="">
                     <i class="fas fa-file-word"></i>
                     <p>Exportar DOC</p>
                 </button>
-                <!-- BOTÃO PARA ABRIR MODAL DE CRIAR NOVA QUESTÃO -->
                 <button class="btn-custom width-full" onclick="abrirModalNovaQuestao()">
                     <i class="fas fa-plus-circle"></i>
                     <p>Criar Nova Questão</p>
+                </button>
+                <button class="btn-custom" onclick="gerarTodasImagensProva()">
+                    <i class="fas fa-magic"></i>
+                    <p>Gerar Imagens IA</p>
                 </button>
             </div>
         </div>
@@ -49,6 +54,7 @@
                     </div>
                     <form class="form" id="form-prova">
                         {% csrf_token %}
+
                         <div class="form__title-test">
                             <span>*</span>
                             <input type="text" id="titulo" placeholder="Título da Prova" required />
@@ -65,14 +71,10 @@
                                 <label for="tipo_prova">Tipo de Prova:</label>
                                 <select id="tipo_prova" required>
                                     <option value="">Selecione</option>
-                                    {% for value, label in tipos_prova %}
-                                        <option value="{{ value }}">{{ label }}</option>
-                                    {% empty %}
-                                        <option value="av1">Primeira Avaliação</option>
-                                        <option value="av2">Segunda Avaliação</option>
-                                        <option value="recuperacao">Recuperação</option>
-                                        <option value="final">Prova Final</option>
-                                    {% endfor %}
+                                    <option value="av1">Primeira Avaliação</option>
+                                    <option value="av2">Segunda Avaliação</option>
+                                    <option value="recuperacao">Recuperação</option>
+                                    <option value="final">Prova Final</option>
                                 </select>
                             </div>
                         </div>
@@ -114,26 +116,24 @@
                     </div>
                 </div>
                 
-                <!-- SEÇÃO DE ACESSIBILIDADE DA PROVA -->
                 <div class="accessibility-section">
                     <p>Nível de Acessibilidade da Prova:</p>
                     <div class="accessibility-options">
                         <div class="accessibility-option">
                             <input type="radio" id="grupo1" name="acessibilidade_prova" value="1" checked>
-                            <label for="grupo1">Grupo 1</label>
+                            <label for="grupo1">Grau 1</label>
                         </div>
                         <div class="accessibility-option">
                             <input type="radio" id="grupo2" name="acessibilidade_prova" value="2">
-                            <label for="grupo2">Grupo 2</label>
+                            <label for="grupo2">Grau 2</label>
                         </div>
                         <div class="accessibility-option">
                             <input type="radio" id="grupo3" name="acessibilidade_prova" value="3">
-                            <label for="grupo3">Grupo 3</label>
+                            <label for="grupo3">Grau 3</label>
                         </div>
                     </div>
                 </div>
                 
-                <!-- ÁREA ONDE AS QUESTÕES SELECIONADAS SÃO EXIBIDAS NO PREVIEW -->
                 <div id="questoes-preview">
                     <p class="text-center text-muted">
                         <i class="fas fa-info-circle"></i> 
@@ -141,7 +141,6 @@
                     </p>
                 </div>
                 
-                <!-- ÁREA CLICÁVEL PARA ABRIR O MODAL DE SELEÇÃO DE QUESTÕES -->
                 <div class="add-question-area" onclick="abrirModalSelecionarQuestoes()">
                     <div class="add-icon">+</div>
                     <div class="add-text">Clique para adicionar questões</div>
@@ -150,31 +149,24 @@
         </div>
     </div>
 
-    <!-- =========================================== -->
-    <!--  MODAL PARA SELECIONAR QUESTÕES EXISTENTES  -->
-    <!-- =========================================== -->
+    <!-- MODAL PARA SELECIONAR QUESTÕES EXISTENTES -->
     <div class="modal fade" id="modalSelecionarQuestoes" tabindex="-1" aria-labelledby="modalSelecionarQuestoesLabel" aria-hidden="true">
         <div class="modal-dialog modal-questoes modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
-                <!-- CABEÇALHO DO MODAL -->
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalSelecionarQuestoesLabel">
                         <i class="fas fa-question-circle text-primary"></i>
                         Selecionar Questões para a Prova
                     </h5>
-                    <!-- BOTÃO PARA FECHAR O MODAL -->
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <!-- CORPO DO MODAL -->
                 <div class="modal-body">
-                    <!-- BARRA DE PESQUISA PARA FILTRAR QUESTÕES -->
                     <div class="mb-3">
                         <div class="input-group">
                             <span class="input-group-text">
                                 <i class="fas fa-search"></i>
                             </span>
-                            <!-- CAMPO DE BUSCA QUE CHAMA A FUNÇÃO filtrarQuestoesModal() -->
                             <input
                                 type="text"
                                 class="form-control"
@@ -185,56 +177,17 @@
                         </div>
                     </div>
 
-                    <!-- GRID ONDE AS QUESTÕES SÃO EXIBIDAS -->
                     <div class="questoes-grid" id="questoes-grid">
-                        <!-- LOOP DJANGO PARA EXIBIR AS QUESTÕES DISPONÍVEIS -->
-                        {% for questao in questoes_dashboard %}
-                            <!-- CARD DE CADA QUESTÃO - CLICÁVEL PARA SELEÇÃO -->
-                            <div class="questao-card-modal" 
-                                 data-id="{{ questao.id }}" 
-                                 data-titulo="{{ questao.titulo }}" 
-                                 data-materia="{{ questao.materia }}" 
-                                 data-tipo="{{ questao.tipo }}" 
-                                 onclick="toggleQuestaoSelecao({{ questao.id }}, this)">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div class="flex-grow-1">
-                                        <!-- TÍTULO TRUNCADO DA QUESTÃO -->
-                                        <h6 class="mb-1 text-primary">{{ questao.titulo|truncatechars:60 }}</h6>
-                                        <!-- BADGES COM MATÉRIA E TIPO -->
-                                        <div class="d-flex flex-wrap gap-1 mb-2">
-                                            <span class="badge bg-secondary">{{ questao.materia }}</span>
-                                            <span class="badge bg-info">{{ questao.get_tipo_display }}</span>
-                                        </div>
-                                        <!-- INFORMAÇÕES ADICIONAIS -->
-                                        <small class="text-muted">{{ questao.ano_escolar }} - {{ questao.grupo_ensino }}</small>
-                                    </div>
-                                    <div class="text-end">
-                                        <!-- ÍCONES DE SELEÇÃO - ALTERNADOS CONFORME ESTADO -->
-                                        <i class="fas fa-check-circle text-success" style="display: none;"></i>
-                                        <i class="fas fa-plus-circle text-primary"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        {% empty %}
-                            <!-- MENSAGEM QUANDO NÃO HÁ QUESTÕES -->
-                            <div class="col-12 text-center text-muted p-4">
-                                <i class="fas fa-question-circle fa-3x mb-3"></i>
-                                <p>Nenhuma questão disponível no banco de dados</p>
-                                <small>Crie algumas questões primeiro para poder adicioná-las às provas</small>
-                            </div>
-                        {% endfor %}
+                        <!-- As questões estáticas serão inseridas aqui via JavaScript -->
                     </div>
                 </div>
 
-                <!-- RODAPÉ DO MODAL -->
                 <div class="modal-footer">
-                    <!-- CONTADOR DE QUESTÕES SELECIONADAS -->
                     <div class="me-auto">
                         <span class="text-muted">
                             <span id="questoes-selecionadas-count">0</span> questão(ões) selecionada(s)
                         </span>
                     </div>
-                    <!-- BOTÕES DE AÇÃO -->
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" onclick="confirmarSelecaoQuestoes()">
                         <i class="fas fa-check"></i> Adicionar Selecionadas
@@ -244,31 +197,22 @@
         </div>
     </div>
 
-    <!-- ============================== -->
     <!-- MODAL PARA CRIAR NOVA QUESTÃO -->
-    <!-- ============================== -->
     <div class="modal fade" id="modalNovaQuestao" tabindex="-1" aria-labelledby="modalNovaQuestaoLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
-                <!-- CABEÇALHO DO MODAL -->
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalNovaQuestaoLabel">Criar Nova Questão</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <!-- CORPO DO MODAL -->
                 <div class="modal-body">
-                    <!-- FORMULÁRIO PARA CRIAR NOVA QUESTÃO -->
                     <form id="form-nova-questao">
-                        {% csrf_token %}
-                        
-                        <!-- CAMPO PARA ENUNCIADO DA QUESTÃO -->
                         <div class="mb-3">
                             <label for="nova-titulo" class="form-label">Enunciado da Questão *</label>
                             <textarea class="form-control" id="nova-titulo" name="titulo" rows="3" required></textarea>
                         </div>
 
-                        <!-- CAMPOS MATÉRIA E TIPO EM LINHA -->
                         <div class="row">
                             <div class="col-md-6">
                                 <label for="nova-materia" class="form-label">Matéria *</label>
@@ -276,7 +220,6 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="nova-tipo" class="form-label">Tipo de Questão *</label>
-                                <!-- SELECT QUE CONTROLA QUAIS SEÇÕES APARECEM -->
                                 <select class="form-select" id="nova-tipo" name="tipo" required onchange="toggleTipoQuestao()">
                                     <option value="">Selecione</option>
                                     <option value="aberta">Questão Aberta</option>
@@ -286,41 +229,30 @@
                             </div>
                         </div>
 
-                        <!-- SEÇÃO PARA ALTERNATIVAS (MÚLTIPLA ESCOLHA) -->
-                        <!-- INICIALMENTE OCULTA - MOSTRADA APENAS QUANDO TIPO = "multipla" -->
                         <div id="alternativas-section" style="display: none" class="mt-3">
                             <h6>Alternativas</h6>
-                            <!-- CONTAINER ONDE AS ALTERNATIVAS SÃO ADICIONADAS DINAMICAMENTE -->
                             <div id="alternativas-container">
-                                <!-- PRIMEIRA ALTERNATIVA (EXEMPLO) -->
                                 <div class="alternativa-input mb-2">
                                     <div class="input-group">
                                         <span class="input-group-text">a)</span>
                                         <input type="text" class="form-control" name="alternativas[]" placeholder="Digite a alternativa" />
-                                        <!-- RADIO BUTTON PARA MARCAR COMO CORRETA -->
                                         <div class="input-group-text">
                                             <input type="radio" name="correta" value="0" title="Marcar como correta" />
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <!-- BOTÃO PARA ADICIONAR MAIS ALTERNATIVAS -->
                             <button type="button" class="btn btn-sm btn-secondary" onclick="adicionarAlternativa()">
                                 <i class="fas fa-plus"></i> Adicionar Alternativa
                             </button>
                         </div>
 
-                        <!-- SEÇÃO PARA FRASES (VERDADEIRO/FALSO) -->
-                        <!-- INICIALMENTE OCULTA - MOSTRADA APENAS QUANDO TIPO = "vf" -->
                         <div id="vf-section" style="display: none" class="mt-3">
                             <h6>Frases</h6>
-                            <!-- CONTAINER ONDE AS FRASES SÃO ADICIONADAS DINAMICAMENTE -->
                             <div id="frases-container">
-                                <!-- PRIMEIRA FRASE (EXEMPLO) -->
                                 <div class="frase-input mb-2">
                                     <div class="input-group">
                                         <input type="text" class="form-control" name="frases[]" placeholder="Digite a frase" />
-                                        <!-- SELECT PARA ESCOLHER SE É VERDADEIRA OU FALSA -->
                                         <select class="form-select" name="verdadeira[]" style="max-width: 120px">
                                             <option value="1">Verdadeiro</option>
                                             <option value="0">Falso</option>
@@ -328,7 +260,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- BOTÃO PARA ADICIONAR MAIS FRASES -->
                             <button type="button" class="btn btn-sm btn-secondary" onclick="adicionarFrase()">
                                 <i class="fas fa-plus"></i> Adicionar Frase
                             </button>
@@ -336,7 +267,6 @@
                     </form>
                 </div>
 
-                <!-- RODAPÉ DO MODAL -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" onclick="salvarNovaQuestao()">Salvar Questão</button>
@@ -351,10 +281,222 @@
             <span class="visually-hidden">Carregando...</span>
         </div>
     </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script>
+ <script>
+        // QUESTÕES ESTÁTICAS TODAS DO 9º ANO - SEM NÍVEL DE ACESSIBILIDADE PRÉ-DEFINIDO
+        const questoesEstaticas = [
+            {
+                id: 1,
+                titulo: "Resolva a equação do 2º grau: x² - 5x + 6 = 0",
+                materia: "Matemática",
+                tipo: "multipla",
+                get_tipo_display: "Múltipla Escolha",
+                ano_escolar: "9º Ano",
+                grupo_ensino: "Ensino Fundamental",
+                 imagem_gerada: null, 
+                 gerando_imagem: false, 
+                alternativas: [
+                    { texto: "x = 2 e x = 3", correta: true },
+                    { texto: "x = 1 e x = 6", correta: false },
+                    { texto: "x = -2 e x = -3", correta: false },
+                    { texto: "x = 0 e x = 5", correta: false }
+                ]
+            },
+            {
+                id: 2,
+                titulo: "Sobre as características dos seres vivos, analise as afirmações:",
+                materia: "Biologia",
+                tipo: "vf",
+                get_tipo_display: "Verdadeiro ou Falso",
+                ano_escolar: "9º Ano",
+                grupo_ensino: "Ensino Fundamental",
+                 imagem_gerada: null, 
+gerando_imagem: false, 
+                frases_vf: [
+                    { texto: "Todos os seres vivos são compostos por células", verdadeira: true },
+                    { texto: "A reprodução é uma característica exclusiva dos animais", verdadeira: false },
+                    { texto: "O crescimento é uma propriedade comum a todos os seres vivos", verdadeira: true },
+                    { texto: "Apenas os animais respondem a estímulos do ambiente", verdadeira: false }
+                ]
+            },
+            {
+                id: 3,
+                titulo: "Explique o conceito de densidade e como ela pode ser calculada. Dê um exemplo prático de aplicação da densidade no cotidiano.",
+                materia: "Física",
+                tipo: "aberta",
+                get_tipo_display: "Questão Aberta",
+                ano_escolar: "9º Ano",
+                grupo_ensino: "Ensino Fundamental",
+                imagem_gerada: null, 
+gerando_imagem: false, 
+            },
+            {
+                id: 4,
+                titulo: "Qual foi o principal objetivo da Proclamação da República no Brasil?",
+                materia: "História",
+                tipo: "multipla",
+                get_tipo_display: "Múltipla Escolha",
+                ano_escolar: "9º Ano",
+                grupo_ensino: "Ensino Fundamental",
+                imagem_gerada: null, 
+gerando_imagem: false, 
+                alternativas: [
+                    { texto: "Acabar com a monarquia e estabelecer um governo republicano", correta: true },
+                    { texto: "Abolir a escravidão no país", correta: false },
+                    { texto: "Conquistar a independência de Portugal", correta: false },
+                    { texto: "Criar o sistema federativo", correta: false }
+                ]
+            },
+            {
+                id: 5,
+                titulo: "Sobre as figuras de linguagem, verifique as afirmações:",
+                materia: "Português",
+                tipo: "vf",
+                get_tipo_display: "Verdadeiro ou Falso",
+                ano_escolar: "9º Ano",
+                grupo_ensino: "Ensino Fundamental",
+                imagem_gerada: null, 
+gerando_imagem: false, 
+                frases_vf: [
+                    { texto: "A metáfora é uma comparação implícita entre dois elementos", verdadeira: true },
+                    { texto: "A ironia expressa sempre o contrário do que se pensa", verdadeira: false },
+                    { texto: "A personificação atribui características humanas a seres inanimados", verdadeira: true },
+                    { texto: "O eufemismo é usado para suavizar uma expressão", verdadeira: true }
+                ]
+            },
+            {
+                id: 6,
+                titulo: "Descreva as principais características do relevo brasileiro e explique como a ação do homem tem modificado a paisagem natural.",
+                materia: "Geografia",
+                tipo: "aberta",
+                get_tipo_display: "Questão Aberta",
+                ano_escolar: "9º Ano",
+                grupo_ensino: "Ensino Fundamental",
+                imagem_gerada: null, 
+gerando_imagem: false, 
+            },
+            {
+                id: 7,
+                titulo: "Qual é o resultado de (3x + 2)² - (2x - 1)²?",
+                materia: "Matemática",
+                tipo: "multipla",
+                get_tipo_display: "Múltipla Escolha",
+                ano_escolar: "9º Ano",
+                grupo_ensino: "Ensino Fundamental",
+                imagem_gerada: null, 
+gerando_imagem: false, 
+                alternativas: [
+                    { texto: "5x² + 16x + 3", correta: true },
+                    { texto: "9x² + 12x + 4", correta: false },
+                    { texto: "x² + 16x + 3", correta: false },
+                    { texto: "5x² + 4x + 3", correta: false }
+                ]
+            },
+            {
+                id: 8,
+                titulo: "Sobre as reações químicas e balanceamento de equações:",
+                materia: "Química",
+                tipo: "vf",
+                get_tipo_display: "Verdadeiro ou Falso",
+                ano_escolar: "9º Ano",
+                grupo_ensino: "Ensino Fundamental",
+                imagem_gerada: null, 
+gerando_imagem: false, 
+                frases_vf: [
+                    { texto: "Uma reação química sempre produz novas substâncias", verdadeira: true },
+                    { texto: "O balanceamento garante a conservação da massa", verdadeira: true },
+                    { texto: "Na combustão, sempre há liberação de energia", verdadeira: true },
+                    { texto: "Catalisadores alteram o resultado final da reação", verdadeira: false }
+                ]
+            },
+            {
+                id: 9,
+                titulo: "Analise o uso das tecnologias na sociedade atual e seus impactos positivos e negativos. Como podemos usar a tecnologia de forma responsável?",
+                materia: "Sociologia",
+                tipo: "aberta",
+                get_tipo_display: "Questão Aberta",
+                ano_escolar: "9º Ano",
+                grupo_ensino: "Ensino Fundamental",
+                imagem_gerada: null, 
+gerando_imagem: false, 
+            },
+            {
+                id: 10,
+                titulo: "Qual é a principal função do sistema cardiovascular?",
+                materia: "Biologia",
+                tipo: "multipla",
+                get_tipo_display: "Múltipla Escolha",
+                ano_escolar: "9º Ano",
+                grupo_ensino: "Ensino Fundamental",
+                imagem_gerada: null, 
+gerando_imagem: false, 
+                alternativas: [
+                    { texto: "Transportar nutrientes e oxigênio pelo corpo", correta: true },
+                    { texto: "Produzir hormônios para o crescimento", correta: false },
+                    { texto: "Filtrar toxinas do organismo", correta: false },
+                    { texto: "Controlar a temperatura corporal", correta: false }
+                ]
+            }
+        ];
+        
+        const palavrasChave = {
+    'matemática': ['equação', 'resultado', 'resolver', 'calcular', 'x²', 'grau'],
+    'biologia': ['seres vivos', 'células', 'reprodução', 'características', 'animais'],
+    'física': ['densidade', 'calcular', 'aplicação', 'conceito'],
+    'história': ['proclamação', 'república', 'objetivo', 'brasil'],
+    'português': ['figuras de linguagem', 'metáfora', 'ironia', 'personificação'],
+    'geografia': ['relevo', 'brasileiro', 'características', 'paisagem'],
+    'química': ['reações químicas', 'balanceamento', 'substâncias', 'massa'],
+    'sociologia': ['tecnologias', 'sociedade', 'impactos', 'responsável']
+};
+
         let questoesSelecionadas = [];
-        let questoesSelecionadasTemp = []; // Para o modal de seleção
+        let questoesSelecionadasTemp = [];
+
+        // Função para carregar questões estáticas no modal
+        function carregarQuestoesModal() {
+            const container = document.getElementById('questoes-grid');
+            let html = '';
+
+            questoesEstaticas.forEach(questao => {
+                html += `
+                    <div class="questao-card-modal" 
+                         data-id="${questao.id}" 
+                         data-titulo="${questao.titulo}" 
+                         data-materia="${questao.materia}" 
+                         data-tipo="${questao.tipo}" 
+                         onclick="toggleQuestaoSelecao(${questao.id}, this)">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1 text-primary">${questao.titulo.length > 60 ? questao.titulo.substring(0, 60) + '...' : questao.titulo}</h6>
+                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                    <span class="badge bg-secondary">${questao.materia}</span>
+                                    <span class="badge bg-info">${questao.get_tipo_display}</span>
+                                </div>
+                                <small class="text-muted">${questao.ano_escolar} - ${questao.grupo_ensino}</small>
+                            </div>
+                            <div class="text-end">
+                                <i class="fas fa-check-circle text-success" style="display: none;"></i>
+                                <i class="fas fa-plus-circle text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (questoesEstaticas.length === 0) {
+                html = `
+                    <div class="col-12 text-center text-muted p-4">
+                        <i class="fas fa-question-circle fa-3x mb-3"></i>
+                        <p>Nenhuma questão disponível no banco de dados</p>
+                        <small>Crie algumas questões primeiro para poder adicioná-las às provas</small>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
 
         // Atualiza preview quando campos são alterados
         document.getElementById('titulo').addEventListener('input', function() {
@@ -370,45 +512,58 @@
             document.getElementById('preview-tipo').textContent = selectedOption.text || '-';
         });
 
-        // Nova função para abrir modal de seleção de questões
         function abrirModalSelecionarQuestoes() {
-            questoesSelecionadasTemp = [...questoesSelecionadas]; // Copia as questões já selecionadas
+            questoesSelecionadasTemp = [...questoesSelecionadas];
+            carregarQuestoesModal();
             atualizarVisualizacaoModal();
             const modal = new bootstrap.Modal(document.getElementById('modalSelecionarQuestoes'));
             modal.show();
         }
+        function getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                getCookie('csrftoken');
+        }
 
-        // Função para toggle de seleção de questão no modal
+        // Função auxiliar para obter cookie
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
         function toggleQuestaoSelecao(questaoId, element) {
             const index = questoesSelecionadasTemp.findIndex(q => q.id == questaoId);
             const icons = element.querySelectorAll('i');
-            const checkIcon = icons[0]; // check-circle
-            const plusIcon = icons[1]; // plus-circle
+            const checkIcon = icons[0];
+            const plusIcon = icons[1];
             
             if (index > -1) {
-                // Remove da seleção
                 questoesSelecionadasTemp.splice(index, 1);
                 element.classList.remove('selecionada');
                 checkIcon.style.display = 'none';
                 plusIcon.style.display = 'block';
             } else {
-                // Busca dados da questão e adiciona à seleção temporária
-                const questaoData = {
-                    id: questaoId,
-                    titulo: element.dataset.titulo,
-                    materia: element.dataset.materia,
-                    tipo: element.dataset.tipo
-                };
-                questoesSelecionadasTemp.push(questaoData);
-                element.classList.add('selecionada');
-                checkIcon.style.display = 'block';
-                plusIcon.style.display = 'none';
+                const questaoData = questoesEstaticas.find(q => q.id == questaoId);
+                if (questaoData) {
+                    questoesSelecionadasTemp.push({...questaoData});
+                    element.classList.add('selecionada');
+                    checkIcon.style.display = 'block';
+                    plusIcon.style.display = 'none';
+                }
             }
             
             atualizarContadorSelecao();
         }
 
-        // Atualiza a visualização do modal baseada nas questões já selecionadas
         function atualizarVisualizacaoModal() {
             const cards = document.querySelectorAll('.questao-card-modal');
             cards.forEach(card => {
@@ -431,12 +586,10 @@
             atualizarContadorSelecao();
         }
 
-        // Atualiza contador de questões selecionadas
         function atualizarContadorSelecao() {
             document.getElementById('questoes-selecionadas-count').textContent = questoesSelecionadasTemp.length;
         }
 
-        // Filtrar questões no modal
         function filtrarQuestoesModal() {
             const searchTerm = document.getElementById('search-questoes-modal').value.toLowerCase();
             const questoes = document.querySelectorAll('.questao-card-modal');
@@ -454,66 +607,19 @@
             });
         }
 
-        // Confirma a seleção de questões e carrega dados completos
-        async function confirmarSelecaoQuestoes() {
-            try {
-                showLoading();
-                
-                // Remove questões que não estão mais selecionadas
-                questoesSelecionadas = questoesSelecionadas.filter(q => 
-                    questoesSelecionadasTemp.some(temp => temp.id == q.id)
-                );
-                
-                // Adiciona novas questões selecionadas
-                for (const questaoTemp of questoesSelecionadasTemp) {
-                    if (!questoesSelecionadas.find(q => q.id == questaoTemp.id)) {
-                        // Busca dados completos da questão
-                        const questaoCompleta = await buscarQuestaoCompleta(questaoTemp.id);
-                        if (questaoCompleta) {
-                            questoesSelecionadas.push(questaoCompleta);
-                        }
-                    }
-                }
-                
-                atualizarPreview();
-                
-                // Fecha o modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('modalSelecionarQuestoes'));
-                modal.hide();
-                
-            } catch (error) {
-                alert('Erro ao adicionar questões: ' + error.message);
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Função para buscar dados completos da questão (mantém a lógica original)
-        async function buscarQuestaoCompleta(questaoId) {
-            const formData = new FormData();
-            formData.append('action', 'buscar_questao');
-            formData.append('questao_id', questaoId);
-            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-
-            const response = await fetch('', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
+        function confirmarSelecaoQuestoes() {
+            questoesSelecionadas = [...questoesSelecionadasTemp];
+            atualizarPreview();
             
-            if (data.success) {
-                return data.questao;
-            } else {
-                console.error('Erro ao carregar questão:', data.error);
-                return null;
-            }
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalSelecionarQuestoes'));
+            modal.hide();
         }
 
         function removerQuestao(index) {
             questoesSelecionadas.splice(index, 1);
             atualizarPreview();
         }
+
 
         function atualizarPreview() {
     const container = document.getElementById('questoes-preview');
@@ -530,65 +636,108 @@
 
     let html = '';
     questoesSelecionadas.forEach((questao, index) => {
+        const nivelAcessibilidade = questao.acessibilidade || 1;
+        const temImagem = nivelAcessibilidade == 3 && (questao.imagem_gerada || questao.gerando_imagem);
+        
         html += `
-            <div class="questao-preview">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h6><strong>${index + 1}. ${questao.titulo}</strong></h6>
-                    <button class="btn btn-sm btn-danger" onclick="removerQuestao(${index})">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+        <div class="questao-preview acessibilidade-${nivelAcessibilidade}">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h6><strong>${index + 1}.</strong></h6>
+                <button class="btn btn-sm btn-danger" onclick="removerQuestao(${index})">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         `;
 
-        // Imagens da questão
-        if (questao.imagens && questao.imagens.length > 0) {
-            questao.imagens.forEach(img => {
-                if (img.imagem) {
-                    html += `<img src="/media/${img.imagem}" class="questao-imagem" alt="Imagem da questão">`;
-                    if (img.legenda) {
-                        html += `<p class="text-muted small"><em>${img.legenda}</em></p>`;
-                    }
-                }
-            });
-        }
-
-        // Conteúdo específico por tipo
-        if (questao.tipo === 'multipla' && questao.alternativas) {
-            questao.alternativas.forEach((alt, altIndex) => {
-                const letra = String.fromCharCode(97 + altIndex);
-                html += `<div class="alternativa-item">${letra}) ${alt.texto}</div>`;
-            });
-        } else if (questao.tipo === 'vf' && questao.frases_vf) {
-            questao.frases_vf.forEach(frase => {
-                html += `<div class="frase-vf-item">( ) ${frase.texto}</div>`;
-            });
-        } else if (questao.tipo === 'aberta') {
+        // Se tem imagem, usa layout horizontal
+        if (temImagem) {
             html += `
-                <div class="mt-3">
-                    <div style="border-bottom: 1px solid #ccc; margin: 10px 0; height: 20px;"></div>
-                    <div style="border-bottom: 1px solid #ccc; margin: 10px 0; height: 20px;"></div>
-                    <div style="border-bottom: 1px solid #ccc; margin: 10px 0; height: 20px;"></div>
-                </div>
+            <div class="questao-conteudo-container">
+                <div class="questao-texto-container">
+                    <div class="mb-2">
+                        <strong>${aplicarDestaquePalavras(questao.titulo, questao.materia, questao.acessibilidade)}</strong>
+                    </div>
+                    <div class="questao-opcoes-container">
             `;
+            
+            // Adiciona alternativas ou frases no container de texto
+            if (questao.tipo === 'multipla' && questao.alternativas) {
+                questao.alternativas.forEach((alt, altIndex) => {
+                    const letra = String.fromCharCode(97 + altIndex);
+                    html += `<div class="alternativa-item">${letra}) ${aplicarDestaquePalavras(alt.texto, questao.materia, questao.acessibilidade)}</div>`;
+                });
+            } else if (questao.tipo === 'vf' && questao.frases_vf) {
+                questao.frases_vf.forEach(frase => {
+                    html += `<div class="frase-vf-item">( ) ${aplicarDestaquePalavras(frase.texto, questao.materia, questao.acessibilidade)}</div>`;
+                });
+            } else if (questao.tipo === 'aberta') {
+                html += `
+                    <div class="linhas-resposta">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                `;
+            }
+            
+            html += `
+                    </div>
+                </div>
+                <div class="questao-imagem-container">
+                    ${questao.gerando_imagem ? 
+                        '<div class="gerando-imagem"><i class="fas fa-spinner fa-spin"></i><br>Gerando imagem...</div>' :
+                        questao.imagem_gerada ? 
+                            `<img src="${questao.imagem_gerada}" alt="Imagem da questão ${index + 1}" class="questao-imagem" />` :
+                            '<div class="sem-imagem">Imagem será gerada</div>'
+                    }
+                </div>
+            </div>
+            `;
+        } else {
+            // Layout tradicional sem imagem
+            html += `
+            <div class="mb-2">
+                <strong>${aplicarDestaquePalavras(questao.titulo, questao.materia, questao.acessibilidade)}</strong>
+            </div>
+            `;
+            
+            // Conteúdo específico por tipo
+            if (questao.tipo === 'multipla' && questao.alternativas) {
+                questao.alternativas.forEach((alt, altIndex) => {
+                    const letra = String.fromCharCode(97 + altIndex);
+                    html += `<div class="alternativa-item">${letra}) ${aplicarDestaquePalavras(alt.texto, questao.materia, questao.acessibilidade)}</div>`;
+                });
+            } else if (questao.tipo === 'vf' && questao.frases_vf) {
+                questao.frases_vf.forEach(frase => {
+                    html += `<div class="frase-vf-item">( ) ${aplicarDestaquePalavras(frase.texto, questao.materia, questao.acessibilidade)}</div>`;
+                });
+            } else if (questao.tipo === 'aberta') {
+                html += `
+                    <div class="linhas-resposta">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                `;
+            }
         }
 
-        // ADICIONAR SEÇÃO DE ACESSIBILIDADE PARA CADA QUESTÃO
-        const nivelAcessibilidade = questao.acessibilidade || 1; // valor padrão
+        // Seção de acessibilidade para cada questão
         html += `
             <div class="question-accessibility-section">
                 <div class="accessibility-title">NÍVEL DE ACESSIBILIDADE DA QUESTÃO:</div>
                 <div class="accessibility-options">
                     <div class="accessibility-option">
                         <input type="radio" id="questao_grupo1_${index}" name="acessibilidade_questao_${index}" value="1" ${nivelAcessibilidade == 1 ? 'checked' : ''} onchange="atualizarAcessibilidadeQuestao(${index}, 1)">
-                        <label for="questao_grupo1_${index}">Grupo 1</label>
+                        <label for="questao_grupo1_${index}">Grau 1</label>
                     </div>
                     <div class="accessibility-option">
                         <input type="radio" id="questao_grupo2_${index}" name="acessibilidade_questao_${index}" value="2" ${nivelAcessibilidade == 2 ? 'checked' : ''} onchange="atualizarAcessibilidadeQuestao(${index}, 2)">
-                        <label for="questao_grupo2_${index}">Grupo 2</label>
+                        <label for="questao_grupo2_${index}">Grau 2</label>
                     </div>
                     <div class="accessibility-option">
                         <input type="radio" id="questao_grupo3_${index}" name="acessibilidade_questao_${index}" value="3" ${nivelAcessibilidade == 3 ? 'checked' : ''} onchange="atualizarAcessibilidadeQuestao(${index}, 3)">
-                        <label for="questao_grupo3_${index}">Grupo 3</label>
+                        <label for="questao_grupo3_${index}">Grau 3</label>
                     </div>
                 </div>
             </div>
@@ -600,11 +749,229 @@
     container.innerHTML = html;
 }
 
-function atualizarAcessibilidadeQuestao(index, nivel) {
-    // Atualiza o nível de acessibilidade da questão no array
+    async function gerarImagemQuestao(questaoIndex) {
+    const questao = questoesSelecionadas[questaoIndex];
+    if (!questao) return;
+    
+    questao.gerando_imagem = true;
+    atualizarPreview();
+    
+    try {
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', getCSRFToken());
+        formData.append('action', 'gerar_imagem_questao');
+        formData.append('questao_dados', JSON.stringify(questao));
+        
+        const response = await fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            questao.imagem_gerada = data.imagem_url;
+            questao.gerando_imagem = false;
+            atualizarPreview();
+        } else {
+            throw new Error(data.error || 'Erro ao gerar imagem');
+        }
+        
+    } catch (error) {
+        console.error('Erro:', error);
+        questao.gerando_imagem = false;
+        atualizarPreview();
+        alert('Erro ao gerar imagem: ' + error.message);
+    }
+}
+
+// Função para gerar todas as imagens necessárias
+async function gerarTodasImagensProva() {
+    if (questoesSelecionadas.length === 0) {
+        alert('Adicione questões à prova primeiro!');
+        return;
+    }
+    
+    const questoesNivel3 = questoesSelecionadas.filter(q => q.acessibilidade == 3);
+    if (questoesNivel3.length === 0) {
+        alert('Nenhuma questão com nível 3 de acessibilidade encontrada!');
+        return;
+    }
+    
+    showLoading();
+    
+    for (let i = 0; i < questoesSelecionadas.length; i++) {
+        if (questoesSelecionadas[i].acessibilidade == 3 && !questoesSelecionadas[i].imagem_gerada) {
+            await gerarImagemQuestao(i);
+        }
+    }
+    
+    hideLoading();
+}
+
+        function atualizarAcessibilidadeQuestao(index, nivel) {
     if (questoesSelecionadas[index]) {
         questoesSelecionadas[index].acessibilidade = nivel;
+        // Atualizar preview quando mudar acessibilidade
+        atualizarPreview();
     }
+}
+        function aplicarDestaquePalavras(texto, materia, nivelAcessibilidade) {
+        // Só aplica destaque para graus 2 e 3
+        if (!nivelAcessibilidade || nivelAcessibilidade == 1) {
+            return texto;
+        }
+        
+        const materiaLower = materia.toLowerCase();
+        const palavras = palavrasChave[materiaLower] || [];
+        
+        let textoComDestaque = texto;
+        palavras.forEach(palavra => {
+            const regex = new RegExp(`\\b${palavra}\\b`, 'gi');
+            textoComDestaque = textoComDestaque.replace(regex, `<span class="palavra-chave">$&</span>`);
+        });
+        
+        return textoComDestaque;
+    }
+    
+    function capturarConteudoPreview() {
+    const titulo = document.getElementById('titulo').value || 'Título da Prova';
+    const materia = document.getElementById('materia').value || 'Matéria';
+    const tipoProva = document.getElementById('tipo_prova');
+    const tipoTexto = tipoProva.options[tipoProva.selectedIndex]?.text || 'Tipo';
+    
+    // Capturar acessibilidade da prova
+    const acessibilidadeProva = document.querySelector('input[name="acessibilidade_prova"]:checked')?.value || 1;
+    
+    // Montar o conteúdo HTML do preview
+    let conteudoHTML = `
+        <div class="prova-container">
+            <div class="cabecalho-prova">
+                <div class="info-prova">
+                    <p><strong>Título da Prova:</strong> ${titulo}</p>
+                    <p><strong>Matéria:</strong> ${materia}</p>
+                    <p><strong>Tipo:</strong> ${tipoTexto}</p>
+                    <p><strong>Nome:</strong> ___________________</p>
+                    <p><strong>Data:</strong> ___________________</p>
+                </div>
+                <div class="acessibilidade-prova">
+                    <p><strong>Nível de Acessibilidade da Prova: Grau ${acessibilidadeProva}</strong></p>
+                </div>
+            </div>
+            <div class="questoes-container">
+    `;
+    
+    // Adicionar cada questão formatada
+    questoesSelecionadas.forEach((questao, index) => {
+        const nivelAcessibilidade = questao.acessibilidade || 1;
+        const temImagem = nivelAcessibilidade == 3 && questao.imagem;
+        
+        conteudoHTML += `
+            <div class="questao acessibilidade-${nivelAcessibilidade}">
+                <div class="questao-numero">
+                    <h3>${index + 1}.</h3>
+                </div>
+        `;
+        
+        if (temImagem) {
+            // Layout com imagem
+            conteudoHTML += `
+                <div class="questao-com-imagem">
+                    <div class="questao-texto">
+                        <p><strong>${aplicarDestaquePalavrasParaPDF(questao.titulo, questao.materia, questao.acessibilidade)}</strong></p>
+            `;
+            
+            // Adicionar alternativas/frases
+            if (questao.tipo === 'multipla' && questao.alternativas) {
+                questao.alternativas.forEach((alt, altIndex) => {
+                    const letra = String.fromCharCode(97 + altIndex);
+                    conteudoHTML += `<p class="alternativa">${letra}) ${aplicarDestaquePalavrasParaPDF(alt.texto, questao.materia, questao.acessibilidade)}</p>`;
+                });
+            } else if (questao.tipo === 'vf' && questao.frases_vf) {
+                questao.frases_vf.forEach(frase => {
+                    conteudoHTML += `<p class="frase-vf">( ) ${aplicarDestaquePalavrasParaPDF(frase.texto, questao.materia, questao.acessibilidade)}</p>`;
+                });
+            } else if (questao.tipo === 'aberta') {
+                conteudoHTML += `
+                    <div class="linhas-resposta">
+                        <p>_________________________________________________</p>
+                        <p>_________________________________________________</p>
+                        <p>_________________________________________________</p>
+                    </div>
+                `;
+            }
+            
+            conteudoHTML += `
+                    </div>
+                    <div class="questao-imagem">
+                        <img src="${questao.imagem_gerada || questao.imagem}" alt="Imagem da questão ${index + 1}" style="max-width: 300px; height: auto;" />
+                    </div>
+                </div>
+            `;
+        } else {
+            // Layout sem imagem
+            conteudoHTML += `
+                <div class="questao-sem-imagem">
+                    <p><strong>${aplicarDestaquePalavrasParaPDF(questao.titulo, questao.materia, questao.acessibilidade)}</strong></p>
+            `;
+            
+            if (questao.tipo === 'multipla' && questao.alternativas) {
+                questao.alternativas.forEach((alt, altIndex) => {
+                    const letra = String.fromCharCode(97 + altIndex);
+                    conteudoHTML += `<p class="alternativa">${letra}) ${aplicarDestaquePalavrasParaPDF(alt.texto, questao.materia, questao.acessibilidade)}</p>`;
+                });
+            } else if (questao.tipo === 'vf' && questao.frases_vf) {
+                questao.frases_vf.forEach(frase => {
+                    conteudoHTML += `<p class="frase-vf">( ) ${aplicarDestaquePalavrasParaPDF(frase.texto, questao.materia, questao.acessibilidade)}</p>`;
+                });
+            } else if (questao.tipo === 'aberta') {
+                conteudoHTML += `
+                    <div class="linhas-resposta">
+                        <p>_________________________________________________</p>
+                        <p>_________________________________________________</p>
+                        <p>_________________________________________________</p>
+                    </div>
+                `;
+            }
+            
+            conteudoHTML += `</div>`;
+        }
+        
+        // Adicionar informação de acessibilidade da questão
+        conteudoHTML += `
+            <div class="acessibilidade-questao">
+                <p><em>Nível de Acessibilidade da Questão: Grau ${nivelAcessibilidade}</em></p>
+            </div>
+        </div>
+        `;
+    });
+    
+    conteudoHTML += `
+            </div>
+        </div>
+    `;
+    
+    return conteudoHTML;
+}
+
+// FUNÇÃO PARA APLICAR DESTAQUE DE PALAVRAS ESPECÍFICA PARA PDF
+function aplicarDestaquePalavrasParaPDF(texto, materia, nivelAcessibilidade) {
+    // Só aplica destaque para graus 2 e 3
+    if (!nivelAcessibilidade || nivelAcessibilidade == 1) {
+        return texto;
+    }
+    
+    const materiaLower = materia.toLowerCase();
+    const palavras = palavrasChave[materiaLower] || [];
+    
+    let textoComDestaque = texto;
+    palavras.forEach(palavra => {
+        const regex = new RegExp(`\\b${palavra}\\b`, 'gi');
+        textoComDestaque = textoComDestaque.replace(regex, `<strong><u>$&</u></strong>`);
+    });
+    
+    return textoComDestaque;
 }
 
 
@@ -614,14 +981,25 @@ function atualizarAcessibilidadeQuestao(index, nivel) {
     try {
         showLoading();
 
-        const formData = new FormData(document.getElementById('form-prova'));
-        formData.append('action', 'salvar_prova');
+        const formData = new FormData();
         
-        // Adiciona o nível de acessibilidade da prova
+        // Adicionar CSRF Token
+        const csrfToken = getCSRFToken();
+        if (csrfToken) {
+            formData.append('csrfmiddlewaretoken', csrfToken);
+        }
+        
+        // Dados do formulário
+        formData.append('action', 'salvar_prova');
+        formData.append('titulo', document.getElementById('titulo').value);
+        formData.append('materia', document.getElementById('materia').value);
+        formData.append('tipo_prova', document.getElementById('tipo_prova').value);
+        
+        // Nível de acessibilidade da prova
         const acessibilidadeProva = document.querySelector('input[name="acessibilidade_prova"]:checked')?.value || 1;
         formData.append('acessibilidade_prova', acessibilidadeProva);
         
-        // Incluir questões com seus níveis de acessibilidade
+        // Questões selecionadas com acessibilidade
         const questoesComAcessibilidade = questoesSelecionadas.map(questao => ({
             ...questao,
             acessibilidade: questao.acessibilidade || 1
@@ -629,114 +1007,42 @@ function atualizarAcessibilidadeQuestao(index, nivel) {
         
         formData.append('questoes_selecionadas', JSON.stringify(questoesComAcessibilidade));
 
-        const response = await fetch('', {
+        const response = await fetch(window.location.href, {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
         });
 
-        const data = await response.json();
-        
-        if (data.success) {
-            alert('Prova salva com sucesso!');
+        // Verificar se a resposta é JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            
+            if (data.success) {
+                alert('Prova salva com sucesso!');
+            } else {
+                alert('Erro ao salvar prova: ' + (data.error || 'Erro desconhecido'));
+            }
         } else {
-            alert('Erro ao salvar prova: ' + data.error);
+            // Se não for JSON, provavelmente é HTML (erro 403/404)
+            const text = await response.text();
+            console.error('Erro de servidor:', text);
+            alert('Erro de servidor. Verifique se você está logado e tem permissão para esta ação.');
         }
+        
     } catch (error) {
+        console.error('Erro:', error);
         alert('Erro ao salvar prova: ' + error.message);
     } finally {
         hideLoading();
     }
 }
 
-    async function exportarPDF() {
-    if (!validarFormulario()) return;
 
-    try {
-        showLoading();
 
-        const formData = new FormData(document.getElementById('form-prova'));
-        formData.append('action', 'exportar_pdf');
-        
-        // Adiciona o nível de acessibilidade da prova
-        const acessibilidadeProva = document.querySelector('input[name="acessibilidade_prova"]:checked')?.value || 1;
-        formData.append('acessibilidade_prova', acessibilidadeProva);
-        
-        // Questões com acessibilidade
-        const questoesComAcessibilidade = questoesSelecionadas.map(questao => ({
-            ...questao,
-            acessibilidade: questao.acessibilidade || 1
-        }));
-        
-        formData.append('questoes_selecionadas', JSON.stringify(questoesComAcessibilidade));
 
-        const response = await fetch('', {
-            method: 'POST',
-            body: formData
-        });
-
-        if (response.ok) {
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${document.getElementById('titulo').value || 'prova'}.pdf`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-        } else {
-            const data = await response.json();
-            alert('Erro ao exportar PDF: ' + data.error);
-        }
-    } catch (error) {
-        alert('Erro ao exportar PDF: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-    async function exportarDOC() {
-    if (!validarFormulario()) return;
-
-    try {
-        showLoading();
-
-        const formData = new FormData(document.getElementById('form-prova'));
-        formData.append('action', 'exportar_doc');
-        
-        // Adiciona o nível de acessibilidade da prova
-        const acessibilidadeProva = document.querySelector('input[name="acessibilidade_prova"]:checked')?.value || 1;
-        formData.append('acessibilidade_prova', acessibilidadeProva);
-        
-        // Questões com acessibilidade
-        const questoesComAcessibilidade = questoesSelecionadas.map(questao => ({
-            ...questao,
-            acessibilidade: questao.acessibilidade || 1
-        }));
-        
-        formData.append('questoes_selecionadas', JSON.stringify(questoesComAcessibilidade));
-
-        const response = await fetch('', {
-            method: 'POST',
-            body: formData
-        });
-
-        if (response.ok) {
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${document.getElementById('titulo').value || 'prova'}.docx`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-        } else {
-            const data = await response.json();
-            alert('Erro ao exportar DOC: ' + data.error);
-        }
-    } catch (error) {
-        alert('Erro ao exportar DOC: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
 
         function validarFormulario() {
             const titulo = document.getElementById('titulo').value.trim();
@@ -825,7 +1131,7 @@ function atualizarAcessibilidadeQuestao(index, nivel) {
         function showLoading() {
             document.querySelector('.loading').style.display = 'flex';
         }
-
+        
         function hideLoading() {
             document.querySelector('.loading').style.display = 'none';
         }

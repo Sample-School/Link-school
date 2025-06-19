@@ -1,93 +1,64 @@
-from django.contrib.auth.views import LoginView
-from django.contrib.auth import authenticate, login
+from django.contrib.auth.views import LoginView, PasswordResetView
+from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
-from django.urls import reverse_lazy,  reverse
+from django.http import HttpResponseRedirect, JsonResponse
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
-from django.views.generic import TemplateView, View, CreateView,  ListView
+from django.views.generic import TemplateView, View, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
-from .forms import NewResetPasswordForm
+from django.contrib.auth.decorators import login_required
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
-from .forms import UserLoginForm
-from django.contrib.auth import logout
-from django.shortcuts import redirect
 from django.db import IntegrityError
-from django_tenants.utils import tenant_context
 from django.utils.text import slugify
 from django import forms
 from django.utils import timezone
-from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
 from django.db.models import Q
-from django.contrib.sessions.models import Session
 from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
 import json
-from io import BytesIO
-import os
+import logging
 
+from .forms import CustomPasswordResetForm, UsuarioClienteForm, ClienteSystemSettingsForm, UserLoginForm, NewResetPasswordForm
+from .models import Prova, QuestaoProva, UsuarioCliente, ClienteSystemSettings, SessaoUsuarioCliente
+from .services.services import QuestaoService
+from .services.dalle_service import *
 
-# Imports para exportação
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.pdfgen import canvas
-from reportlab.lib.utils import ImageReader
-import io
-from PIL import Image as PILImage
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
-
-# Imports para DOC
-try:
-    from docx import Document
-    from docx.shared import Inches
-    HAS_DOCX = True
-except ImportError:
-    HAS_DOCX = False
-
-
-from .forms import CustomPasswordResetForm, UsuarioClienteForm, ClienteSystemSettingsForm
-from .models import  Prova,  Prova, QuestaoProva ,UsuarioCliente, ClienteSystemSettings, SessaoUsuarioCliente
-from .services import QuestaoService
+logger = logging.getLogger(__name__)
 
 
 class ClienteUserLoginView(LoginView):
+    """View personalizada para login dos usuários cliente"""
     template_name = "clienteLogin.html"
     success_url = reverse_lazy('LSCliente:clientehome')
     form_class = UserLoginForm
 
     def get_form_kwargs(self):
-        # Adiciona o request aos kwargs do formulário
+        # Passa o request para o formulário para validações específicas do tenant
         kwargs = super().get_form_kwargs()
         kwargs['request'] = self.request
         return kwargs
     
     def form_valid(self, form):
-        """Método que é chamado quando o formulário é válido"""
+        """Processa login válido e configura sessão do tenant"""
         user = form.get_user()
-        # Efetuar login manualmente para garantir que a sessão seja corretamente inicializada
         login(self.request, user)
         
-        # Registrar o login no console para debug
+        # Log para debug do processo de autenticação
         print(f"[LOGIN DEBUG] Usuário {user.email} autenticado com sucesso")
         print(f"[LOGIN DEBUG] Sessão: {self.request.session.session_key}")
         
-        # Adicionar marcador de sessão para verificar no middleware
+        # Marca a sessão com o tenant atual para validação no middleware
         self.request.session['authenticated_tenant'] = self.request.tenant.schema_name
-        self.request.session.save()  # Forçar salvamento da sessão
+        self.request.session.save()
         
         return HttpResponseRedirect(self.get_success_url())
     
     def post(self, request, *args, **kwargs):
-        # Usa o método get_form_kwargs para garantir que o request seja passado
+        # Garante que o formulário receba o request através do get_form_kwargs
         form_kwargs = self.get_form_kwargs()
         form = self.form_class(**form_kwargs)
         
@@ -96,56 +67,57 @@ class ClienteUserLoginView(LoginView):
         return self.form_invalid(form)
 
     def get_success_url(self):
+        """Define URL de redirecionamento após login bem-sucedido"""
         next_url = self.request.GET.get('next')
         print(f"[DEBUG] ClienteUserLoginView: next_url={next_url}")
         
         if next_url:
-            # Se for /home/, substituir pelo caminho correto
+            # Mantém a URL original se for /home/ para não quebrar a resolução
             if next_url == '/home/':
-                return next_url  # Manter o caminho como está para evitar problemas de resolução
+                return next_url
             return next_url
         
         default_url = reverse('LSCliente:clientehome')
         print(f"[DEBUG] Usando URL padrão: {default_url}")
         return default_url
 
+
 class ClienteHomeView(LoginRequiredMixin, TemplateView):
+    """Dashboard principal do cliente"""
     template_name = 'cliente_index.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Home"
-        # Adicionar a lista de usuários ao contexto
+        # Carrega lista de usuários para exibição no dashboard
         from LSCliente.models import UsuarioCliente
         context["usuarios"] = UsuarioCliente.objects.all().order_by('nome')
         context["tenant_name"] = self.request.tenant.nome
         context["tenant_schema"] = self.request.tenant.schema_name
         return context
 
+
 class TenantPasswordResetView(PasswordResetView):
-    """
-    View para reset de senha que é consciente do tenant atual.
-    """
+    """View para reset de senha que funciona com multi-tenant"""
+    
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # Passa o request para o formulário
+        # Importante: passa o request para o formulário conseguir filtrar por tenant
         kwargs['request'] = self.request
         return kwargs
 
+
 class TenantAwarePasswordResetConfirmView(View):
     """
-    Uma versão completamente personalizada do PasswordResetConfirmView 
-    que é consciente do sistema multi-tenant.
+    View personalizada para confirmar reset de senha no ambiente multi-tenant.
+    Substitui a view padrão do Django que não funciona bem com tenants.
     """
     template_name = 'cliente_password_reset/password_reset_senha_nova_form.html'
     success_url = reverse_lazy('LSCliente:clientepassword_reset_complete')
     
     def get(self, request, *args, **kwargs):
-        """
-        Exibe o formulário de redefinição de senha e valida o token
-        """
-        # Debug
-        print(f"[DEBUG] TenantAwarePasswordResetConfirmView GET chamado no tenant: {request.tenant.schema_name}")
+        """Exibe formulário de nova senha após validar token"""
+        print(f"[DEBUG] Reset de senha GET no tenant: {request.tenant.schema_name}")
         print(f"[DEBUG] uidb64: {kwargs.get('uidb64')}")
         print(f"[DEBUG] token: {kwargs.get('token')}")
         
@@ -158,11 +130,8 @@ class TenantAwarePasswordResetConfirmView(View):
         return render(request, self.template_name, context)
     
     def post(self, request, *args, **kwargs):
-        """
-        Processa o formulário de redefinição de senha
-        """
-        # Debug
-        print(f"[DEBUG] TenantAwarePasswordResetConfirmView POST chamado no tenant: {request.tenant.schema_name}")
+        """Processa nova senha"""
+        print(f"[DEBUG] Reset de senha POST no tenant: {request.tenant.schema_name}")
         
         context = self._get_context_with_user(request, **kwargs)
         
@@ -179,9 +148,7 @@ class TenantAwarePasswordResetConfirmView(View):
         return render(request, self.template_name, context)
     
     def _get_context_with_user(self, request, **kwargs):
-        """
-        Método auxiliar para obter o contexto com informações do usuário e validação do token
-        """
+        """Valida token e retorna contexto com informações do usuário"""
         context = {
             'validlink': False,
             'user': None,
@@ -190,16 +157,16 @@ class TenantAwarePasswordResetConfirmView(View):
         }
         
         try:
-            # Decodificar o uidb64
+            # Decodifica o UID que vem na URL
             uid = force_str(urlsafe_base64_decode(kwargs.get('uidb64', '')))
             print(f"[DEBUG] UID decodificado: {uid}")
             
             try:
-                # Obtenha o usuário do tenant atual usando UsuarioCliente
+                # Busca usuário no tenant atual
                 user = UsuarioCliente.objects.get(pk=uid)
                 print(f"[DEBUG] Usuário encontrado: {user.email}")
                 
-                # Verificar o token
+                # Verifica se o token ainda é válido
                 token = kwargs.get('token', '')
                 if default_token_generator.check_token(user, token):
                     context['validlink'] = True
@@ -216,25 +183,29 @@ class TenantAwarePasswordResetConfirmView(View):
 
 
 class ClienteUserMangeView(LoginRequiredMixin, View):
+    """Gerenciamento de usuários - criação e edição"""
     template_name = 'cliente_userManage.html'
     success_url = reverse_lazy('LSCliente:CLUserList')
     
     def get_object(self):
+        """Retorna usuário para edição baseado no ID da query string"""
         user_id = self.request.GET.get('id')
         if user_id:
             return get_object_or_404(UsuarioCliente, id=user_id)
         return None
     
     def get(self, request, *args, **kwargs):
+        """Exibe formulário vazio ou preenchido para edição"""
         usuario = self.get_object()
         form = UsuarioClienteForm(instance=usuario) if usuario else UsuarioClienteForm()
         return render(request, self.template_name, {'form': form})
     
     def post(self, request, *args, **kwargs):
+        """Processa criação ou edição de usuário"""
         usuario_id = request.POST.get('usuario_id')
         
         if usuario_id:
-            # Modo de edição
+            # Modo edição - carrega usuário existente
             try:
                 usuario = get_object_or_404(UsuarioCliente, id=usuario_id)
                 form = UsuarioClienteForm(request.POST, request.FILES, instance=usuario)
@@ -242,7 +213,7 @@ class ClienteUserMangeView(LoginRequiredMixin, View):
                 messages.error(request, f'Usuário não encontrado. Erro: {str(e)}')
                 return redirect(self.success_url)
         else:
-            # Modo de criação
+            # Modo criação - novo usuário
             form = UsuarioClienteForm(request.POST, request.FILES)
         
         if form.is_valid():
@@ -253,19 +224,22 @@ class ClienteUserMangeView(LoginRequiredMixin, View):
             except Exception as e:
                 messages.error(request, f'Erro ao salvar usuário: {str(e)}')
         
-        # Se o formulário tem erros ou ocorreu uma exceção
+        # Se chegou aqui, tem erro no formulário
         return render(request, self.template_name, {'form': form})
 
+
 class ClienteUserListView(LoginRequiredMixin, ListView):
+    """Lista paginada de usuários com busca"""
     model = UsuarioCliente
     template_name = 'cliente_userList.html'
     context_object_name = 'usuarios'
-    paginate_by = 10  # Paginação de 10 usuários por página
+    paginate_by = 10
     
     def get_queryset(self):
+        """Aplica filtros de busca e ordenação"""
         queryset = UsuarioCliente.objects.all().order_by('-date_joined')
         
-        # Filtro de pesquisa
+        # Filtro de busca por nome ou email
         search_query = self.request.GET.get('search')
         if search_query:
             queryset = queryset.filter(
@@ -275,7 +249,10 @@ class ClienteUserListView(LoginRequiredMixin, ListView):
             
         return queryset
 
+
 class ClienteUserToggleStatusView(LoginRequiredMixin, View):
+    """Ativa/desativa usuários via AJAX"""
+    
     def post(self, request, pk):
         try:
             usuario = get_object_or_404(UsuarioCliente, id=pk)
@@ -292,36 +269,36 @@ class ClienteUserToggleStatusView(LoginRequiredMixin, View):
             
         return redirect('LSCliente:CLUserList')
 
+
 @method_decorator(login_required, name='dispatch')
 class ClienteProvaCreateView(LoginRequiredMixin, View):
+    """View principal para criação de provas com IA"""
     template_name = 'cliente_provaCreate.html' 
 
     def get(self, request):
-        """Exibe a tela de criação de prova"""
-        # Busca questões disponíveis do dashboard
+        """Carrega tela de criação com questões disponíveis"""
         questoes_dashboard = QuestaoService.buscar_questoes_dashboard()
-        
-        # Busca configurações do cliente
         config_cliente = ClienteSystemSettings.obter_configuracao()
         
         context = {
             'questoes_dashboard': questoes_dashboard,
             'tipos_prova': Prova.TIPO_PROVA_CHOICES,
-            'config_cliente': config_cliente
+            'config_cliente': config_cliente,
+            'dalle_disponivel': bool(settings.OPENAI_API_KEY),
         }
         
         return render(request, self.template_name, context)
     
     def post(self, request):
-        """Processa a criação da prova"""
+        """Roteador para diferentes ações da criação de prova"""
         action = request.POST.get('action')
         
         if action == 'salvar_prova':
             return self._salvar_prova(request)
-        elif action == 'exportar_pdf':
-            return self._exportar_pdf(request)
-        elif action == 'exportar_doc':
-            return self._exportar_doc(request)
+        elif action == 'gerar_imagem_questao':
+            return self._gerar_imagem_questao(request)
+        elif action == 'gerar_todas_imagens':
+            return self._gerar_todas_imagens_prova(request)
         elif action == 'buscar_questao':
             return self._buscar_questao_ajax(request)
         elif action == 'criar_questao':
@@ -330,13 +307,15 @@ class ClienteProvaCreateView(LoginRequiredMixin, View):
         return JsonResponse({'error': 'Ação não reconhecida'}, status=400)
     
     def _salvar_prova(self, request):
-        """Salva a prova no banco de dados com dados de acessibilidade"""
+        """Salva prova no banco e opcionalmente gera imagens automaticamente"""
         try:
+            # Extrai dados do formulário
             titulo = request.POST.get('titulo')
             materia = request.POST.get('materia')
             tipo_prova = request.POST.get('tipo_prova')
-            acessibilidade_prova = request.POST.get('acessibilidade_prova', 1)  # Novo campo
+            acessibilidade_prova = request.POST.get('acessibilidade_prova', 1)
             questoes_selecionadas = json.loads(request.POST.get('questoes_selecionadas', '[]'))
+            gerar_imagens_automatico = request.POST.get('gerar_imagens_automatico', 'false') == 'true'
             
             # Validações básicas
             if not titulo or not materia or not tipo_prova:
@@ -345,313 +324,173 @@ class ClienteProvaCreateView(LoginRequiredMixin, View):
             if not questoes_selecionadas:
                 return JsonResponse({'error': 'Adicione pelo menos uma questão'}, status=400)
             
-            # Cria a prova com acessibilidade
+            # Cria a prova principal
             prova = Prova.objects.create(
                 titulo=titulo,
                 materia=materia,
                 tipo_prova=tipo_prova,
-                acessibilidade_prova=int(acessibilidade_prova),  # Salva acessibilidade da prova
+                acessibilidade_prova=int(acessibilidade_prova),
                 criado_por=request.user
             )
             
-            # Adiciona questões à prova com seus níveis de acessibilidade
+            # Lista para controlar questões que precisam de imagem
+            questoes_para_gerar_imagem = []
+            
+            # Adiciona cada questão à prova
             for i, questao_data in enumerate(questoes_selecionadas, 1):
                 questao_completa = QuestaoService.buscar_questao_completa(questao_data['id'])
-                
-                # Obtém o nível de acessibilidade da questão (padrão 1 se não especificado)
                 acessibilidade_questao = questao_data.get('acessibilidade', 1)
                 
-                QuestaoProva.objects.create(
+                questao_prova = QuestaoProva.objects.create(
                     prova=prova,
                     questao_id=questao_data['id'],
                     questao_dados=questao_completa,
                     ordem=i,
-                    acessibilidade_questao=int(acessibilidade_questao)  # Salva acessibilidade da questão
+                    acessibilidade_questao=int(acessibilidade_questao),
+                    fonte_imagem='dalle' if acessibilidade_questao == 3 else 'estatica'
                 )
+                
+                # Se precisa de imagem (acessibilidade nível 3), adiciona na lista
+                if acessibilidade_questao == 3:
+                    questoes_para_gerar_imagem.append({
+                        'questao_prova_id': questao_prova.id,
+                        'questao_data': questao_completa
+                    })
+            
+            response_data = {
+                'success': True, 
+                'prova_id': prova.id,
+                'questoes_com_imagem': len(questoes_para_gerar_imagem)
+            }
+            
+            # Gerar imagens automaticamente se foi solicitado
+            if gerar_imagens_automatico and questoes_para_gerar_imagem:
+                try:
+                    imagens_geradas = self._processar_geracao_imagens(questoes_para_gerar_imagem)
+                    response_data['imagens_geradas'] = imagens_geradas
+                    
+                    # Atualiza status da prova
+                    if imagens_geradas > 0:
+                        prova.imagens_geradas = True
+                        prova.data_geracao_imagens = timezone.now()
+                        prova.save()
+                        
+                except Exception as e:
+                    logger.error(f"Erro ao gerar imagens: {str(e)}")
+                    response_data['warning'] = 'Prova salva, mas algumas imagens não puderam ser geradas'
             
             messages.success(request, 'Prova salva com sucesso!')
-            return JsonResponse({'success': True, 'prova_id': prova.id})
+            return JsonResponse(response_data)
             
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Dados das questões inválidos'}, status=400)
         except Exception as e:
+            logger.error(f"Erro ao salvar prova: {str(e)}")
             return JsonResponse({'error': f'Erro interno: {str(e)}'}, status=500)
+    
+    def _gerar_imagem_questao(self, request):
+        """Gera imagem para uma questão específica usando DALL-E"""
+        try:
+            questao_prova_id = request.POST.get('questao_prova_id')
+            if not questao_prova_id:
+                return JsonResponse({'error': 'ID da questão não fornecido'}, status=400)
+            
+            questao_prova = QuestaoProva.objects.get(id=questao_prova_id)
+            
+            # Usa o serviço DALL-E para gerar a imagem
+            imagem_path = dalle_service.gerar_imagem_questao(questao_prova.questao_dados)
+            
+            if imagem_path:
+                # Salva o caminho da imagem no banco
+                questao_prova.imagem_gerada = imagem_path
+                questao_prova.data_geracao_imagem = timezone.now()
+                questao_prova.save()
+                
+                return JsonResponse({
+                    'success': True,
+                    'imagem_url': questao_prova.get_imagem_url(),
+                    'message': 'Imagem gerada com sucesso!'
+                })
+            else:
+                return JsonResponse({'error': 'Falha ao gerar imagem'}, status=500)
+                
+        except QuestaoProva.DoesNotExist:
+            return JsonResponse({'error': 'Questão não encontrada'}, status=404)
+        except Exception as e:
+            logger.error(f"Erro ao gerar imagem: {str(e)}")
+            return JsonResponse({'error': f'Erro ao gerar imagem: {str(e)}'}, status=500)
+    
+    def _gerar_todas_imagens_prova(self, request):
+        """Gera todas as imagens necessárias para uma prova de uma vez"""
+        try:
+            prova_id = request.POST.get('prova_id')
+            if not prova_id:
+                return JsonResponse({'error': 'ID da prova não fornecido'}, status=400)
+            
+            prova = Prova.objects.get(id=prova_id, criado_por=request.user)
+            questoes_com_imagem = prova.get_questoes_com_imagem().filter(imagem_gerada__isnull=True)
+            
+            if not questoes_com_imagem.exists():
+                return JsonResponse({'message': 'Todas as imagens já foram geradas!'})
+            
+            # Prepara dados para geração em lote
+            questoes_para_gerar = [
+                {
+                    'questao_prova_id': q.id,
+                    'questao_data': q.questao_dados
+                }
+                for q in questoes_com_imagem
+            ]
+            
+            # Processa geração das imagens
+            imagens_geradas = self._processar_geracao_imagens(questoes_para_gerar)
+            
+            # Atualiza status da prova se necessário
+            if imagens_geradas > 0:
+                prova.imagens_geradas = prova.todas_imagens_geradas()
+                if prova.imagens_geradas:
+                    prova.data_geracao_imagens = timezone.now()
+                prova.save()
+            
+            return JsonResponse({
+                'success': True,
+                'imagens_geradas': imagens_geradas,
+                'total_questoes': len(questoes_para_gerar),
+                'message': f'{imagens_geradas} imagens geradas com sucesso!'
+            })
+            
+        except Prova.DoesNotExist:
+            return JsonResponse({'error': 'Prova não encontrada'}, status=404)
+        except Exception as e:
+            logger.error(f"Erro ao gerar imagens da prova: {str(e)}")
+            return JsonResponse({'error': f'Erro interno: {str(e)}'}, status=500)
+    
+    def _processar_geracao_imagens(self, questoes_para_gerar):
+        """Processa a geração de imagens para múltiplas questões sequencialmente"""
+        imagens_geradas = 0
+        
+        for questao_info in questoes_para_gerar:
+            try:
+                questao_prova = QuestaoProva.objects.get(id=questao_info['questao_prova_id'])
+                
+                # Tenta gerar imagem via DALL-E
+                imagem_path = dalle_service.gerar_imagem_questao(questao_info['questao_data'])
+                
+                if imagem_path:
+                    questao_prova.imagem_gerada = imagem_path
+                    questao_prova.data_geracao_imagem = timezone.now()
+                    questao_prova.save()
+                    imagens_geradas += 1
+                    logger.info(f"Imagem gerada para questão {questao_prova.id}")
+                else:
+                    logger.warning(f"Falha ao gerar imagem para questão {questao_prova.id}")
+                    
+            except Exception as e:
+                logger.error(f"Erro ao processar questão {questao_info['questao_prova_id']}: {str(e)}")
+                continue
+        
+        return imagens_geradas
 
-    
-    def _exportar_pdf(self, request):
-        """Exporta a prova como PDF com informações de acessibilidade"""
-        try:
-            # Coleta dados do formulário
-            titulo = request.POST.get('titulo', '').strip()
-            materia = request.POST.get('materia', '').strip()
-            tipo_prova = request.POST.get('tipo_prova', '').strip()
-            acessibilidade_prova = request.POST.get('acessibilidade_prova', 1)  # Novo campo
-            questoes_data = request.POST.get('questoes_selecionadas', '[]')
-            
-            # Validações
-            if not titulo or not materia or not tipo_prova:
-                return JsonResponse({'error': 'Preencha todos os campos obrigatórios'}, status=400)
-            
-            try:
-                questoes_selecionadas = json.loads(questoes_data)
-            except json.JSONDecodeError:
-                return JsonResponse({'error': 'Dados das questões inválidos'}, status=400)
-            
-            if not questoes_selecionadas:
-                return JsonResponse({'error': 'Adicione pelo menos uma questão'}, status=400)
-            
-            # Cria o PDF
-            buffer = BytesIO()
-            doc = SimpleDocTemplate(
-                buffer, 
-                pagesize=A4,
-                topMargin=1*inch,
-                bottomMargin=1*inch,
-                leftMargin=0.75*inch,
-                rightMargin=0.75*inch
-            )
-            
-            # Estilos
-            styles = getSampleStyleSheet()
-            title_style = ParagraphStyle(
-                'CustomTitle',
-                parent=styles['Heading1'],
-                fontSize=16,
-                spaceAfter=30,
-                alignment=TA_CENTER
-            )
-            
-            normal_style = styles['Normal']
-            normal_style.fontSize = 12
-            normal_style.spaceAfter = 12
-            
-            # Estilo para informações de acessibilidade
-            accessibility_style = ParagraphStyle(
-                'AccessibilityInfo',
-                parent=styles['Normal'],
-                fontSize=10,
-                textColor=colors.grey,
-                spaceAfter=6
-            )
-            
-            story = []
-            
-            # Busca configurações do cliente
-            try:
-                config_cliente = ClienteSystemSettings.obter_configuracao()
-            except:
-                config_cliente = None
-            
-            # Logo do cliente (se existir)
-            if config_cliente and hasattr(config_cliente, 'imagem_home_1') and config_cliente.imagem_home_1:
-                try:
-                    if hasattr(config_cliente.imagem_home_1, 'path'):
-                        logo_path = config_cliente.imagem_home_1.path
-                        if os.path.exists(logo_path):
-                            logo = Image(logo_path, width=2*inch, height=1*inch)
-                            story.append(logo)
-                            story.append(Spacer(1, 12))
-                except Exception as e:
-                    print(f"Erro ao carregar logo: {e}")
-            
-            # Cabeçalho da prova
-            story.append(Paragraph(titulo, title_style))
-            
-            # Informações da prova
-            info_prova = f"""
-            <para align="center"><b>Matéria:</b> {materia}</para>
-            <para align="center"><b>Tipo:</b> {dict(Prova.TIPO_PROVA_CHOICES).get(tipo_prova, tipo_prova)}</para>
-            <para align="center"><b>Nível de Acessibilidade:</b> Grupo {acessibilidade_prova}</para>
-            """
-            story.append(Paragraph(info_prova, normal_style))
-            story.append(Spacer(1, 20))
-            
-            # Campo para nome do aluno
-            nome_campo = """
-            <para><b>Nome:</b> _______________________________________________</para>
-            <para><b>Data:</b> ___/___/______</para>
-            """
-            story.append(Paragraph(nome_campo, normal_style))
-            story.append(Spacer(1, 30))
-            
-            # Linha separadora
-            story.append(Paragraph("_" * 80, normal_style))
-            story.append(Spacer(1, 20))
-            
-            # Questões
-            for i, questao_data in enumerate(questoes_selecionadas, 1):
-                try:
-                    # Se questao_data é um dicionário completo, usa diretamente
-                    if isinstance(questao_data, dict) and 'titulo' in questao_data:
-                        questao = questao_data
-                    else:
-                        # Caso contrário, busca os dados completos
-                        questao_id = questao_data.get('id') if isinstance(questao_data, dict) else questao_data
-                        questao = QuestaoService.buscar_questao_completa(questao_id)
-                    
-                    if not questao:
-                        continue
-                    
-                    # Número e enunciado da questão
-                    titulo_questao = questao.get('titulo', f'Questão {i}')
-                    story.append(Paragraph(f"<b>{i}. {titulo_questao}</b>", normal_style))
-                    
-                    # Informação de acessibilidade da questão
-                    acessibilidade_questao = questao_data.get('acessibilidade', 1) if isinstance(questao_data, dict) else 1
-                    story.append(Paragraph(f"<i>Nível de Acessibilidade: Grupo {acessibilidade_questao}</i>", accessibility_style))
-                    story.append(Spacer(1, 10))
-                    
-                    # Tratamento por tipo de questão
-                    tipo_questao = questao.get('tipo', 'aberta')
-                    
-                    if tipo_questao == 'multipla':
-                        alternativas = questao.get('alternativas', [])
-                        for j, alt in enumerate(alternativas):
-                            letra = chr(ord('a') + j)
-                            texto_alt = alt.get('texto', '') if isinstance(alt, dict) else str(alt)
-                            story.append(Paragraph(f"<b>{letra})</b> {texto_alt}", normal_style))
-                    
-                    elif tipo_questao == 'vf':
-                        frases = questao.get('frases_vf', [])
-                        for frase in frases:
-                            texto_frase = frase.get('texto', '') if isinstance(frase, dict) else str(frase)
-                            story.append(Paragraph(f"( ) {texto_frase}", normal_style))
-                    
-                    elif tipo_questao == 'aberta':
-                        # Adiciona linhas para resposta
-                        for _ in range(4):
-                            story.append(Spacer(1, 20))
-                            story.append(Paragraph("_" * 80, normal_style))
-                    
-                    story.append(Spacer(1, 25))
-                    
-                except Exception as e:
-                    print(f"Erro ao processar questão {i}: {e}")
-                    continue
-            
-            # Gera o PDF
-            doc.build(story)
-            pdf_data = buffer.getvalue()
-            buffer.close()
-            
-            # Sanitiza o nome do arquivo
-            nome_arquivo = "".join(c for c in titulo if c.isalnum() or c in (' ', '-', '_')).rstrip()
-            if not nome_arquivo:
-                nome_arquivo = "prova"
-            
-            # Retorna o PDF
-            response = HttpResponse(pdf_data, content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="{nome_arquivo}.pdf"'
-            return response
-            
-        except Exception as e:
-            print(f"Erro ao exportar PDF: {e}")
-            return JsonResponse({'error': f'Erro ao gerar PDF: {str(e)}'}, status=500)
-        
-    def _exportar_doc(self, request):
-        """Exporta a prova como DOC"""
-        if not HAS_DOCX:
-            return JsonResponse({'error': 'Biblioteca python-docx não instalada'}, status=500)
-        
-        try:
-            # Coleta dados
-            titulo = request.POST.get('titulo', '').strip()
-            materia = request.POST.get('materia', '').strip()
-            tipo_prova = request.POST.get('tipo_prova', '').strip()
-            
-            # Validações
-            if not titulo or not materia or not tipo_prova:
-                return JsonResponse({'error': 'Preencha todos os campos obrigatórios'}, status=400)
-            
-            try:
-                questoes_selecionadas = json.loads(request.POST.get('questoes_selecionadas', '[]'))
-            except json.JSONDecodeError:
-                return JsonResponse({'error': 'Dados das questões inválidos'}, status=400)
-            
-            if not questoes_selecionadas:
-                return JsonResponse({'error': 'Adicione pelo menos uma questão'}, status=400)
-            
-            # Cria documento Word
-            doc = Document()
-            
-            # Cabeçalho
-            doc.add_heading(titulo, 0)
-            doc.add_paragraph(f'Matéria: {materia}')
-            doc.add_paragraph(f'Tipo: {dict(Prova.TIPO_PROVA_CHOICES).get(tipo_prova, tipo_prova)}')
-            doc.add_paragraph()
-            
-            # Campo para nome
-            doc.add_paragraph('Nome: _' + '_' * 50)
-            doc.add_paragraph('Data: ___/___/______')
-            doc.add_paragraph()
-            doc.add_paragraph('_' * 80)
-            doc.add_paragraph()
-            
-            # Questões
-            for i, questao_data in enumerate(questoes_selecionadas, 1):
-                try:
-                    # Trata os dados da questão
-                    if isinstance(questao_data, dict) and 'titulo' in questao_data:
-                        questao = questao_data
-                    else:
-                        questao_id = questao_data.get('id') if isinstance(questao_data, dict) else questao_data
-                        questao = QuestaoService.buscar_questao_completa(questao_id)
-                    
-                    if not questao:
-                        continue
-                    
-                    # Enunciado
-                    p = doc.add_paragraph()
-                    p.add_run(f'{i}. ').bold = True
-                    p.add_run(questao.get('titulo', f'Questão {i}'))
-                    
-                    # Conteúdo por tipo
-                    tipo_questao = questao.get('tipo', 'aberta')
-                    
-                    if tipo_questao == 'multipla':
-                        alternativas = questao.get('alternativas', [])
-                        for j, alt in enumerate(alternativas):
-                            letra = chr(ord('a') + j)
-                            texto_alt = alt.get('texto', '') if isinstance(alt, dict) else str(alt)
-                            doc.add_paragraph(f'{letra}) {texto_alt}')
-                    
-                    elif tipo_questao == 'vf':
-                        frases = questao.get('frases_vf', [])
-                        for frase in frases:
-                            texto_frase = frase.get('texto', '') if isinstance(frase, dict) else str(frase)
-                            doc.add_paragraph(f'( ) {texto_frase}')
-                    
-                    elif tipo_questao == 'aberta':
-                        for _ in range(4):
-                            doc.add_paragraph('_' * 80)
-                    
-                    doc.add_paragraph()
-                    
-                except Exception as e:
-                    print(f"Erro ao processar questão {i}: {e}")
-                    continue
-            
-            # Salva em buffer
-            buffer = BytesIO()
-            doc.save(buffer)
-            buffer.seek(0)
-            
-            # Sanitiza nome do arquivo
-            nome_arquivo = "".join(c for c in titulo if c.isalnum() or c in (' ', '-', '_')).rstrip()
-            if not nome_arquivo:
-                nome_arquivo = "prova"
-            
-            response = HttpResponse(
-                buffer.getvalue(),
-                content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-            )
-            response['Content-Disposition'] = f'attachment; filename="{nome_arquivo}.docx"'
-            return response
-            
-        except Exception as e:
-            print(f"Erro ao exportar DOC: {e}")
-            return JsonResponse({'error': f'Erro ao gerar DOC: {str(e)}'}, status=500)
-    
     def _buscar_questao_ajax(self, request):
         """Busca dados completos de uma questão via AJAX"""
         try:
@@ -670,34 +509,36 @@ class ClienteProvaCreateView(LoginRequiredMixin, View):
             return JsonResponse({'error': f'Erro ao buscar questão: {str(e)}'}, status=500)
     
     def _criar_nova_questao(self, request):
-        """Cria uma nova questão no cliente"""
+        """Placeholder para criação de novas questões"""
         try:
-            # Implementar lógica para criar questões no tenant atual
+            # TODO: Implementar funcionalidade de criação de questões
             return JsonResponse({'success': True, 'message': 'Funcionalidade em desenvolvimento'})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
 
 class ClienteParametroView(LoginRequiredMixin, TemplateView):
+    """Configurações do sistema e monitoramento de sessões"""
     template_name = 'cliente_parametros.html'
     
     def get(self, request):
-        # Obter ou criar configuração do cliente
+        """Carrega página de configurações com sessões ativas"""
+        # Obtém configuração atual do cliente
         configuracao = ClienteSystemSettings.obter_configuracao()
         
-        # Obter sessões ativas dos usuários - CORRIGIDO
+        # Busca sessões ativas baseado no tempo de inatividade
         sessoes_ativas = []
         try:
-            # Calcular tempo limite para sessões ativas
+            # Calcula tempo limite para considerar sessão ativa
             tempo_limite = timezone.now() - timezone.timedelta(minutes=configuracao.tempo_maximo_inatividade)
             
-            # Buscar sessões ativas usando o modelo correto
+            # Busca sessões que ainda estão dentro do tempo limite
             from LSCliente.models import SessaoUsuarioCliente
             sessoes_query = SessaoUsuarioCliente.objects.select_related('usuario').filter(
                 ultima_atividade__gte=tempo_limite
             ).order_by('-ultima_atividade')
             
-            # Debug: Verificar se existem sessões
+            # Debug: mostra quantas sessões foram encontradas
             print(f"Total de sessões encontradas: {sessoes_query.count()}")
             
             for sessao in sessoes_query:
@@ -709,7 +550,7 @@ class ClienteParametroView(LoginRequiredMixin, TemplateView):
             print(f"Erro ao buscar sessões ativas: {e}")
             sessoes_ativas = []
         
-        # Total de usuários no sistema
+        # Conta total de usuários ativos no sistema
         total_usuarios = UsuarioCliente.objects.filter(is_active=True).count()
         
         context = {
@@ -717,7 +558,7 @@ class ClienteParametroView(LoginRequiredMixin, TemplateView):
             'sessoes_ativas': sessoes_ativas,
             'total_usuarios': total_usuarios,
             'title': 'Configurações do Sistema',
-            # Debug info
+            # Info para debug se necessário
             'debug_info': {
                 'total_sessoes': len(sessoes_ativas),
                 'tempo_limite': configuracao.tempo_maximo_inatividade,
@@ -727,24 +568,26 @@ class ClienteParametroView(LoginRequiredMixin, TemplateView):
         return render(request, self.template_name, context)
     
     def post(self, request):
+        """Processa diferentes ações de configuração via AJAX"""
         action = request.POST.get('action')
         configuracao = ClienteSystemSettings.obter_configuracao()
         
         try:
             if action == 'logout_user':
+                # Força logout de um usuário específico
                 user_id = request.POST.get('user_id')
                 try:
                     user_id = int(user_id)
                     
-                    # Buscar a sessão do usuário usando o modelo correto
+                    # Busca sessão do usuário no nosso controle
                     from LSCliente.models import SessaoUsuarioCliente
                     sessao = SessaoUsuarioCliente.objects.filter(usuario_id=user_id).first()
                     
                     if sessao:
-                        # Nome do usuário para a mensagem
+                        # Nome do usuário para mostrar na mensagem
                         usuario_nome = getattr(sessao.usuario, 'nome', None) or getattr(sessao.usuario, 'email', f'ID {user_id}')
                         
-                        # Encerrar a sessão Django se existir
+                        # Remove sessão do Django se existir
                         if hasattr(sessao, 'chave_sessao') and sessao.chave_sessao:
                             try:
                                 from django.contrib.sessions.models import Session
@@ -752,7 +595,7 @@ class ClienteParametroView(LoginRequiredMixin, TemplateView):
                             except Exception as e:
                                 print(f"Erro ao deletar sessão Django: {e}")
                         
-                        # Remover do nosso rastreamento
+                        # Remove do nosso rastreamento
                         sessao.delete()
                         
                         return JsonResponse({
@@ -769,13 +612,13 @@ class ClienteParametroView(LoginRequiredMixin, TemplateView):
                     return JsonResponse({'success': False, 'message': 'ID de usuário inválido'})
             
             elif action == 'update_logo':
-                # Debug: Verificar o que está chegando
+                # Atualiza logo do sistema
                 print(f"DEBUG - Action: {action}")
                 print(f"DEBUG - request.FILES: {dict(request.FILES)}")
                 print(f"DEBUG - request.POST: {dict(request.POST)}")
                 print(f"DEBUG - FILES keys: {list(request.FILES.keys())}")
                 
-                # Processar upload da logo - verificar diferentes nomes de campo
+                # Verifica diferentes nomes possíveis para o campo de arquivo
                 logo_file = None
                 possible_names = ['logo', 'imagem_home_1', 'imagem', 'image', 'file', 'upload']
                 
@@ -787,14 +630,14 @@ class ClienteParametroView(LoginRequiredMixin, TemplateView):
                 
                 if logo_file:
                     try:
-                        # Verificar se é uma imagem válida
+                        # Verifica se realmente é uma imagem
                         if not logo_file.content_type.startswith('image/'):
                             return JsonResponse({
                                 'success': False, 
                                 'message': f'Arquivo deve ser uma imagem. Tipo recebido: {logo_file.content_type}'
                             })
                         
-                        # Salvar no campo correto (imagem_home_1 baseado no template)
+                        # Salva no campo correto baseado no template
                         configuracao.imagem_home_1 = logo_file
                         configuracao.save()
                         return JsonResponse({
@@ -815,7 +658,7 @@ class ClienteParametroView(LoginRequiredMixin, TemplateView):
                     })
             
             elif action == 'update_colors':
-                # Atualizar cores do sistema
+                # Atualiza cores do tema do sistema
                 try:
                     primary_color = request.POST.get('primary_color', '').strip()
                     second_color = request.POST.get('second_color', '').strip()

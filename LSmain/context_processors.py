@@ -2,19 +2,19 @@ from django_tenants.utils import get_public_schema_name
 
 def tenant_settings(request):
     """
-    Context processor que adiciona configurações baseadas no tenant atual ao contexto.
-    Isso torna as variáveis disponíveis em todos os templates.
+    Context processor que disponibiliza configurações do tenant nos templates.
+    Define URLs e flags baseadas no schema atual (público ou cliente).
     """
     tenant = request.tenant
     
-    # Configurações específicas para o tenant
+    # Define URLs baseadas no tipo de tenant
     if tenant.schema_name == get_public_schema_name():
-        # Tenant público (Master)
+        # Schema público (master) - URLs padrão
         login_url = '/login/'
         home_url = '/'
         password_reset_url = '/password_reset/'
     else:
-        # Tenant cliente
+        # Schema de cliente - URLs específicas
         login_url = '/clientelogin/'
         home_url = '/home/'
         password_reset_url = '/clientepassword_reset/'
